@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Details und Messdaten zu {{ $activity->name }} in RideDock.">
+    @if ($latestAiAnalysis && in_array($latestAiAnalysis->status->value, ['pending', 'processing'], true))
+        <meta http-equiv="refresh" content="5">
+    @endif
     <title>{{ $activity->name }} · RideDock</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -24,6 +27,13 @@
     </header>
 
     <main class="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-12">
+        @if (session('status'))
+            <div class="mb-8 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm text-emerald-900" role="status">{{ session('status') }}</div>
+        @endif
+        @if (session('analysis_error'))
+            <div class="mb-8 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3.5 text-sm text-rose-900" role="alert">{{ session('analysis_error') }}</div>
+        @endif
+
         <section class="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
             <div>
                 <div class="flex flex-wrap items-center gap-2 text-sm text-slate-500">
@@ -86,6 +96,146 @@
                     <p class="mt-3 text-sm leading-6 text-slate-500">Aus dem aufgezeichneten Event-Stream der Aktivität.</p>
                 </article>
             </div>
+        </section>
+
+        <section class="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm shadow-slate-950/[0.03]" aria-labelledby="ai-analysis-heading">
+            <div class="flex flex-col justify-between gap-5 border-b border-slate-100 px-6 py-5 sm:flex-row sm:items-center sm:px-8">
+                <div>
+                    <p class="text-sm text-emerald-700">RideDock Coach</p>
+                    <h2 id="ai-analysis-heading" class="mt-1 text-xl font-semibold tracking-tight">Fahrt analysieren</h2>
+                </div>
+
+                @if ($aiConfigured && (! $latestAiAnalysis || in_array($latestAiAnalysis->status->value, ['completed', 'failed'], true)))
+                    <form method="POST" action="{{ route('activities.ai-analysis.store', $activity) }}" data-activity-analysis-form>
+                        @csrf
+                        <button type="submit" class="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700">
+                            {{ $latestAiAnalysis?->status->value === 'completed' ? 'Neu analysieren' : 'Analyse starten' }}
+                        </button>
+                    </form>
+                @endif
+            </div>
+
+            <div class="px-6 py-8 sm:px-8" data-activity-analysis-progress role="status" aria-live="polite" aria-busy="true" hidden>
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h3 class="font-medium">Analyse wird erstellt</h3>
+                        <p class="mt-1 text-sm text-slate-500">Der Coach wertet deine Trainingsdaten aus.</p>
+                    </div>
+                    <span class="shrink-0 text-xs font-medium text-emerald-700">Bitte kurz warten</span>
+                </div>
+                <div class="mt-5 h-2 overflow-hidden rounded-full bg-emerald-100" role="progressbar" aria-label="Fortschritt der Fahrtanalyse" aria-valuetext="Analyse wird erstellt">
+                    <span class="analysis-progress-bar block h-full w-1/3 rounded-full bg-emerald-600"></span>
+                </div>
+            </div>
+
+            @if (! $aiConfigured)
+                <div class="px-6 py-8 sm:px-8">
+                    <h3 class="font-medium">KI-Zugang noch nicht konfiguriert</h3>
+                    <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Die Oberfläche und der datensparsame Trainingskontext sind bereit. Hinterlege serverseitig API-Schlüssel und Modell, um Analysen zu starten.</p>
+                    <a href="{{ route('settings.training') }}" class="mt-4 inline-flex text-sm font-medium text-emerald-700 hover:text-emerald-900">Training & KI konfigurieren</a>
+                </div>
+            @elseif (! $latestAiAnalysis)
+                <div class="grid gap-6 px-6 py-8 sm:grid-cols-[1fr_auto] sm:items-center sm:px-8">
+                    <div>
+                        <h3 class="font-medium">Noch keine Analyse für diese Fahrt</h3>
+                        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600">RideDock vergleicht die Fahrt mit den vergangenen sechs Wochen und verwendet dein Trainingsprofil. GPS-Daten und Aktivitätsnotizen werden nicht übertragen.</p>
+                    </div>
+                    <a href="{{ route('settings.training') }}" class="text-sm font-medium text-emerald-700 hover:text-emerald-900">Trainingsprofil prüfen</a>
+                </div>
+            @elseif (in_array($latestAiAnalysis->status->value, ['pending', 'processing'], true))
+                @php
+                    $analysisIsProcessing = $latestAiAnalysis->status->value === 'processing';
+                    $analysisStatus = $analysisIsProcessing ? 'Analyse wird erstellt' : 'Wartet auf Verarbeitung';
+                @endphp
+                <div class="px-6 py-8 sm:px-8" role="status" aria-live="polite" aria-busy="true">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <h3 class="font-medium">{{ $analysisStatus }}</h3>
+                            <p class="mt-1 text-sm text-slate-500">
+                                {{ $analysisIsProcessing ? 'Der Coach wertet deine Trainingsdaten aus.' : 'Die Analyse startet, sobald die Hintergrundverarbeitung bereit ist.' }}
+                            </p>
+                        </div>
+                        <span class="shrink-0 text-xs font-medium text-emerald-700">Automatische Aktualisierung</span>
+                    </div>
+                    <div
+                        class="mt-5 h-2 overflow-hidden rounded-full bg-emerald-100"
+                        role="progressbar"
+                        aria-label="Fortschritt der Fahrtanalyse"
+                        aria-valuetext="{{ $analysisStatus }}"
+                    >
+                        <span class="analysis-progress-bar block h-full w-1/3 rounded-full bg-emerald-600"></span>
+                    </div>
+                </div>
+            @elseif ($latestAiAnalysis->status->value === 'failed')
+                <div class="px-6 py-8 sm:px-8">
+                    <h3 class="font-medium text-rose-800">Analyse fehlgeschlagen</h3>
+                    <p class="mt-2 text-sm leading-6 text-slate-600">Es wurden keine Aktivitätsdaten verändert. Du kannst die Analyse erneut starten.</p>
+                </div>
+            @else
+                @php
+                    $analysisOutput = $latestAiAnalysis->output ?? [];
+                    $nextSession = $nextPlannedSession ?? (array) data_get($analysisOutput, 'next_session', []);
+                    $nextSessionUsesWeeklyPlan = $nextPlannedSession !== null;
+                @endphp
+                <div class="grid gap-8 px-6 py-8 lg:grid-cols-[1.25fr_0.75fr] sm:px-8">
+                    <div>
+                        <p class="text-lg leading-8 text-slate-800">{{ data_get($analysisOutput, 'summary') }}</p>
+                        <div class="mt-6 rounded-2xl bg-emerald-50 p-5">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-emerald-700">Trainingswirkung</p>
+                            <p class="mt-2 text-sm leading-6 text-emerald-950">{{ data_get($analysisOutput, 'training_effect') }}</p>
+                        </div>
+
+                        @if (data_get($analysisOutput, 'observations', []) !== [])
+                            <div class="mt-7 space-y-5">
+                                @foreach ((array) data_get($analysisOutput, 'observations', []) as $observation)
+                                    <article>
+                                        <h3 class="font-medium">{{ data_get($observation, 'title') }}</h3>
+                                        <p class="mt-1 text-sm leading-6 text-slate-600">{{ data_get($observation, 'detail') }}</p>
+                                        <p class="mt-2 text-xs text-slate-400">Basis: {{ implode(', ', (array) data_get($observation, 'evidence', [])) }}</p>
+                                    </article>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+
+                    <aside class="rounded-2xl border border-slate-200 p-5">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">{{ $nextSessionUsesWeeklyPlan ? 'Nächster Plantag' : 'Nächste Einheit' }}</p>
+                            @if ($nextSessionUsesWeeklyPlan)
+                                <span class="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">Laut Sieben-Tage-Plan</span>
+                            @endif
+                        </div>
+                        @if ($nextSessionUsesWeeklyPlan)
+                            <p class="mt-3 text-xs font-medium text-slate-400">{{ \Carbon\CarbonImmutable::parse((string) data_get($nextSession, 'date'))->locale('de')->isoFormat('dddd, D. MMMM') }}</p>
+                        @endif
+                        <h3 class="mt-2 text-lg font-semibold">{{ data_get($nextSession, 'title') }}</h3>
+                        <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                            @if (data_get($nextSession, 'duration_minutes'))
+                                <span class="rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">{{ data_get($nextSession, 'duration_minutes') }} min</span>
+                            @endif
+                            <span class="rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">{{ data_get($nextSession, 'intensity') }}</span>
+                        </div>
+                        <p class="mt-4 text-sm leading-6 text-slate-700">{{ data_get($nextSession, 'details') }}</p>
+                        <p class="mt-4 text-sm leading-6 text-slate-500">{{ data_get($nextSession, 'rationale') }}</p>
+
+                        @if ($nextSessionUsesWeeklyPlan)
+                            <a href="{{ route('coach.index') }}#weekly-plan" class="mt-5 inline-flex text-sm font-medium text-emerald-700 hover:text-emerald-900">Wochenplan öffnen</a>
+                        @endif
+
+                        @if (data_get($analysisOutput, 'data_gaps', []) !== [])
+                            <div class="mt-5 border-t border-slate-100 pt-4">
+                                <p class="text-xs font-medium text-slate-500">Fehlende Datengrundlage</p>
+                                <ul class="mt-2 space-y-1 text-xs leading-5 text-slate-500">
+                                    @foreach ((array) data_get($analysisOutput, 'data_gaps', []) as $gap)
+                                        <li>· {{ $gap }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                    </aside>
+                </div>
+                <div class="border-t border-slate-100 px-6 py-4 text-xs text-slate-400 sm:px-8">KI-generierter Trainingshinweis · keine medizinische Beratung · {{ $latestAiAnalysis->completed_at?->locale('de')->diffForHumans() }}</div>
+            @endif
         </section>
 
         @php

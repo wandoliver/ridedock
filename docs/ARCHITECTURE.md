@@ -20,7 +20,7 @@
 ## Import sequence
 
 1. OAuth callback stores the access and refresh tokens using Laravel's encrypted cast.
-2. A connection sync job refreshes an expiring token.
+2. A connection sync refreshes an expiring token.
 3. The provider returns one normalized page plus an opaque next cursor.
 4. `ActivityImporter` first matches the exact provider/external ID, then a conservative ride fingerprint.
 5. A source row is upserted and the normalized activity is merged according to provider priority.
@@ -29,9 +29,9 @@
 
 Imports may fill fields that are still null, but RPE and notes are never overwritten.
 
-## Failure and retry behavior
+## Processing and failure behavior
 
-Queue jobs retry with backoff. A failed sync records a bounded error on the connection and retains its page cursor. Re-running the sync is safe because source keys and activity fingerprints are unique. Webhooks only enqueue work and return immediately.
+Imports and requested AI analyses run synchronously by default, without a separate queue worker. A failed sync records a bounded error on the connection and retains its page cursor. Re-running the sync is safe because source keys and activity fingerprints are unique. Deployments may opt into an asynchronous Laravel queue later; that requires a worker and does not change the domain services.
 
 ## FIT enrichment
 
@@ -49,4 +49,4 @@ The heatmap consumes only normalized `latlng` streams through `RouteGeometryProv
 
 ## Scaling path
 
-SQLite is suitable for one rider. PostgreSQL is recommended for a hosted multiuser instance. Large streams can later move from JSON rows to compressed object storage without changing the activity/export contracts. Provider sync jobs can move to Redis queues independently.
+SQLite is suitable for one rider. PostgreSQL is recommended for a hosted multiuser instance. Large streams can later move from JSON rows to compressed object storage without changing the activity/export contracts. Provider syncs can move to Redis queues independently when asynchronous processing becomes useful.

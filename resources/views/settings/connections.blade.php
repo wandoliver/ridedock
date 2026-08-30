@@ -37,6 +37,11 @@
             <p class="mt-4 max-w-2xl text-base leading-7 text-slate-600">Verwalte die Dienste, aus denen RideDock deine Aktivitäten und FIT-Dateien synchronisiert.</p>
         </section>
 
+        <nav class="mt-7 flex w-fit rounded-xl border border-slate-200 bg-white p-1 shadow-sm" aria-label="Einstellungsbereiche">
+            <a href="{{ route('settings.training') }}" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950">Training & KI</a>
+            <a href="{{ route('settings.connections') }}" class="rounded-lg bg-slate-950 px-3 py-2 text-sm font-medium text-white" aria-current="page">Verbindungen</a>
+        </nav>
+
         <section class="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-950/[0.03] sm:p-8" aria-label="Datenquellen">
             <div class="flex items-center justify-between gap-4">
                 <div>

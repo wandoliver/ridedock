@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Training\Contracts\TrainingAdvisor;
+use App\Domain\Training\Services\NextPlannedSessionResolver;
 use App\Models\Activity;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
@@ -9,8 +11,12 @@ use Illuminate\Http\Request;
 
 class ActivityDetailController extends Controller
 {
-    public function __invoke(Request $request, string $activity): View
-    {
+    public function __invoke(
+        Request $request,
+        string $activity,
+        TrainingAdvisor $trainingAdvisor,
+        NextPlannedSessionResolver $nextPlannedSessionResolver,
+    ): View {
         $user = $request->user();
 
         if (! $user instanceof User) {
@@ -36,6 +42,9 @@ class ActivityDetailController extends Controller
         return view('activities.show', [
             'activity' => $model,
             'activityStreams' => $activityStreams,
+            'latestAiAnalysis' => $model->aiAnalyses()->latest()->first(),
+            'aiConfigured' => $trainingAdvisor->isConfigured(),
+            'nextPlannedSession' => $nextPlannedSessionResolver->resolve($user),
         ]);
     }
 }

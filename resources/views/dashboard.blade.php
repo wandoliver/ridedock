@@ -21,6 +21,7 @@
             <div class="flex items-center gap-2">
                 @auth
                     <span class="hidden text-sm text-slate-500 sm:inline">{{ auth()->user()->name }}</span>
+                    <a href="{{ route('coach.index') }}" class="rounded-xl px-3 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50 hover:text-emerald-900">Coach</a>
                     <a href="{{ route('settings.connections') }}" class="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950">Einstellungen</a>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
@@ -95,6 +96,18 @@
                     <p class="mt-2 text-2xl font-semibold tracking-tight">{{ $metric['value'] }}</p>
                 </article>
             @endforeach
+        </section>
+
+        <section class="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50 px-6 py-5 sm:flex sm:items-center sm:justify-between sm:gap-6 sm:px-8" aria-label="RideDock Coach">
+            <div>
+                <p class="text-sm font-medium text-emerald-700">RideDock Coach</p>
+                <h2 class="mt-1 text-xl font-semibold tracking-tight">Training analysieren</h2>
+                <p class="mt-2 text-sm leading-6 text-emerald-950/70">Wähle eine importierte Fahrt und erhalte eine Analyse auf Basis deines Trainingsprofils.</p>
+            </div>
+            <a href="{{ route('coach.index') }}" class="mt-4 inline-flex shrink-0 items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700 sm:mt-0">
+                Coach öffnen
+                <svg viewBox="0 0 20 20" class="size-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m7 4 6 6-6 6"/></svg>
+            </a>
         </section>
 
         <section class="mt-6">

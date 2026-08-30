@@ -8,10 +8,17 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $email
+ * @property-read AthleteProfile|null $athleteProfile
+ */
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
@@ -29,6 +36,18 @@ class User extends Authenticatable
     public function providerConnections(): HasMany
     {
         return $this->hasMany(ProviderConnection::class);
+    }
+
+    /** @return HasOne<AthleteProfile, $this> */
+    public function athleteProfile(): HasOne
+    {
+        return $this->hasOne(AthleteProfile::class);
+    }
+
+    /** @return HasMany<AiAnalysis, $this> */
+    public function aiAnalyses(): HasMany
+    {
+        return $this->hasMany(AiAnalysis::class);
     }
 
     /**

@@ -8,7 +8,7 @@
 - [x] canonical activity/source/stream/event schema
 - [x] encrypted provider tokens and OAuth state protection
 - [x] Hammerhead OAuth, webhook, activity and FIT adapter
-- [x] idempotent queued sync with cursor resume and overlap window
+- [x] idempotent sync with cursor resume and overlap window
 - [x] Hammerhead FIT source-file archive
 - [x] idempotent FIT enrichment for summary metrics and streams
 - [x] RPE and notes API
@@ -18,14 +18,15 @@
 - [x] measurement charts for recorded streams
 - [x] connection settings UI
 
-## AI analysis — next
+## AI analysis — in progress
 
-- [ ] Define the first AI use case and its user-visible output
-- [ ] Build a compact, schema-versioned training context from normalized data
+- [x] Define the first AI use case and its user-visible output
+- [x] Build a compact, schema-versioned training context from normalized data
 - [ ] Add heart-rate and power zones/profile history
 - [ ] Calculate weekly volume, intensity distribution and efficiency trends
 - [ ] Add transparent training-load, monotony and freshness estimates
-- [ ] Integrate an AI assistant without exposing provider credentials or raw location data by default
+- [x] Integrate an AI assistant without exposing provider credentials or raw location data by default
+- [ ] Generate a seven-day plan from goals, available time and recent training
 
 ## Product follow-up
 

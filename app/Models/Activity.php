@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
 
 /**
@@ -42,6 +43,8 @@ use Illuminate\Support\Collection;
  * @property-read Collection<int, ActivitySource> $sources
  * @property-read Collection<int, ActivityStream> $streams
  * @property-read Collection<int, ActivityEvent> $events
+ * @property-read Collection<int, AiAnalysis> $aiAnalyses
+ * @property-read AiAnalysis|null $latestAiAnalysis
  */
 #[Fillable([
     'user_id', 'deduplication_key', 'name', 'type', 'started_at', 'timezone',
@@ -95,5 +98,17 @@ class Activity extends Model
     public function events(): HasMany
     {
         return $this->hasMany(ActivityEvent::class);
+    }
+
+    /** @return HasMany<AiAnalysis, $this> */
+    public function aiAnalyses(): HasMany
+    {
+        return $this->hasMany(AiAnalysis::class);
+    }
+
+    /** @return HasOne<AiAnalysis, $this> */
+    public function latestAiAnalysis(): HasOne
+    {
+        return $this->hasOne(AiAnalysis::class)->latestOfMany();
     }
 }

@@ -49,7 +49,7 @@ class ProviderOAuthControllerTest extends TestCase
         ], Cache::get('provider-oauth-state:'.$query['state']));
     }
 
-    public function test_callback_stores_connection_queues_sync_and_returns_to_connection_settings(): void
+    public function test_callback_stores_connection_starts_sync_and_returns_to_connection_settings(): void
     {
         Queue::fake();
         $user = User::factory()->create();
@@ -69,7 +69,7 @@ class ProviderOAuthControllerTest extends TestCase
         $response = $this->get('/api/v1/oauth/hammerhead/callback?code=valid-code&state=valid-state');
 
         $response->assertRedirect(route('settings.connections'))
-            ->assertSessionHas('status', 'Hammerhead ist verbunden. Die erste Synchronisierung wurde gestartet.');
+            ->assertSessionHas('status', 'Hammerhead ist verbunden. Die erste Synchronisierung wurde angestoßen.');
         $connection = ProviderConnection::query()->firstOrFail();
         $this->assertSame($user->id, $connection->user_id);
         $this->assertSame('hammerhead-user', $connection->external_user_id);
@@ -89,7 +89,7 @@ class ProviderOAuthControllerTest extends TestCase
         $this->assertDatabaseEmpty('provider_connections');
     }
 
-    public function test_owner_requeues_a_provider_sync_from_connection_settings(): void
+    public function test_owner_restarts_a_provider_sync_from_connection_settings(): void
     {
         Queue::fake();
         $user = User::factory()->create();
@@ -98,7 +98,7 @@ class ProviderOAuthControllerTest extends TestCase
         $this->actingAs($user)
             ->post(route('provider.sync', 'hammerhead'))
             ->assertRedirect(route('settings.connections'))
-            ->assertSessionHas('status', 'Hammerhead Synchronisierung wurde eingereiht.');
+            ->assertSessionHas('status', 'Hammerhead Synchronisierung wurde angestoßen.');
 
         Queue::assertPushed(SyncProviderConnection::class, fn (SyncProviderConnection $job): bool => $job->providerConnection->is($connection));
     }

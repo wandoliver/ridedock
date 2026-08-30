@@ -1,6 +1,6 @@
 # RideDock
 
-![Release](https://img.shields.io/badge/release-v0.0.1-blue)
+![Release](https://img.shields.io/badge/release-v0.0.2-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ## Architecture
@@ -23,7 +23,7 @@ See [Architecture](docs/ARCHITECTURE.md), [Data model](docs/DATA_MODEL.md), [Pro
 
 ## Local setup
 
-Requirements: PHP 8.3+, Composer, SQLite (default) or PostgreSQL/MySQL, and a queue worker for non-local deployments.
+Requirements: PHP 8.3+, Composer, and SQLite (default) or PostgreSQL/MySQL.
 
 ```bash
 composer setup
@@ -41,8 +41,9 @@ php artisan key:generate
 touch database/database.sqlite
 php artisan migrate
 php artisan app:create-owner-token you@example.com
-php artisan queue:work
 ```
+
+RideDock processes imports and requested AI analyses synchronously by default (`QUEUE_CONNECTION=sync`), so no queue worker is required. A hosted installation may explicitly select an asynchronous queue connection such as `database`; only then must it also run `php artisan queue:work`.
 
 ## Provider configuration
 

@@ -1,6 +1,8 @@
 import L from 'leaflet';
+import { initializeActivityAnalysis } from './activity-analysis.js';
 import { initializeActivityDetail } from './activity-detail.js';
 import { decodePolyline, heatPointsFromRoutes, setHeatmapPanelExpanded } from './heatmap.js';
+import { initializeWeeklyPlan } from './weekly-plan.js';
 
 const heatmapElement = document.getElementById('ride-heatmap');
 const heatmapDataElement = document.getElementById('ride-heatmap-data');
@@ -73,3 +75,5 @@ if (heatmapElement && heatmapDataElement) {
 }
 
 initializeActivityDetail(L);
+initializeActivityAnalysis();
+initializeWeeklyPlan();

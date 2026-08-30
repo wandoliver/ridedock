@@ -2,10 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Domain\Training\Contracts\TrainingAdvisor;
+use App\Domain\Training\Data\TrainingAdvice;
+use App\Domain\Training\Enums\AiAnalysisStatus;
 use App\Models\Activity;
 use App\Models\ActivityEvent;
 use App\Models\ActivitySource;
 use App\Models\ActivityStream;
+use App\Models\AiAnalysis;
 use App\Models\ProviderConnection;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -92,5 +96,179 @@ class ActivityDetailControllerTest extends TestCase
             ->get(route('dashboard'))
             ->assertOk()
             ->assertSee(route('activities.show', $activity), false);
+    }
+
+    public function test_owner_sees_a_completed_structured_ai_analysis(): void
+    {
+        $this->app->instance(TrainingAdvisor::class, new class implements TrainingAdvisor
+        {
+            public function isConfigured(): bool
+            {
+                return true;
+            }
+
+            public function analyzeActivity(array $context): TrainingAdvice
+            {
+                throw new \LogicException('No provider request expected.');
+            }
+        });
+        $user = User::factory()->create();
+        $activity = Activity::factory()->for($user)->create();
+        AiAnalysis::factory()->for($user)->for($activity)->create([
+            'status' => AiAnalysisStatus::Completed,
+            'output' => [
+                'summary' => 'Solide kontrollierte Ausdauerfahrt.',
+                'training_effect' => 'Aerober Trainingsreiz.',
+                'observations' => [[
+                    'title' => 'Gleichmäßige Belastung',
+                    'detail' => 'Die Belastung war kontrolliert.',
+                    'evidence' => ['activity.rpe', 'activity.duration_minutes'],
+                ]],
+                'next_session' => [
+                    'title' => 'Locker rollen',
+                    'duration_minutes' => 45,
+                    'intensity' => 'Leicht',
+                    'details' => 'Ruhig fahren.',
+                    'rationale' => 'Erholung nach der Belastung.',
+                ],
+                'data_gaps' => ['FTP fehlt'],
+                'cautions' => [],
+            ],
+            'completed_at' => now(),
+        ]);
+
+        $this->withoutVite()
+            ->actingAs($user)
+            ->get(route('activities.show', $activity))
+            ->assertOk()
+            ->assertSee('RideDock Coach')
+            ->assertSee('Solide kontrollierte Ausdauerfahrt.')
+            ->assertSee('Gleichmäßige Belastung')
+            ->assertSee('activity.rpe, activity.duration_minutes')
+            ->assertSee('Locker rollen')
+            ->assertSee('Neu analysieren');
+    }
+
+    public function test_owner_sees_an_indeterminate_progress_bar_for_a_queued_analysis(): void
+    {
+        $this->app->instance(TrainingAdvisor::class, new class implements TrainingAdvisor
+        {
+            public function isConfigured(): bool
+            {
+                return true;
+            }
+
+            public function analyzeActivity(array $context): TrainingAdvice
+            {
+                throw new \LogicException('No provider request expected.');
+            }
+        });
+        $user = User::factory()->create();
+        $activity = Activity::factory()->for($user)->create();
+        AiAnalysis::factory()->for($user)->for($activity)->create([
+            'status' => AiAnalysisStatus::Pending,
+        ]);
+
+        $this->withoutVite()
+            ->actingAs($user)
+            ->get(route('activities.show', $activity))
+            ->assertOk()
+            ->assertSee('Wartet auf Verarbeitung')
+            ->assertSee('role="progressbar"', false)
+            ->assertSee('aria-valuetext="Wartet auf Verarbeitung"', false)
+            ->assertSee('<meta http-equiv="refresh" content="5">', false)
+            ->assertDontSee('aria-valuenow=', false);
+    }
+
+    public function test_weekly_plan_takes_precedence_over_an_activity_next_session(): void
+    {
+        $this->app->instance(TrainingAdvisor::class, new class implements TrainingAdvisor
+        {
+            public function isConfigured(): bool
+            {
+                return true;
+            }
+
+            public function analyzeActivity(array $context): TrainingAdvice
+            {
+                throw new \LogicException('No provider request expected.');
+            }
+        });
+        $user = User::factory()->create();
+        $activity = Activity::factory()->for($user)->create();
+        AiAnalysis::factory()->for($user)->for($activity)->create([
+            'status' => AiAnalysisStatus::Completed,
+            'output' => [
+                'summary' => 'Solide Fahrt.',
+                'training_effect' => 'Aerober Reiz.',
+                'observations' => [],
+                'next_session' => [
+                    'title' => 'Lockere Regenerationsfahrt',
+                    'duration_minutes' => 40,
+                    'intensity' => 'Sehr locker',
+                    'details' => 'Locker fahren.',
+                    'rationale' => 'Aktivitätsempfehlung.',
+                ],
+                'data_gaps' => [],
+                'cautions' => [],
+            ],
+            'completed_at' => now(),
+        ]);
+        AiAnalysis::factory()->for($user)->create([
+            'activity_id' => null,
+            'type' => 'weekly_plan',
+            'status' => AiAnalysisStatus::Completed,
+            'output' => [
+                'days' => [[
+                    'date' => '2026-08-31',
+                    'title' => 'Vollständige Erholung',
+                    'type' => 'rest',
+                    'duration_minutes' => null,
+                    'intensity' => 'Keine Trainingsbelastung',
+                    'details' => 'Radfrei und ausreichend schlafen.',
+                    'rationale' => 'Erholung nach der Vorwoche.',
+                ]],
+            ],
+            'completed_at' => now(),
+        ]);
+
+        $this->withoutVite()
+            ->actingAs($user)
+            ->get(route('activities.show', $activity))
+            ->assertOk()
+            ->assertSee('Laut Sieben-Tage-Plan')
+            ->assertSee('Vollständige Erholung')
+            ->assertSee('Radfrei und ausreichend schlafen.')
+            ->assertDontSee('Lockere Regenerationsfahrt');
+    }
+
+    public function test_owner_sees_that_an_analysis_is_being_processed(): void
+    {
+        $this->app->instance(TrainingAdvisor::class, new class implements TrainingAdvisor
+        {
+            public function isConfigured(): bool
+            {
+                return true;
+            }
+
+            public function analyzeActivity(array $context): TrainingAdvice
+            {
+                throw new \LogicException('No provider request expected.');
+            }
+        });
+        $user = User::factory()->create();
+        $activity = Activity::factory()->for($user)->create();
+        AiAnalysis::factory()->for($user)->for($activity)->create([
+            'status' => AiAnalysisStatus::Processing,
+            'started_at' => now(),
+        ]);
+
+        $this->withoutVite()
+            ->actingAs($user)
+            ->get(route('activities.show', $activity))
+            ->assertOk()
+            ->assertSee('Analyse wird erstellt')
+            ->assertSee('Der Coach wertet deine Trainingsdaten aus.')
+            ->assertSee('aria-valuetext="Analyse wird erstellt"', false);
     }
 }

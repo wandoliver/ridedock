@@ -4,7 +4,26 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.0.2] - 2026-08-30
+
+### Added
+
+- Training profiles with goals, availability, time budget, experience and optional performance values.
+- Privacy-conscious OpenAI activity analyses with structured training effects, observations and recommendations.
+- AI-generated seven-day training plans based on the athlete profile and the previous six weeks of normalized activities.
+- Visible progress indicators for activity analyses and weekly-plan generation.
+
+### Changed
+
+- AI analyses and provider imports run synchronously by default without requiring a queue worker.
+- FTP, heart rate, power and cadence are treated as optional signals rather than required analysis inputs.
+- The Coach page provides direct access to activity analyses, training profiles and generated weekly plans.
+- An active seven-day plan takes precedence over a conflicting next-session recommendation from an individual activity analysis.
+
+### Security
+
+- AI requests exclude GPS coordinates, FIT files, provider payloads and activity notes.
+- OpenAI Responses are requested without server-side response storage.
 
 ## [0.0.1] - 2026-08-30
 

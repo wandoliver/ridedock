@@ -1,13 +1,17 @@
 <?php
 
+use App\Http\Controllers\ActivityAiAnalysisController;
 use App\Http\Controllers\ActivityDetailController;
 use App\Http\Controllers\ActivityIndexController;
 use App\Http\Controllers\Api\ProviderConnectionController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\CoachController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OAuth\ProviderOAuthController;
 use App\Http\Controllers\Settings\ConnectionSettingsController;
+use App\Http\Controllers\Settings\TrainingSettingsController;
+use App\Http\Controllers\WeeklyTrainingPlanController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', DashboardController::class)->name('dashboard');
@@ -28,8 +32,17 @@ Route::middleware('guest')->group(function (): void {
 });
 
 Route::middleware('auth')->group(function (): void {
+    Route::get('/coach', CoachController::class)->name('coach.index');
     Route::get('/activities', ActivityIndexController::class)->name('activities.index');
     Route::get('/settings/connections', ConnectionSettingsController::class)->name('settings.connections');
+    Route::get('/settings/training', [TrainingSettingsController::class, 'show'])->name('settings.training');
+    Route::patch('/settings/training', [TrainingSettingsController::class, 'update'])->name('settings.training.update');
+    Route::post('/activities/{activity}/ai-analysis', ActivityAiAnalysisController::class)
+        ->middleware('throttle:10,1')
+        ->name('activities.ai-analysis.store');
+    Route::post('/coach/weekly-plan', WeeklyTrainingPlanController::class)
+        ->middleware('throttle:5,1')
+        ->name('coach.weekly-plan.store');
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('/connections/{provider}/connect', [ProviderOAuthController::class, 'connect'])
         ->middleware('throttle:20,1')

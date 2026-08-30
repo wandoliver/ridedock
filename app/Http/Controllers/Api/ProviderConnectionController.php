@@ -32,9 +32,9 @@ class ProviderConnectionController extends Controller
         if (! $request->expectsJson()) {
             return redirect()
                 ->route('settings.connections')
-                ->with('status', ucfirst($provider).' Synchronisierung wurde eingereiht.');
+                ->with('status', ucfirst($provider).' Synchronisierung wurde angestoßen.');
         }
 
-        return response()->json(['status' => 'queued', 'connection_id' => $connection->id], 202);
+        return response()->json(['status' => 'accepted', 'connection_id' => $connection->id], 202);
     }
 }

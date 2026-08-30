@@ -9,6 +9,26 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
+@keyframes analysis-progress {
+    from {
+        transform: translateX(-110%);
+    }
+
+    to {
+        transform: translateX(310%);
+    }
+}
+
+.analysis-progress-bar {
+    animation: analysis-progress 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .analysis-progress-bar {
+        animation-duration: 3s;
+    }
+}
+
 @layer utilities {
     #ride-heatmap {
         background: #e2e8f0;

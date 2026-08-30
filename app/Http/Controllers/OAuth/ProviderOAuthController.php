@@ -78,6 +78,6 @@ class ProviderOAuthController extends Controller
 
         return redirect()
             ->route('settings.connections')
-            ->with('status', ucfirst($providerName->value).' ist verbunden. Die erste Synchronisierung wurde gestartet.');
+            ->with('status', ucfirst($providerName->value).' ist verbunden. Die erste Synchronisierung wurde angestoßen.');
     }
 }
