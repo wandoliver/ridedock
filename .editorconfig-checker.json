@@ -1,0 +1,20 @@
+{
+    "Verbose": false,
+    "Exclude": [
+        "^vendor/",
+        "^node_modules/",
+        "^storage/",
+        "^bootstrap/cache/",
+        "^public/build/",
+        "^outputs/",
+        "^work/",
+        "^\\.claude/",
+        "^\\.junie/",
+        "^\\.idea/",
+        "^\\.mcp\\.json$",
+        "^\\.phpunit\\.result\\.cache$",
+        "^AGENTS\\.md$",
+        "^CLAUDE\\.md$",
+        "\\.php-cs-fixer\\.cache$"
+    ]
+}

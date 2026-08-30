@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
+    <title id="title">RideDock</title>
+    <desc id="description">RideDock logo with a stylized cycling route and dock.</desc>
+    <rect width="512" height="512" rx="112" fill="#059669"/>
+    <path
+        d="M112 368 206 120h100l94 248M154 286h204"
+        fill="none"
+        stroke="#fff"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="44"
+    />
+    <circle cx="112" cy="368" r="30" fill="#fff"/>
+    <circle cx="400" cy="368" r="30" fill="#fff"/>
+</svg>

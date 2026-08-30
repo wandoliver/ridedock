@@ -1,0 +1,44 @@
+<?php
+
+use App\Http\Controllers\ActivityDetailController;
+use App\Http\Controllers\ActivityIndexController;
+use App\Http\Controllers\Api\ProviderConnectionController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\OAuth\ProviderOAuthController;
+use App\Http\Controllers\Settings\ConnectionSettingsController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', DashboardController::class)->name('dashboard');
+Route::get('/activities/{activity}', ActivityDetailController::class)->name('activities.show');
+Route::get('/api/v1/oauth/{provider}/callback', [ProviderOAuthController::class, 'callback'])
+    ->middleware('throttle:30,1')
+    ->name('provider.oauth.callback');
+
+Route::middleware('guest')->group(function (): void {
+    Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::post('/login', [AuthenticatedSessionController::class, 'store'])
+        ->middleware('throttle:10,1')
+        ->name('login.store');
+    Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+    Route::post('/register', [RegisteredUserController::class, 'store'])
+        ->middleware('throttle:5,1')
+        ->name('register.store');
+});
+
+Route::middleware('auth')->group(function (): void {
+    Route::get('/activities', ActivityIndexController::class)->name('activities.index');
+    Route::get('/settings/connections', ConnectionSettingsController::class)->name('settings.connections');
+    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+    Route::get('/connections/{provider}/connect', [ProviderOAuthController::class, 'connect'])
+        ->middleware('throttle:20,1')
+        ->name('provider.connect');
+    Route::post('/connections/{provider}/sync', [ProviderConnectionController::class, 'sync'])
+        ->middleware('throttle:20,1')
+        ->name('provider.sync');
+});
+
+if (app()->isLocal() && file_exists(base_path('routes/local.php'))) {
+    require base_path('routes/local.php');
+}

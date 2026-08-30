@@ -1,0 +1,46 @@
+# MVP backlog
+
+## Foundation — done
+
+- [x] Laravel 13 API project and SQLite default
+- [x] Sanctum bearer-token authentication
+- [x] provider interfaces and registry
+- [x] canonical activity/source/stream/event schema
+- [x] encrypted provider tokens and OAuth state protection
+- [x] Hammerhead OAuth, webhook, activity and FIT adapter
+- [x] idempotent queued sync with cursor resume and overlap window
+- [x] Hammerhead FIT source-file archive
+- [x] idempotent FIT enrichment for summary metrics and streams
+- [x] RPE and notes API
+- [x] versioned JSON and CSV analysis export
+- [x] dashboard, activity archive and activity detail UI
+- [x] provider-neutral heatmap with privacy trimming
+- [x] measurement charts for recorded streams
+- [x] connection settings UI
+
+## AI analysis — next
+
+- [ ] Define the first AI use case and its user-visible output
+- [ ] Build a compact, schema-versioned training context from normalized data
+- [ ] Add heart-rate and power zones/profile history
+- [ ] Calculate weekly volume, intensity distribution and efficiency trends
+- [ ] Add transparent training-load, monotony and freshness estimates
+- [ ] Integrate an AI assistant without exposing provider credentials or raw location data by default
+
+## Product follow-up
+
+- [ ] Add Wahoo as a second activity provider
+- [ ] Add provider disconnect/deauthorization endpoints and retention choices
+- [ ] Add rate-limit-aware scheduling, distributed locks and per-user sync status
+- [ ] Decode SRAM AXS developer fields into `shift` events using real fixtures
+- [ ] Add explicit private-zone masking and opt-in route export
+- [ ] Add GDPR export/deletion flows and a deployer privacy-policy template
+
+## Release checklist
+
+- [ ] choose and clear the project name
+- [ ] threat model and dependency audit
+- [ ] CI for tests, formatting and static analysis
+- [ ] fixtures scrubbed of personal/location data
+- [ ] confirm API terms for every hosted provider integration
+- [ ] tagged `0.1.0` release and container deployment example
