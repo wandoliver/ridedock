@@ -3,6 +3,10 @@
 ![Release](https://img.shields.io/badge/release-v0.0.2-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
+RideDock is an open-source, self-hosted cycling training platform. It imports raw activity data directly from supported bike computers, normalizes FIT recordings, and turns rides into a private activity archive with detailed measurements, route heatmaps, and training insights.
+
+Its integrated AI coach can analyze individual rides and create seven-day training plans from personal goals, available training days, and recent workload. GPS coordinates, FIT files, provider payloads, and activity notes remain inside RideDock and are not sent to the AI provider.
+
 ## Architecture
 
 ```text
