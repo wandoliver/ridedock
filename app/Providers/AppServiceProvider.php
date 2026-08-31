@@ -11,6 +11,7 @@ use App\Domain\Training\Contracts\WeeklyTrainingPlanner;
 use App\Infrastructure\Ai\OpenAiTrainingAdvisor;
 use App\Infrastructure\Fit\NodeFitFileParser;
 use App\Infrastructure\Providers\Hammerhead\HammerheadProvider;
+use App\Infrastructure\Providers\Wahoo\WahooProvider;
 use App\Modules\Heatmap\Contracts\RouteGeometryProvider;
 use App\Modules\Heatmap\Services\StreamRouteGeometryProvider;
 use Illuminate\Database\Eloquent\Model;
@@ -40,6 +41,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(ProviderRegistry::class, fn ($app) => new ProviderRegistry([
             $app->make(HammerheadProvider::class),
+            $app->make(WahooProvider::class),
         ]));
     }
 

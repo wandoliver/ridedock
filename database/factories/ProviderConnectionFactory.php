@@ -36,4 +36,13 @@ class ProviderConnectionFactory extends Factory
             'capabilities' => ['activities', 'activity_fit'],
         ]);
     }
+
+    public function wahoo(): static
+    {
+        return $this->state(fn (): array => [
+            'provider' => ProviderName::Wahoo,
+            'scopes' => ['user_read', 'workouts_read', 'offline_data'],
+            'capabilities' => ['oauth', 'activities', 'activity_fit'],
+        ]);
+    }
 }

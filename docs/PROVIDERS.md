@@ -18,7 +18,16 @@ The public summary schema includes identity, timestamps, duration, distance, act
 
 ## Wahoo
 
-Planned. The settings page exposes Wahoo only as a placeholder; no credentials, OAuth flow or activity import are implemented yet.
+Implemented as a read-only Wahoo Cloud API adapter:
+
+- confidential OAuth authorization-code and refresh-token flow;
+- authenticated Wahoo user lookup;
+- paginated import of completed cycling workouts;
+- SI-unit mapping from workout summaries;
+- private FIT-file download and enrichment;
+- incremental polling that stops once the overlap boundary is reached.
+
+The connector does not request write scopes and ignores planned, incomplete and non-cycling workouts. Webhooks remain disabled until a public webhook endpoint is configured.
 
 ## Adding a provider
 

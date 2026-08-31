@@ -42,9 +42,21 @@ class ConnectionSettingsControllerTest extends TestCase
             ->assertSee('data-provider-sync-form', false)
             ->assertSee('data-provider-sync-progress', false)
             ->assertSee('Wahoo')
-            ->assertSee('Integration folgt')
+            ->assertSee('Nicht konfiguriert')
             ->assertDontSee('Hammerhead ist die primäre Quelle.')
             ->assertDontSee('Synchronisierung fehlgeschlagen');
+    }
+
+    public function test_configured_wahoo_can_be_connected(): void
+    {
+        config()->set('activity-providers.wahoo.enabled', true);
+
+        $this->withoutVite()
+            ->actingAs(User::factory()->create())
+            ->get(route('settings.connections'))
+            ->assertOk()
+            ->assertSee('Wahoo')
+            ->assertSee(route('provider.connect', 'wahoo'), false);
     }
 
     public function test_failed_connection_offers_retry(): void

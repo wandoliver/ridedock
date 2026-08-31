@@ -26,6 +26,13 @@ class ProviderOAuthControllerTest extends TestCase
             'client_secret' => 'hammerhead-secret',
             'redirect_uri' => 'http://127.0.0.1:8080/api/v1/oauth/hammerhead/callback',
         ]);
+        config()->set('activity-providers.wahoo', [
+            ...config('activity-providers.wahoo'),
+            'enabled' => true,
+            'client_id' => 'wahoo-client',
+            'client_secret' => 'wahoo-secret',
+            'redirect_uri' => 'http://127.0.0.1:8080/api/v1/oauth/wahoo/callback',
+        ]);
     }
 
     public function test_authenticated_user_starts_hammerhead_authorization(): void
@@ -78,6 +85,39 @@ class ProviderOAuthControllerTest extends TestCase
         $this->assertNull(Cache::get('provider-oauth-state:valid-state'));
     }
 
+    public function test_authenticated_user_connects_wahoo_and_stores_the_external_user(): void
+    {
+        Queue::fake();
+        $user = User::factory()->create();
+
+        $authorization = $this->actingAs($user)->get(route('provider.connect', 'wahoo'));
+        $authorization->assertRedirect();
+        $location = $authorization->headers->get('Location');
+        $this->assertIsString($location);
+        parse_str((string) parse_url($location, PHP_URL_QUERY), $query);
+        $this->assertSame('wahoo-client', $query['client_id']);
+        $this->assertSame('user_read workouts_read offline_data', $query['scope']);
+
+        Http::fake([
+            'api.wahooligan.com/oauth/token' => Http::response([
+                'access_token' => 'wahoo-access-token',
+                'refresh_token' => 'wahoo-refresh-token',
+                'expires_in' => 7200,
+            ]),
+            'api.wahooligan.com/v1/user' => Http::response(['id' => 60462]),
+        ]);
+
+        $response = $this->get('/api/v1/oauth/wahoo/callback?code=valid-code&state='.$query['state']);
+
+        $response->assertRedirect(route('settings.connections'))
+            ->assertSessionHas('status', 'Wahoo ist verbunden. Die erste Synchronisierung wurde angestoßen.');
+        $connection = ProviderConnection::query()->where('provider', 'wahoo')->firstOrFail();
+        $this->assertSame('60462', $connection->external_user_id);
+        $this->assertSame('wahoo-access-token', $connection->access_token);
+        $this->assertSame(['user_read', 'workouts_read', 'offline_data'], $connection->scopes);
+        Queue::assertPushed(SyncProviderConnection::class);
+    }
+
     public function test_callback_rejects_an_invalid_state_without_calling_hammerhead(): void
     {
         Http::fake();
@@ -108,7 +148,7 @@ class ProviderOAuthControllerTest extends TestCase
         Queue::fake();
 
         $this->actingAs(User::factory()->create())
-            ->post(route('provider.sync', 'wahoo'))
+            ->post(route('provider.sync', 'garmin'))
             ->assertNotFound();
 
         Queue::assertNothingPushed();

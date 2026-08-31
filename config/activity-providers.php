@@ -32,4 +32,24 @@ return [
         'distance_multiplier_to_meters' => (float) env('HAMMERHEAD_DISTANCE_MULTIPLIER', 1),
         'duration_multiplier_to_seconds' => (float) env('HAMMERHEAD_DURATION_MULTIPLIER', 0.001),
     ],
+
+    'wahoo' => [
+        'priority' => 90,
+        'enabled' => (bool) env('WAHOO_ENABLED', false),
+        'client_id' => env('WAHOO_CLIENT_ID'),
+        'client_secret' => env('WAHOO_CLIENT_SECRET'),
+        'redirect_uri' => env('WAHOO_REDIRECT_URI'),
+        'api_url' => env('WAHOO_API_URL', 'https://api.wahooligan.com/v1'),
+        'auth_url' => env('WAHOO_AUTH_URL', 'https://api.wahooligan.com'),
+        'scopes' => array_values(array_filter(preg_split(
+            '/\s+/',
+            trim((string) env('WAHOO_SCOPES', 'user_read workouts_read offline_data')),
+        ) ?: [])),
+        'environment' => env('WAHOO_ENVIRONMENT', 'sandbox'),
+        'confidential' => (bool) env('WAHOO_CONFIDENTIAL', true),
+        'webhook_enabled' => (bool) env('WAHOO_WEBHOOK_ENABLED', false),
+        'webhook_uri' => env('WAHOO_WEBHOOK_URI'),
+        'webhook_token' => env('WAHOO_WEBHOOK_TOKEN'),
+        'allow_external_sharing' => (bool) env('WAHOO_ALLOW_EXTERNAL_SHARING', false),
+    ],
 ];

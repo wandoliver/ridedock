@@ -30,7 +30,7 @@
 
 ## Product follow-up
 
-- [ ] Add Wahoo as a second activity provider
+- [x] Add Wahoo as a second activity provider
 - [ ] Add provider disconnect/deauthorization endpoints and retention choices
 - [ ] Add rate-limit-aware scheduling, distributed locks and per-user sync status
 - [ ] Decode SRAM AXS developer fields into `shift` events using real fixtures

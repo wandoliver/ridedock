@@ -22,7 +22,7 @@ class ConnectionSettingsController extends Controller
 
         /** @var Collection<int, ProviderConnection> $connections */
         $connections = $user->providerConnections()
-            ->where('provider', ProviderName::Hammerhead)
+            ->whereIn('provider', [ProviderName::Hammerhead, ProviderName::Wahoo])
             ->orderByDesc('last_synced_at')
             ->get(['id', 'user_id', 'provider', 'status', 'last_synced_at']);
 

@@ -10,7 +10,8 @@ Its integrated AI coach can analyze individual rides and create seven-day traini
 ## Architecture
 
 ```text
-Hammerhead/Karoo ─ OAuth + webhook + FIT ─ Provider adapter ─ Normalize
+Hammerhead/Karoo ─ OAuth + webhook + FIT ─┐
+Wahoo           ─ OAuth + polling + FIT ──┴─ Provider adapter ─ Normalize
                                                                   │
                                                                   ▼
                                                         activities + sources
@@ -66,6 +67,16 @@ Hammerhead's current official process requires a developer account, acceptance o
 Hammerhead activity distances are provided in metres and durations in milliseconds. The explicit `HAMMERHEAD_DISTANCE_MULTIPLIER=1` and `HAMMERHEAD_DURATION_MULTIPLIER=0.001` settings normalize both values to SI units; FIT-derived values are authoritative after enrichment.
 
 Official references: [Developer Platform](https://www.hammerhead.io/pages/developer-platform), [Public API documentation](https://api.hammerhead.io/v1/docs), [developer account setup](https://support.hammerhead.io/hc/en-us/articles/43558376710683-Creating-a-Developer-Account), and [API license](https://support.hammerhead.io/hc/en-us/articles/42738760915099-API-Licence-Document).
+
+### Wahoo
+
+Set `WAHOO_ENABLED=true`, the client credentials and the exact redirect URL registered in the Wahoo Developer Portal. The connector uses the confidential OAuth authorization-code flow and requests only `user_read`, `workouts_read` and `offline_data`. Open the authenticated endpoint:
+
+```text
+GET /api/v1/connections/wahoo/connect
+```
+
+RideDock imports completed cycling workouts and their FIT files. Planned workouts, non-cycling workouts and write endpoints are not used. Wahoo webhooks remain disabled until a public webhook URL and token are configured. See the [Wahoo Cloud API documentation](https://cloud-api.wahooligan.com/).
 
 ## API examples
 
