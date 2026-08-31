@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Privacy-conscious OpenAI activity analyses with structured training effects, observations and recommendations.
 - AI-generated seven-day training plans based on the athlete profile and the previous six weeks of normalized activities.
 - Visible progress indicators for activity analyses and weekly-plan generation.
+- Manual Hammerhead synchronization with visible progress feedback from the connection settings.
 
 ### Changed
 
@@ -19,6 +20,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - FTP, heart rate, power and cadence are treated as optional signals rather than required analysis inputs.
 - The Coach page provides direct access to activity analyses, training profiles and generated weekly plans.
 - An active seven-day plan takes precedence over a conflicting next-session recommendation from an individual activity analysis.
+
+### Fixed
+
+- Hammerhead distances and durations use the confirmed API units, preventing synchronized rides from being inflated by a factor of 1,000.
 
 ### Security
 

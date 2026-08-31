@@ -53,7 +53,7 @@
 
             <div class="mt-6 space-y-3">
                 @php($connection = $connections->first())
-                <article class="flex flex-col gap-4 rounded-2xl border border-slate-200 p-4 sm:flex-row sm:items-center">
+                <article class="flex flex-col gap-4 rounded-2xl border border-slate-200 p-4 sm:flex-row sm:flex-wrap sm:items-center" data-provider-connection-card>
                     <span class="grid size-11 shrink-0 place-items-center rounded-xl {{ $connection ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">
                         <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="m6 17 4-8h4l4 8M9 12h7M10 9 8 6"/></svg>
                     </span>
@@ -75,16 +75,36 @@
                     </div>
 
                     @if ($connection?->status->value === 'error')
-                        <form method="POST" action="{{ route('provider.sync', 'hammerhead') }}">
+                        <form method="POST" action="{{ route('provider.sync', 'hammerhead') }}" data-provider-sync-form>
                             @csrf
-                            <button type="submit" class="rounded-xl bg-rose-50 px-3.5 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100">Erneut versuchen</button>
+                            <button type="submit" class="rounded-xl bg-rose-50 px-3.5 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100" data-provider-sync-button>Erneut versuchen</button>
                         </form>
+                    @elseif ($connection?->status->value === 'syncing')
+                        <span class="w-fit rounded-full bg-amber-50 px-3 py-1.5 text-sm font-medium text-amber-700">Läuft</span>
                     @elseif ($connection)
-                        <span class="w-fit rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700">Verbunden</span>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="w-fit rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700">Verbunden</span>
+                            <form method="POST" action="{{ route('provider.sync', 'hammerhead') }}" data-provider-sync-form>
+                                @csrf
+                                <button type="submit" class="rounded-xl bg-slate-950 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-emerald-700" data-provider-sync-button>Jetzt synchronisieren</button>
+                            </form>
+                        </div>
                     @elseif (config('activity-providers.hammerhead.enabled'))
                         <a href="{{ route('provider.connect', 'hammerhead') }}" class="w-fit rounded-xl bg-slate-950 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-emerald-700">Verbinden</a>
                     @else
                         <span class="w-fit rounded-full bg-slate-100 px-3 py-1.5 text-sm text-slate-500">Nicht konfiguriert</span>
+                    @endif
+
+                    @if ($connection)
+                        <div class="w-full basis-full rounded-xl bg-emerald-50 px-4 py-3" data-provider-sync-progress role="status" aria-live="polite" aria-busy="true" hidden>
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-sm font-medium text-emerald-900">Neue Fahrten werden synchronisiert</span>
+                                <span class="text-xs text-emerald-700">Bitte kurz warten</span>
+                            </div>
+                            <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-emerald-200" role="progressbar" aria-label="Fortschritt der Hammerhead-Synchronisierung" aria-valuetext="Synchronisierung läuft">
+                                <span class="analysis-progress-bar block h-full w-1/3 rounded-full bg-emerald-600"></span>
+                            </div>
+                        </div>
                     @endif
                 </article>
 

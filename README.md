@@ -63,7 +63,7 @@ GET /api/v1/connections/hammerhead/connect
 
 Hammerhead's current official process requires a developer account, acceptance of its API agreement, and client credentials from the Dashboard. Review the license before publishing or hosting a connector for others. The current agreement contains restrictions that may require written permission for a public/community service; this repository is not legal advice.
 
-The public OpenAPI schema currently omits units for activity `distance` and `duration`. Conversion is therefore explicit through `HAMMERHEAD_DISTANCE_MULTIPLIER` and `HAMMERHEAD_DURATION_MULTIPLIER`; FIT-derived values are authoritative after enrichment.
+Hammerhead activity distances are provided in metres and durations in milliseconds. The explicit `HAMMERHEAD_DISTANCE_MULTIPLIER=1` and `HAMMERHEAD_DURATION_MULTIPLIER=0.001` settings normalize both values to SI units; FIT-derived values are authoritative after enrichment.
 
 Official references: [Developer Platform](https://www.hammerhead.io/pages/developer-platform), [Public API documentation](https://api.hammerhead.io/v1/docs), [developer account setup](https://support.hammerhead.io/hc/en-us/articles/43558376710683-Creating-a-Developer-Account), and [API license](https://support.hammerhead.io/hc/en-us/articles/42738760915099-API-Licence-Document).
 

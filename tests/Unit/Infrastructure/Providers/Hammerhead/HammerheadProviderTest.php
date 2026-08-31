@@ -7,7 +7,7 @@ use Tests\TestCase;
 
 class HammerheadProviderTest extends TestCase
 {
-    public function test_converts_hammerhead_activity_units_to_si_units(): void
+    public function test_converts_hammerhead_metres_and_milliseconds_to_si_units(): void
     {
         config()->set('activity-providers.hammerhead.distance_multiplier_to_meters', 1);
         config()->set('activity-providers.hammerhead.duration_multiplier_to_seconds', 0.001);
