@@ -5,7 +5,7 @@
 
 RideDock is an open-source, self-hosted cycling training platform. It imports raw activity data directly from supported bike computers, normalizes FIT recordings, and turns rides into a private activity archive with detailed measurements, route heatmaps, and training insights.
 
-Its integrated AI coach can analyze individual rides and create seven-day training plans from personal goals, available training days, and recent workload. GPS coordinates, FIT files, provider payloads, and activity notes remain inside RideDock and are not sent to the AI provider.
+Its integrated AI coach can analyze individual rides and build a three-level training plan: a long-term roadmap to the target date, a current four-week block, and a concrete seven-day schedule. GPS coordinates, FIT files, provider payloads, and activity notes remain inside RideDock and are not sent to the AI provider.
 
 ## Architecture
 
@@ -48,7 +48,7 @@ php artisan migrate
 php artisan app:create-owner-token you@example.com
 ```
 
-RideDock processes provider imports synchronously by default (`QUEUE_CONNECTION=sync`), so no queue worker is required for local use. A hosted installation may select an asynchronous queue connection such as `database`; only then must it also run `php artisan queue:work`. AI activity analyses and weekly plans currently execute synchronously even when another queue connection is selected; moving both flows fully behind the queue is a managed-hosting readiness item.
+RideDock processes provider imports synchronously by default (`QUEUE_CONNECTION=sync`), so no queue worker is required for local use. A hosted installation may select an asynchronous queue connection such as `database`; only then must it also run `php artisan queue:work`. AI activity analyses and training plans currently execute synchronously even when another queue connection is selected; moving these flows fully behind the queue is a managed-hosting readiness item.
 
 ## AI coach configuration
 
@@ -72,7 +72,7 @@ OPENAI_BASE_URL=https://api.openai.com/v1
 OPENAI_TIMEOUT_SECONDS=60
 ```
 
-`OPENAI_MODEL` has no default so enabling AI is always deliberate. Choose a model available to the project that supports the Responses API and structured outputs, then validate it against representative activities and weekly plans. Consult the current [OpenAI model catalog](https://developers.openai.com/api/docs/models) instead of treating an example model ID as a permanent recommendation.
+`OPENAI_MODEL` has no default so enabling AI is always deliberate. Choose a model available to the project that supports the Responses API and structured outputs, then validate it against representative activities and training plans. Consult the current [OpenAI model catalog](https://developers.openai.com/api/docs/models) instead of treating an example model ID as a permanent recommendation.
 
 After changing environment configuration, clear Laravel's cached configuration:
 
@@ -83,9 +83,14 @@ php artisan config:clear
 ### 3. Verify the integration
 
 1. Sign in and open **Settings → Training & AI**.
-2. Save a training profile with at least a goal and available training days.
+2. Save a training profile with at least a goal, a future target date and available training days.
 3. Import an activity and select **Analyze ride** on its detail page.
-4. Open **Coach** and generate a seven-day plan.
+4. Open **Coach** and create the planning levels in order:
+   - **Goal roadmap:** phases from tomorrow through the configured target date;
+   - **Four-week block:** the current roadmap phase translated into four progressive weeks;
+   - **Seven-day plan:** concrete sessions matched to available days and recent workload.
+
+The seven-day plan remains useful on its own, but it uses the current roadmap and matching four-week block automatically when they exist. Creating a new roadmap makes an older block stale, so RideDock asks for a new block before using it for subsequent weekly plans.
 
 Configuration or provider failures are shown without replacing the athlete's stored activity data. AI requests currently run synchronously, so public hosting should move them behind a persistent worker before allowing unrestricted use. The current worker setup and this limitation are described in [DEPLOYMENT.md](DEPLOYMENT.md).
 
@@ -96,7 +101,8 @@ RideDock sends only the normalized context needed for the requested feature:
 - activity summaries and available sensor aggregates;
 - subjective RPE and derived session-RPE load;
 - aggregate training history for the previous six weeks;
-- the athlete's configured goal, availability, constraints and optional performance values.
+- the athlete's configured goal, availability, constraints and optional performance values;
+- the current generated roadmap and matching four-week block when producing a seven-day plan.
 
 RideDock does not send OAuth credentials, provider payloads, FIT files, GPS coordinates, route geometry or activity notes. Requests set `store: false`, so RideDock does not create retrievable Response objects for later application use. This setting is not the same as contractual Zero Data Retention: standard API abuse-monitoring retention and project-level data controls are documented separately in OpenAI's [data controls guide](https://developers.openai.com/api/docs/guides/your-data).
 

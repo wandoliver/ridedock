@@ -3,8 +3,19 @@ export function setWeeklyPlanPending(form, progress) {
 
     if (button) {
         button.disabled = true;
-        button.textContent = 'Plan wird erstellt …';
+        button.textContent = form.dataset?.pendingLabel ?? 'Plan wird erstellt …';
         button.setAttribute('aria-disabled', 'true');
+    }
+
+    const title = progress.querySelector?.('[data-plan-progress-title]');
+    const copy = progress.querySelector?.('[data-plan-progress-copy]');
+
+    if (title && form.dataset?.progressTitle) {
+        title.textContent = form.dataset.progressTitle;
+    }
+
+    if (copy && form.dataset?.progressCopy) {
+        copy.textContent = form.dataset.progressCopy;
     }
 
     progress.hidden = false;
@@ -24,14 +35,16 @@ export function startWeeklyPlanSubmission(event, form, progress, schedule = sche
 }
 
 export function initializeWeeklyPlan() {
-    const form = document.querySelector('[data-weekly-plan-form]');
+    const forms = document.querySelectorAll('[data-training-plan-form]');
     const progress = document.querySelector('[data-weekly-plan-progress]');
 
-    if (!form || !progress) {
+    if (forms.length === 0 || !progress) {
         return;
     }
 
-    form.addEventListener('submit', (event) => startWeeklyPlanSubmission(event, form, progress));
+    forms.forEach((form) => {
+        form.addEventListener('submit', (event) => startWeeklyPlanSubmission(event, form, progress));
+    });
 }
 
 function scheduleAfterPaint(callback) {

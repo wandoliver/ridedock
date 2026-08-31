@@ -6,7 +6,9 @@ use App\Domain\Activities\Contracts\ActivitySourceEnricher;
 use App\Domain\Activities\Contracts\ActivitySourceFileParser;
 use App\Domain\Activities\Services\FitActivitySourceEnricher;
 use App\Domain\Activities\Services\ProviderRegistry;
+use App\Domain\Training\Contracts\GoalTrainingPlanner;
 use App\Domain\Training\Contracts\TrainingAdvisor;
+use App\Domain\Training\Contracts\TrainingBlockPlanner;
 use App\Domain\Training\Contracts\WeeklyTrainingPlanner;
 use App\Infrastructure\Ai\OpenAiTrainingAdvisor;
 use App\Infrastructure\Fit\NodeFitFileParser;
@@ -37,6 +39,8 @@ class AppServiceProvider extends ServiceProvider
             timeoutSeconds: (int) config('ai.providers.openai.timeout_seconds'),
         ));
         $this->app->bind(TrainingAdvisor::class, fn ($app): TrainingAdvisor => $app->make(OpenAiTrainingAdvisor::class));
+        $this->app->bind(GoalTrainingPlanner::class, fn ($app): GoalTrainingPlanner => $app->make(OpenAiTrainingAdvisor::class));
+        $this->app->bind(TrainingBlockPlanner::class, fn ($app): TrainingBlockPlanner => $app->make(OpenAiTrainingAdvisor::class));
         $this->app->bind(WeeklyTrainingPlanner::class, fn ($app): WeeklyTrainingPlanner => $app->make(OpenAiTrainingAdvisor::class));
 
         $this->app->singleton(ProviderRegistry::class, fn ($app) => new ProviderRegistry([

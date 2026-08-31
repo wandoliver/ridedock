@@ -53,7 +53,7 @@ class WeeklyTrainingContextBuilderTest extends TestCase
             CarbonImmutable::parse('2026-08-31'),
         );
 
-        $this->assertSame(1, $context['schema_version']);
+        $this->assertSame(2, $context['schema_version']);
         $this->assertSame('2026-08-31', $context['plan_start']);
         $this->assertSame('2026-09-06', $context['plan_end']);
         $this->assertCount(7, $context['plan_days']);
@@ -62,6 +62,8 @@ class WeeklyTrainingContextBuilderTest extends TestCase
         $this->assertTrue($context['plan_days'][6]['available_for_training']);
         $this->assertSame(3, $context['recent_training']['six_week_summary']['activity_count']);
         $this->assertNull($context['athlete_profile']['optional_signals']['ftp_watts']);
+        $this->assertNull($context['strategy']['goal_plan']);
+        $this->assertNull($context['strategy']['training_block']);
         $this->assertSame([], $context['data_gaps']);
 
         $encodedContext = json_encode($context, JSON_THROW_ON_ERROR);

@@ -11,11 +11,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Read-only Wahoo OAuth connection with paginated workout synchronization and private FIT-file import.
 - Editable 1–10 RPE and private activity notes on the ride detail page.
 - OpenAI setup guidance plus production deployment and managed-hosting readiness documentation.
+- Long-term AI training roadmaps split into contiguous phases through the athlete's target date.
+- Four-week training blocks with weekly load levels, target volume, key sessions and adaptation rules.
 
 ### Changed
 
 - Connection settings now expose live connection and synchronization controls for both Hammerhead and Wahoo.
 - Provider documentation now covers the implemented Wahoo OAuth, polling and FIT workflow.
+- Seven-day plans now use the current goal roadmap and its matching four-week block as strategic context.
+- The Coach presents planning as a hierarchy from target roadmap to training block to concrete week.
+- The Coach separates roadmap, four-week block, weekly plan and ride analyses into compact tabs instead of one long page.
+
+### Fixed
+
+- Synchronous AI requests extend PHP's execution limit to the configured provider timeout plus a small grace period instead of failing at a shorter 30-second web limit.
 
 ### Security
 

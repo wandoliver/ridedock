@@ -2,6 +2,7 @@
 
 namespace App\Domain\Training\Services;
 
+use App\Domain\Training\Enums\AiAnalysisStatus;
 use App\Models\Activity;
 use App\Models\AthleteProfile;
 use App\Models\User;
@@ -10,7 +11,7 @@ use Illuminate\Support\Collection;
 
 final class WeeklyTrainingContextBuilder
 {
-    public const SCHEMA_VERSION = 1;
+    public const SCHEMA_VERSION = 2;
 
     /** @return array<string, mixed> */
     public function build(User $user, ?CarbonImmutable $planStartsAt = null): array
@@ -37,6 +38,7 @@ final class WeeklyTrainingContextBuilder
             'plan_start' => $planStartsAt->toDateString(),
             'plan_end' => $planStartsAt->addDays(6)->toDateString(),
             'athlete_profile' => $this->profile($profile),
+            'strategy' => $this->strategy($user),
             'plan_days' => $this->planDays($planStartsAt, $profile->available_days ?? []),
             'recent_training' => [
                 'window_start' => $historyStartsAt->toDateString(),
@@ -53,6 +55,30 @@ final class WeeklyTrainingContextBuilder
                 'provider_payloads_included' => false,
                 'activity_notes_included' => false,
             ],
+        ];
+    }
+
+    /** @return array{goal_plan: array<string, mixed>|null, training_block: array<string, mixed>|null} */
+    private function strategy(User $user): array
+    {
+        $goalPlan = $user->aiAnalyses()
+            ->where('type', 'goal_plan')
+            ->where('status', AiAnalysisStatus::Completed)
+            ->latest()
+            ->first();
+        $trainingBlock = $user->aiAnalyses()
+            ->where('type', 'training_block')
+            ->where('status', AiAnalysisStatus::Completed)
+            ->latest()
+            ->first();
+
+        if (($trainingBlock?->context['goal_plan_analysis_id'] ?? null) !== $goalPlan?->id) {
+            $trainingBlock = null;
+        }
+
+        return [
+            'goal_plan' => $goalPlan?->output,
+            'training_block' => $trainingBlock?->output,
         ];
     }
 

@@ -1,6 +1,7 @@
 import L from 'leaflet';
 import { initializeActivityAnalysis } from './activity-analysis.js';
 import { initializeActivityDetail } from './activity-detail.js';
+import { initializeCoachTabs } from './coach-tabs.js';
 import { decodePolyline, heatPointsFromRoutes, setHeatmapPanelExpanded } from './heatmap.js';
 import { initializeProviderSync } from './provider-sync.js';
 import { initializeWeeklyPlan } from './weekly-plan.js';
@@ -77,5 +78,6 @@ if (heatmapElement && heatmapDataElement) {
 
 initializeActivityDetail(L);
 initializeActivityAnalysis();
+initializeCoachTabs();
 initializeWeeklyPlan();
 initializeProviderSync();

@@ -9,9 +9,11 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\CoachController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GoalTrainingPlanController;
 use App\Http\Controllers\OAuth\ProviderOAuthController;
 use App\Http\Controllers\Settings\ConnectionSettingsController;
 use App\Http\Controllers\Settings\TrainingSettingsController;
+use App\Http\Controllers\TrainingBlockController;
 use App\Http\Controllers\WeeklyTrainingPlanController;
 use Illuminate\Support\Facades\Route;
 
@@ -47,6 +49,12 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/coach/weekly-plan', WeeklyTrainingPlanController::class)
         ->middleware('throttle:5,1')
         ->name('coach.weekly-plan.store');
+    Route::post('/coach/goal-plan', GoalTrainingPlanController::class)
+        ->middleware('throttle:5,1')
+        ->name('coach.goal-plan.store');
+    Route::post('/coach/training-block', TrainingBlockController::class)
+        ->middleware('throttle:5,1')
+        ->name('coach.training-block.store');
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('/connections/{provider}/connect', [ProviderOAuthController::class, 'connect'])
         ->middleware('throttle:20,1')

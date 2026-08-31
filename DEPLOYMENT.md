@@ -90,7 +90,7 @@ php artisan queue:work --sleep=1 --tries=3 --timeout=120
 
 Restart workers after every deployment so they load the new code and configuration. Monitor `failed_jobs`, worker restarts, queue age and repeated provider failures. Increase concurrency only after confirming provider rate limits and ensuring unique jobs still behave as expected.
 
-AI activity analyses and weekly plans currently use synchronous dispatch from their web controllers. A queue worker does not make those requests asynchronous yet. Convert both controller flows and the weekly-plan generator to proper queued jobs before opening a managed service to unrestricted traffic; until then, size web timeouts conservatively and keep the user group limited.
+AI activity analyses, goal roadmaps, four-week blocks and weekly plans currently use synchronous dispatch from their web controllers. A queue worker does not make those requests asynchronous yet. RideDock raises PHP's per-request execution limit to `OPENAI_TIMEOUT_SECONDS` plus ten seconds when PHP is configured with a shorter non-zero limit. The web server or hosting platform may enforce a separate hard timeout, which must also exceed this value. Convert these controller flows and generators to proper queued jobs before opening a managed service to unrestricted traffic; until then, size web timeouts conservatively and keep the user group limited.
 
 RideDock currently has no mandatory scheduled command. Add a scheduler process only when recurring synchronization, cleanup or retention jobs are introduced.
 

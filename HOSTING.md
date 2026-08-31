@@ -57,9 +57,9 @@ Bring-your-own OpenAI keys may remain an option for self-hosted installations. I
 
 ### AI service controls
 
-- asynchronous queue execution for activity analyses and weekly plans;
+- asynchronous queue execution for activity analyses, goal roadmaps, training blocks and weekly plans;
 - a dedicated server-side OpenAI project or service-account key;
-- per-user analysis and weekly-plan quotas;
+- per-user analysis and training-plan quotas;
 - token and cost accounting by user, feature and model;
 - project budgets and operator alerts;
 - request throttling and graceful handling of rate limits or outages;
