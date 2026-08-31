@@ -50,6 +50,18 @@ php artisan app:create-owner-token you@example.com
 
 RideDock processes provider imports synchronously by default (`QUEUE_CONNECTION=sync`), so no queue worker is required for local use. A hosted installation may select an asynchronous queue connection such as `database`; only then must it also run `php artisan queue:work`. AI activity analyses and training plans currently execute synchronously even when another queue connection is selected; moving these flows fully behind the queue is a managed-hosting readiness item.
 
+### Local HTTPS
+
+OAuth providers may require an HTTPS callback during local development. Create a trusted certificate with `mkcert`:
+
+```bash
+mkdir -p .certs
+mkcert -install
+mkcert -cert-file .certs/localhost.pem -key-file .certs/localhost-key.pem 127.0.0.1 localhost ::1
+```
+
+When these certificate files exist, `composer run dev` starts Laravel internally on port `8002` and exposes RideDock at `https://127.0.0.1:8001` through the bundled local HTTPS proxy. Stop all development processes together with `Ctrl+C`.
+
 ## AI coach configuration
 
 The AI coach is optional. Without an AI provider, RideDock remains usable for importing and viewing activities. Normalized activity summaries can also be exported through the authenticated JSON/CSV API. The current implementation uses the OpenAI [Responses API](https://developers.openai.com/api/reference/responses) with strict structured outputs.

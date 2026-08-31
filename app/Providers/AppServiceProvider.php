@@ -56,6 +56,13 @@ class AppServiceProvider extends ServiceProvider
     {
         Model::preventLazyLoading(! app()->isProduction());
 
+        if (app()->environment('local')
+            && file_exists(base_path('.certs/localhost.pem'))
+            && file_exists(base_path('.certs/localhost-key.pem'))) {
+            DevCommands::artisan('serve --host=127.0.0.1 --port=8002 --tries=1', 'server');
+            DevCommands::register('node scripts/https-proxy.mjs', 'https')->green();
+        }
+
         if (config('queue.default') === 'sync') {
             DevCommands::except('queue');
         }

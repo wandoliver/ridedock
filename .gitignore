@@ -20,6 +20,7 @@
 /boost.json
 
 # Local development tools
+/.certs/
 /.idea
 /.nova
 /.phpunit.cache
