@@ -371,13 +371,7 @@
                     <div>
                         <div class="flex flex-wrap items-center gap-2">
                             <h3 class="font-medium transition group-hover:text-emerald-800">{{ $activity->name }}</h3>
-                            @if (in_array($analysisStatus, ['pending', 'processing'], true))
-                                <span class="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">Analyse läuft</span>
-                            @elseif ($analysisStatus === 'completed')
-                                <span class="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">Analysiert</span>
-                            @elseif ($analysisStatus === 'failed')
-                                <span class="rounded-full bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-700">Erneut versuchen</span>
-                            @endif
+                            @include('activities._analysis-status', ['status' => $analysisStatus])
                         </div>
                         <p class="mt-1 text-sm text-slate-500">{{ $activity->started_at->locale('de')->isoFormat('ddd, D. MMM YYYY · HH:mm') }}</p>
                     </div>

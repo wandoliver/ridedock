@@ -48,6 +48,7 @@
                         <div class="flex flex-wrap items-center gap-2">
                             <h2 class="font-medium transition group-hover:text-emerald-800">{{ $activity->name }}</h2>
                             <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[0.7rem] font-medium text-slate-500">{{ str($activity->type)->replace('_', ' ')->headline() }}</span>
+                            @include('activities._analysis-status', ['status' => $activity->latestAiAnalysis?->status->value])
                         </div>
                         <p class="mt-1 text-sm text-slate-500">{{ $activity->started_at->locale('de')->isoFormat('ddd, D. MMM YYYY · HH:mm') }}</p>
                     </div>

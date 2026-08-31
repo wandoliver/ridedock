@@ -147,7 +147,10 @@
             @forelse ($activities as $activity)
                 <a href="{{ route('activities.show', $activity) }}" class="group grid gap-4 border-b border-slate-100 px-6 py-5 transition last:border-0 hover:bg-emerald-50/40 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-emerald-600 sm:grid-cols-[1fr_auto] sm:items-center sm:px-8">
                     <div>
-                        <p class="font-medium transition group-hover:text-emerald-800">{{ $activity->name }}</p>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <p class="font-medium transition group-hover:text-emerald-800">{{ $activity->name }}</p>
+                            @include('activities._analysis-status', ['status' => $activity->latestAiAnalysis?->status->value])
+                        </div>
                         <p class="mt-1 text-sm text-slate-500">{{ $activity->started_at->locale('de')->isoFormat('ddd, D. MMM · HH:mm') }}</p>
                     </div>
                     <div class="flex items-center gap-6 text-sm">

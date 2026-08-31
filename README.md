@@ -52,7 +52,7 @@ RideDock processes provider imports synchronously by default (`QUEUE_CONNECTION=
 
 ## AI coach configuration
 
-The AI coach is optional. RideDock remains usable for importing, viewing and exporting activities when no AI provider is configured. The current implementation uses the OpenAI [Responses API](https://developers.openai.com/api/reference/responses) with strict structured outputs.
+The AI coach is optional. Without an AI provider, RideDock remains usable for importing and viewing activities. Normalized activity summaries can also be exported through the authenticated JSON/CSV API. The current implementation uses the OpenAI [Responses API](https://developers.openai.com/api/reference/responses) with strict structured outputs.
 
 ### 1. Create server-side credentials
 

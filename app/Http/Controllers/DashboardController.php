@@ -37,6 +37,7 @@ class DashboardController extends Controller
 
         /** @var Collection<int, Activity> $activities */
         $activities = (clone $activityQuery)
+            ->with('latestAiAnalysis')
             ->latest('started_at')
             ->limit(5)
             ->get([

@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Domain\Activities\Enums\ConnectionStatus;
+use App\Domain\Training\Enums\AiAnalysisStatus;
 use App\Models\Activity;
 use App\Models\ActivityStream;
+use App\Models\AiAnalysis;
 use App\Models\ProviderConnection;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -41,6 +43,9 @@ class DashboardControllerTest extends TestCase
             'moving_time_s' => 5400,
             'elevation_gain_m' => 620,
         ]);
+        AiAnalysis::factory()->for($user)->for($activity)->create([
+            'status' => AiAnalysisStatus::Completed,
+        ]);
         ActivityStream::factory()->for($activity)->create([
             'type' => 'latlng',
             'data' => [
@@ -55,6 +60,7 @@ class DashboardControllerTest extends TestCase
             ->get(route('dashboard'))
             ->assertOk()
             ->assertSee('Passo Ride')
+            ->assertSee('Analysiert')
             ->assertSee('43 km')
             ->assertSee('620 m')
             ->assertSee('1 Route')

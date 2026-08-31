@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Domain\Training\Enums\AiAnalysisStatus;
 use App\Models\Activity;
+use App\Models\AiAnalysis;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -67,5 +69,23 @@ class ActivityIndexControllerTest extends TestCase
             ->assertSee('Letzte 30 Tage')
             ->assertSee('Recent ride')
             ->assertDontSee('Old ride');
+    }
+
+    public function test_analysis_status_is_visible_in_the_archive(): void
+    {
+        $user = User::factory()->create();
+        $activity = Activity::factory()->for($user)->create([
+            'name' => 'Analysierte Fahrt',
+        ]);
+        AiAnalysis::factory()->for($user)->for($activity)->create([
+            'status' => AiAnalysisStatus::Completed,
+        ]);
+
+        $this->withoutVite()
+            ->actingAs($user)
+            ->get(route('activities.index'))
+            ->assertOk()
+            ->assertSee('Analysierte Fahrt')
+            ->assertSee('Analysiert');
     }
 }

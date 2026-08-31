@@ -22,6 +22,7 @@ class ActivityIndexController extends Controller
         $period = ActivityPeriod::resolve($request->query('period'));
         $range = $period->range($now);
         $activities = $user->activities()
+            ->with('latestAiAnalysis')
             ->when($range['from'], fn ($query, $from) => $query->where('started_at', '>=', $from))
             ->when($range['to'], fn ($query, $to) => $query->where('started_at', '<=', $to))
             ->latest('started_at')
