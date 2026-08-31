@@ -69,10 +69,54 @@ class ActivityDetailControllerTest extends TestCase
             ->assertSee('220 W')
             ->assertSee('RPE 6')
             ->assertSee('Kontrolliert gefahren.')
+            ->assertSee(route('activities.feedback.update', $activity), false)
+            ->assertSee('Gefühl speichern')
             ->assertSee('Hammerhead')
             ->assertSee('1 Schaltvorgang')
             ->assertSee('id="ride-route"', false)
             ->assertSee('data-stream-chart="power"', false);
+    }
+
+    public function test_owner_updates_or_clears_rpe_and_notes_from_the_detail_page(): void
+    {
+        $user = User::factory()->create();
+        $activity = Activity::factory()->for($user)->create();
+
+        $this->actingAs($user)
+            ->patch(route('activities.feedback.update', $activity), [
+                'rpe' => 7,
+                'notes' => 'Die Beine waren am Ende schwer.',
+            ])
+            ->assertRedirect(route('activities.show', $activity))
+            ->assertSessionHas('status', 'Gefühl und Notizen wurden gespeichert.');
+
+        $this->assertSame(7, $activity->fresh()->rpe);
+        $this->assertSame('Die Beine waren am Ende schwer.', $activity->fresh()->notes);
+
+        $this->actingAs($user)
+            ->patch(route('activities.feedback.update', $activity), [
+                'rpe' => '',
+                'notes' => '',
+            ])
+            ->assertRedirect(route('activities.show', $activity));
+
+        $this->assertNull($activity->fresh()->rpe);
+        $this->assertNull($activity->fresh()->notes);
+    }
+
+    public function test_another_user_cannot_update_activity_feedback(): void
+    {
+        $activity = Activity::factory()->create(['rpe' => 4, 'notes' => 'Privat']);
+
+        $this->actingAs(User::factory()->create())
+            ->patch(route('activities.feedback.update', $activity), [
+                'rpe' => 9,
+                'notes' => 'Überschrieben',
+            ])
+            ->assertNotFound();
+
+        $this->assertSame(4, $activity->fresh()->rpe);
+        $this->assertSame('Privat', $activity->fresh()->notes);
     }
 
     public function test_guest_and_another_user_cannot_see_an_activity(): void

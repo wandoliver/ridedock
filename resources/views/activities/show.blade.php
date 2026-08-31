@@ -83,11 +83,62 @@
                 <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-950/[0.03] sm:p-8">
                     <p class="text-sm text-slate-500">Belastung</p>
                     <h2 class="mt-1 text-xl font-semibold tracking-tight">Gefühl & Notizen</h2>
-                    <div class="mt-6 flex items-center justify-between rounded-2xl bg-emerald-50 p-4">
-                        <span class="text-sm text-emerald-800">Anstrengung</span>
-                        <strong class="text-lg text-emerald-900">{{ $activity->rpe ? 'RPE '.$activity->rpe : 'Nicht bewertet' }}</strong>
-                    </div>
-                    <p class="mt-5 text-sm leading-6 text-slate-600">{{ $activity->notes ?: 'Noch keine Notiz zu dieser Fahrt.' }}</p>
+                    <p class="mt-2 text-sm leading-6 text-slate-500">Bewerte, wie anstrengend sich die gesamte Fahrt angefühlt hat.</p>
+
+                    <form method="POST" action="{{ route('activities.feedback.update', $activity) }}" class="mt-6">
+                        @csrf
+                        @method('PATCH')
+
+                        <fieldset>
+                            <legend class="text-sm font-medium text-slate-700">Anstrengung (RPE)</legend>
+                            <div class="mt-3 grid grid-cols-5 gap-2" aria-label="Anstrengung von 1 bis 10">
+                                @foreach (range(1, 10) as $rpe)
+                                    <label class="cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="rpe"
+                                            value="{{ $rpe }}"
+                                            class="peer sr-only"
+                                            @checked((string) old('rpe', $activity->rpe) === (string) $rpe)
+                                        >
+                                        <span class="grid min-h-10 place-items-center rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-600 transition hover:border-emerald-300 peer-checked:border-emerald-600 peer-checked:bg-emerald-50 peer-checked:text-emerald-800 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-emerald-600">{{ $rpe }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            <div class="mt-2 flex items-center justify-between gap-3 text-xs text-slate-400">
+                                <span>1 · sehr leicht</span>
+                                <span>10 · maximal</span>
+                            </div>
+                            <label class="mt-3 inline-flex cursor-pointer items-center gap-2 text-xs text-slate-500">
+                                <input
+                                    type="radio"
+                                    name="rpe"
+                                    value=""
+                                    class="size-4 border-slate-300 text-emerald-600 focus:ring-emerald-600"
+                                    @checked(old('rpe', $activity->rpe) === null || old('rpe', $activity->rpe) === '')
+                                >
+                                Keine Bewertung
+                            </label>
+                            @error('rpe')
+                                <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>
+                            @enderror
+                        </fieldset>
+
+                        <label for="activity-notes" class="mt-6 block text-sm font-medium text-slate-700">Notiz</label>
+                        <textarea
+                            id="activity-notes"
+                            name="notes"
+                            rows="4"
+                            maxlength="10000"
+                            placeholder="Wie lief die Fahrt? Beine, Atmung, Wetter oder Besonderheiten …"
+                            class="mt-2 block w-full resize-y rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm leading-6 text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                        >{{ old('notes', $activity->notes) }}</textarea>
+                        @error('notes')
+                            <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>
+                        @enderror
+
+                        <button type="submit" class="mt-4 w-full rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700">Gefühl speichern</button>
+                    </form>
                 </article>
 
                 <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-950/[0.03] sm:p-8">

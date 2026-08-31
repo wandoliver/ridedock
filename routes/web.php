@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActivityAiAnalysisController;
 use App\Http\Controllers\ActivityDetailController;
+use App\Http\Controllers\ActivityFeedbackController;
 use App\Http\Controllers\ActivityIndexController;
 use App\Http\Controllers\Api\ProviderConnectionController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -34,6 +35,9 @@ Route::middleware('guest')->group(function (): void {
 Route::middleware('auth')->group(function (): void {
     Route::get('/coach', CoachController::class)->name('coach.index');
     Route::get('/activities', ActivityIndexController::class)->name('activities.index');
+    Route::patch('/activities/{activity}/feedback', ActivityFeedbackController::class)
+        ->middleware('throttle:30,1')
+        ->name('activities.feedback.update');
     Route::get('/settings/connections', ConnectionSettingsController::class)->name('settings.connections');
     Route::get('/settings/training', [TrainingSettingsController::class, 'show'])->name('settings.training');
     Route::patch('/settings/training', [TrainingSettingsController::class, 'update'])->name('settings.training.update');
