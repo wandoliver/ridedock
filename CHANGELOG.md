@@ -6,9 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.0.3] - 2026-08-31
+
 ### Added
 
 - Read-only Wahoo OAuth connection with paginated workout synchronization and private FIT-file import.
+- Trusted local HTTPS development proxy for testing OAuth callbacks, including HTTPS support for the Vite development server.
 - Editable 1–10 RPE and private activity notes on the ride detail page.
 - OpenAI setup guidance plus production deployment and managed-hosting readiness documentation.
 - Long-term AI training roadmaps split into contiguous phases through the athlete's target date.
