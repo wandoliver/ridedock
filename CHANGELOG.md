@@ -9,6 +9,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - Read-only Wahoo OAuth connection with paginated workout synchronization and private FIT-file import.
+- Editable 1–10 RPE and private activity notes on the ride detail page.
+- OpenAI setup guidance plus production deployment and managed-hosting readiness documentation.
+
+### Changed
+
+- Connection settings now expose live connection and synchronization controls for both Hammerhead and Wahoo.
+- Provider documentation now covers the implemented Wahoo OAuth, polling and FIT workflow.
+
+### Security
+
+- Web-based RPE and note updates are restricted to the owning user and validated server-side.
+- Wahoo requests only read access and keeps webhook handling disabled until explicitly configured.
 
 ## [0.0.2] - 2026-08-30
 

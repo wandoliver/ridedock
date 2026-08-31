@@ -24,7 +24,7 @@ Wahoo           ─ OAuth + polling + FIT ──┴─ Provider adapter ─ Norm
 
 The provider payload remains available in `activity_sources.raw_payload`, while application code reads the normalized `activities` record. Raw source files use the non-serving `activity_sources` disk and are never returned through the API.
 
-See [Architecture](docs/ARCHITECTURE.md), [Data model](docs/DATA_MODEL.md), [Provider notes](docs/PROVIDERS.md), [MVP backlog](docs/MVP_BACKLOG.md), and the [Changelog](CHANGELOG.md).
+See [Architecture](docs/ARCHITECTURE.md), [Data model](docs/DATA_MODEL.md), [Provider notes](docs/PROVIDERS.md), [production deployment](DEPLOYMENT.md), [managed hosting](HOSTING.md), [MVP backlog](docs/MVP_BACKLOG.md), and the [Changelog](CHANGELOG.md).
 
 ## Local setup
 
@@ -48,7 +48,67 @@ php artisan migrate
 php artisan app:create-owner-token you@example.com
 ```
 
-RideDock processes imports and requested AI analyses synchronously by default (`QUEUE_CONNECTION=sync`), so no queue worker is required. A hosted installation may explicitly select an asynchronous queue connection such as `database`; only then must it also run `php artisan queue:work`.
+RideDock processes provider imports synchronously by default (`QUEUE_CONNECTION=sync`), so no queue worker is required for local use. A hosted installation may select an asynchronous queue connection such as `database`; only then must it also run `php artisan queue:work`. AI activity analyses and weekly plans currently execute synchronously even when another queue connection is selected; moving both flows fully behind the queue is a managed-hosting readiness item.
+
+## AI coach configuration
+
+The AI coach is optional. RideDock remains usable for importing, viewing and exporting activities when no AI provider is configured. The current implementation uses the OpenAI [Responses API](https://developers.openai.com/api/reference/responses) with strict structured outputs.
+
+### 1. Create server-side credentials
+
+Create or select an OpenAI project in the [API Platform](https://platform.openai.com/settings/organization/projects), then create a project API key. Use a separate project and key for each deployment environment so usage, limits and key rotation remain isolated.
+
+Never expose the key in browser code, a mobile application, screenshots or the repository. OpenAI recommends loading API credentials from a server-side environment variable or key-management service; RideDock reads the key only from server configuration. See the official [OpenAI API authentication guidance](https://developers.openai.com/api/reference/overview#authentication).
+
+### 2. Configure RideDock
+
+Set these values in the deployment's `.env` file or secret manager:
+
+```dotenv
+AI_PROVIDER=openai
+OPENAI_API_KEY=replace-with-a-project-api-key
+OPENAI_MODEL=replace-with-a-responses-api-model
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_TIMEOUT_SECONDS=60
+```
+
+`OPENAI_MODEL` has no default so enabling AI is always deliberate. Choose a model available to the project that supports the Responses API and structured outputs, then validate it against representative activities and weekly plans. Consult the current [OpenAI model catalog](https://developers.openai.com/api/docs/models) instead of treating an example model ID as a permanent recommendation.
+
+After changing environment configuration, clear Laravel's cached configuration:
+
+```bash
+php artisan config:clear
+```
+
+### 3. Verify the integration
+
+1. Sign in and open **Settings → Training & AI**.
+2. Save a training profile with at least a goal and available training days.
+3. Import an activity and select **Analyze ride** on its detail page.
+4. Open **Coach** and generate a seven-day plan.
+
+Configuration or provider failures are shown without replacing the athlete's stored activity data. AI requests currently run synchronously, so public hosting should move them behind a persistent worker before allowing unrestricted use. The current worker setup and this limitation are described in [DEPLOYMENT.md](DEPLOYMENT.md).
+
+### Data sent to OpenAI
+
+RideDock sends only the normalized context needed for the requested feature:
+
+- activity summaries and available sensor aggregates;
+- subjective RPE and derived session-RPE load;
+- aggregate training history for the previous six weeks;
+- the athlete's configured goal, availability, constraints and optional performance values.
+
+RideDock does not send OAuth credentials, provider payloads, FIT files, GPS coordinates, route geometry or activity notes. Requests set `store: false`, so RideDock does not create retrievable Response objects for later application use. This setting is not the same as contractual Zero Data Retention: standard API abuse-monitoring retention and project-level data controls are documented separately in OpenAI's [data controls guide](https://developers.openai.com/api/docs/guides/your-data).
+
+### Cost and hosted use
+
+API usage is billed to the OpenAI project behind `OPENAI_API_KEY`. A personal installation is controlled by its operator. A managed multiuser service must add per-user quotas, rate limits, usage accounting and operator spend alerts before public access. End users of a managed service should not be asked to paste the operator's API key into the browser. See [HOSTING.md](HOSTING.md) for the managed-service roadmap.
+
+## Deployment options
+
+- **Local development:** SQLite and synchronous jobs are sufficient for evaluating RideDock.
+- **Production self-hosting:** use HTTPS, PostgreSQL, persistent private storage, backups and a supervised queue worker. Follow [DEPLOYMENT.md](DEPLOYMENT.md).
+- **Managed RideDock:** a public multiuser service requires additional identity, privacy, lifecycle, billing and operational controls. Follow [HOSTING.md](HOSTING.md).
 
 ## Provider configuration
 
