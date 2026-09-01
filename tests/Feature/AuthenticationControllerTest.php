@@ -22,8 +22,18 @@ class AuthenticationControllerTest extends TestCase
 
         $response->assertRedirect(route('dashboard'));
         $this->assertAuthenticated();
-        $this->assertDatabaseHas('users', ['email' => 'ada@example.com']);
+        $this->assertDatabaseHas('users', ['email' => 'ada@example.com', 'locale' => 'en']);
         $this->assertTrue(Hash::check('SecureRide123', User::firstOrFail()->password));
+    }
+
+    public function test_guest_pages_use_english_by_default(): void
+    {
+        $this->withoutVite()
+            ->get(route('register'))
+            ->assertOk()
+            ->assertSee('<html lang="en">', false)
+            ->assertSee('Create account')
+            ->assertSee('Already registered?');
     }
 
     public function test_user_signs_in_and_out_with_a_regenerated_session(): void

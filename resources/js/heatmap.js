@@ -25,7 +25,9 @@ export function setHeatmapPanelExpanded(frame, button, label, expanded) {
     frame.classList.toggle('min-h-[28rem]', !expanded);
     frame.classList.toggle('min-h-[42rem]', expanded);
     button.setAttribute('aria-pressed', String(expanded));
-    label.textContent = expanded ? 'Verkleinern' : 'Vergrößern';
+    label.textContent = expanded
+        ? (button.dataset?.collapseLabel ?? 'Verkleinern')
+        : (button.dataset?.expandLabel ?? 'Vergrößern');
 }
 
 function decodeValue(encoded, startIndex) {

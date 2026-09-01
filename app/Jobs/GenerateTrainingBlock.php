@@ -17,6 +17,7 @@ class GenerateTrainingBlock
     public function handle(TrainingBlockPlanner $trainingPlanner): void
     {
         $analysis = AiAnalysis::query()->findOrFail($this->analysisId);
+        app()->setLocale($analysis->user()->value('locale') ?? config('app.locale'));
 
         $analysis->update([
             'status' => AiAnalysisStatus::Processing,
@@ -40,9 +41,16 @@ class GenerateTrainingBlock
 
     public function failed(?Throwable $exception): void
     {
-        AiAnalysis::query()->whereKey($this->analysisId)->update([
+        $analysis = AiAnalysis::query()->find($this->analysisId);
+
+        if ($analysis === null) {
+            return;
+        }
+
+        app()->setLocale($analysis->user()->value('locale') ?? config('app.locale'));
+        $analysis->update([
             'status' => AiAnalysisStatus::Failed,
-            'error' => 'Der Trainingsblock konnte nicht erstellt werden.',
+            'error' => __('ui.messages.block_failed_stored'),
             'completed_at' => now(),
         ]);
     }

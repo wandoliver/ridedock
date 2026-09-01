@@ -28,13 +28,13 @@ class WeeklyTrainingPlanController extends Controller
         $profile = $user->athleteProfile;
 
         if (! $trainingPlanner->isConfigured()) {
-            return back()->with('analysis_error', 'Die KI-Analyse ist noch nicht konfiguriert.');
+            return back()->with('analysis_error', __('ui.messages.ai_not_configured'));
         }
 
         if (($profile->available_days ?? []) === []) {
             return redirect()
                 ->route('settings.training')
-                ->with('analysis_error', 'Bitte wähle zuerst deine verfügbaren Trainingstage.');
+                ->with('analysis_error', __('ui.messages.choose_days'));
         }
 
         $analysis = $user->aiAnalyses()->create([
@@ -53,17 +53,17 @@ class WeeklyTrainingPlanController extends Controller
 
             $analysis->update([
                 'status' => AiAnalysisStatus::Failed,
-                'error' => 'Der Wochenplan konnte nicht erstellt werden.',
+                'error' => __('ui.messages.week_failed_stored'),
                 'completed_at' => now(),
             ]);
 
             return redirect()
                 ->to(route('coach.index').'#weekly-plan')
-                ->with('analysis_error', 'Der Wochenplan konnte nicht erstellt werden. Bitte versuche es erneut.');
+                ->with('analysis_error', __('ui.messages.week_failed'));
         }
 
         return redirect()
             ->to(route('coach.index').'#weekly-plan')
-            ->with('status', 'Dein Sieben-Tage-Plan ist fertig.');
+            ->with('status', __('ui.messages.week_complete'));
     }
 }

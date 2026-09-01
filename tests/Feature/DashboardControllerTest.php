@@ -24,13 +24,13 @@ class DashboardControllerTest extends TestCase
         $this->withoutVite()
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('Fahrten verstehen, Daten behalten.')
-            ->assertSee('Anmelden')
+            ->assertSee('Understand your rides. Keep your data.')
+            ->assertSee('Sign in')
             ->assertSee(route('login.store'), false)
             ->assertSee('name="email"', false)
             ->assertSee('name="password"', false)
-            ->assertDontSee('Kennzahlen &amp; Heatmap', false)
-            ->assertDontSee('Interaktive Heatmap deiner Routen')
+            ->assertDontSee('Metrics &amp; heatmap', false)
+            ->assertDontSee('Interactive heatmap of your routes')
             ->assertDontSee('Private morning ride');
     }
 

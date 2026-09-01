@@ -34,18 +34,18 @@ enum ActivityPeriod: string
     public function shortLabel(CarbonImmutable $now): string
     {
         return match ($this) {
-            self::ThirtyDays => '30 Tage',
+            self::ThirtyDays => __('ui.period.thirty_days_short'),
             self::CurrentYear => (string) $now->year,
-            self::All => 'Alles',
+            self::All => __('ui.period.all_short'),
         };
     }
 
     public function label(CarbonImmutable $now): string
     {
         return match ($this) {
-            self::ThirtyDays => 'Letzte 30 Tage',
-            self::CurrentYear => 'Jahr '.$now->year,
-            self::All => 'Gesamter Zeitraum',
+            self::ThirtyDays => __('ui.period.thirty_days'),
+            self::CurrentYear => __('ui.period.year', ['year' => $now->year]),
+            self::All => __('ui.period.all'),
         };
     }
 }

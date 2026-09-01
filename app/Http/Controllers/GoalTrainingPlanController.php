@@ -30,14 +30,14 @@ class GoalTrainingPlanController extends Controller
         $tomorrow = CarbonImmutable::today(config('app.timezone'))->addDay();
 
         if (! $trainingPlanner->isConfigured()) {
-            return back()->with('analysis_error', 'Die KI-Analyse ist noch nicht konfiguriert.');
+            return back()->with('analysis_error', __('ui.messages.ai_not_configured'));
         }
 
         if ($profile?->goal === null || trim($profile->goal) === ''
             || $profile->goal_date === null || $profile->goal_date->isBefore($tomorrow)) {
             return redirect()
                 ->route('settings.training')
-                ->with('analysis_error', 'Bitte hinterlege zuerst ein Ziel mit zukünftigem Zieldatum.');
+                ->with('analysis_error', __('ui.messages.goal_required'));
         }
 
         $analysis = $user->aiAnalyses()->create([
@@ -56,17 +56,17 @@ class GoalTrainingPlanController extends Controller
 
             $analysis->update([
                 'status' => AiAnalysisStatus::Failed,
-                'error' => 'Die Ziel-Roadmap konnte nicht erstellt werden.',
+                'error' => __('ui.messages.roadmap_failed_stored'),
                 'completed_at' => now(),
             ]);
 
             return redirect()
                 ->to(route('coach.index').'#goal-plan')
-                ->with('analysis_error', 'Die Ziel-Roadmap konnte nicht erstellt werden. Bitte versuche es erneut.');
+                ->with('analysis_error', __('ui.messages.roadmap_failed'));
         }
 
         return redirect()
             ->to(route('coach.index').'#goal-plan')
-            ->with('status', 'Deine Ziel-Roadmap ist fertig.');
+            ->with('status', __('ui.messages.roadmap_complete'));
     }
 }

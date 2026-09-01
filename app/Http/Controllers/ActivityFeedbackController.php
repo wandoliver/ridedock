@@ -18,6 +18,6 @@ class ActivityFeedbackController extends Controller
 
         return redirect()
             ->route('activities.show', $model)
-            ->with('status', 'Gefühl und Notizen wurden gespeichert.');
+            ->with('status', __('ui.activity.feedback_saved'));
     }
 }

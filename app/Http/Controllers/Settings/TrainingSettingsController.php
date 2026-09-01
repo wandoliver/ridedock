@@ -36,11 +36,17 @@ class TrainingSettingsController extends Controller
             abort(404);
         }
 
+        $validated = $request->validated();
+        $user->update(['locale' => $validated['locale']]);
+        unset($validated['locale']);
+
         $user->athleteProfile()->updateOrCreate(
             ['user_id' => $user->id],
-            $request->validated(),
+            $validated,
         );
 
-        return to_route('settings.training')->with('status', 'Trainingsprofil gespeichert.');
+        app()->setLocale($user->locale);
+
+        return to_route('settings.training')->with('status', __('ui.settings.profile_saved'));
     }
 }

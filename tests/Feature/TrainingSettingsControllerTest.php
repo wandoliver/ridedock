@@ -25,7 +25,7 @@ class TrainingSettingsControllerTest extends TestCase
             ->actingAs($user)
             ->get(route('settings.training'))
             ->assertOk()
-            ->assertSee('Training & KI', false)
+            ->assertSee('Training &amp; KI', false)
             ->assertSee('Trainingsprofil')
             ->assertSee('FTP')
             ->assertSee('(optional)')
@@ -73,5 +73,29 @@ class TrainingSettingsControllerTest extends TestCase
             ->assertSessionHasErrors(['weekly_hours', 'available_days.0', 'ftp_watts', 'max_heart_rate']);
 
         $this->assertDatabaseEmpty('athlete_profiles');
+    }
+
+    public function test_user_can_switch_their_profile_to_english(): void
+    {
+        config()->set('ai.providers.openai.api_key');
+        config()->set('ai.providers.openai.model');
+        $user = User::factory()->create(['locale' => 'de']);
+
+        $this->actingAs($user)->patch(route('settings.training.update'), [
+            'locale' => 'en',
+            'available_days' => [],
+        ])->assertRedirect(route('settings.training'))
+            ->assertSessionHas('status', 'Training profile saved.');
+
+        $this->assertSame('en', $user->refresh()->locale);
+
+        $this->withoutVite()
+            ->actingAs($user)
+            ->get(route('settings.training'))
+            ->assertOk()
+            ->assertSee('<html lang="en">', false)
+            ->assertSee('Display language')
+            ->assertSee('Training profile')
+            ->assertSee('API access missing');
     }
 }

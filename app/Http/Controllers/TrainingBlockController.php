@@ -25,7 +25,7 @@ class TrainingBlockController extends Controller
         }
 
         if (! $trainingPlanner->isConfigured()) {
-            return back()->with('analysis_error', 'Die KI-Analyse ist noch nicht konfiguriert.');
+            return back()->with('analysis_error', __('ui.messages.ai_not_configured'));
         }
 
         $goalPlan = $user->aiAnalyses()
@@ -37,7 +37,7 @@ class TrainingBlockController extends Controller
         if ($goalPlan === null) {
             return redirect()
                 ->to(route('coach.index').'#goal-plan')
-                ->with('analysis_error', 'Erstelle zuerst deine Ziel-Roadmap.');
+                ->with('analysis_error', __('ui.messages.roadmap_first'));
         }
 
         $analysis = $user->aiAnalyses()->create([
@@ -56,17 +56,17 @@ class TrainingBlockController extends Controller
 
             $analysis->update([
                 'status' => AiAnalysisStatus::Failed,
-                'error' => 'Der Trainingsblock konnte nicht erstellt werden.',
+                'error' => __('ui.messages.block_failed_stored'),
                 'completed_at' => now(),
             ]);
 
             return redirect()
                 ->to(route('coach.index').'#training-block')
-                ->with('analysis_error', 'Der Trainingsblock konnte nicht erstellt werden. Bitte versuche es erneut.');
+                ->with('analysis_error', __('ui.messages.block_failed'));
         }
 
         return redirect()
             ->to(route('coach.index').'#training-block')
-            ->with('status', 'Dein Vier-Wochen-Block ist fertig.');
+            ->with('status', __('ui.messages.block_complete'));
     }
 }

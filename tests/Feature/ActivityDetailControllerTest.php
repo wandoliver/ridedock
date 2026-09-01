@@ -264,7 +264,7 @@ class ActivityDetailControllerTest extends TestCase
             'status' => AiAnalysisStatus::Completed,
             'output' => [
                 'days' => [[
-                    'date' => '2026-08-31',
+                    'date' => now()->toDateString(),
                     'title' => 'Vollständige Erholung',
                     'type' => 'rest',
                     'duration_minutes' => null,

@@ -9,6 +9,7 @@ use App\Domain\Activities\Services\ProviderRegistry;
 use App\Http\Controllers\Controller;
 use App\Jobs\SyncProviderConnection;
 use App\Models\ProviderConnection;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -76,8 +77,14 @@ class ProviderOAuthController extends Controller
 
         SyncProviderConnection::dispatch($connection);
 
+        $locale = User::query()->whereKey($state['user_id'])->value('locale');
+
+        if (is_string($locale)) {
+            app()->setLocale($locale);
+        }
+
         return redirect()
             ->route('settings.connections')
-            ->with('status', ucfirst($providerName->value).' ist verbunden. Die erste Synchronisierung wurde angestoßen.');
+            ->with('status', __('ui.messages.provider_connected', ['provider' => ucfirst($providerName->value)]));
     }
 }

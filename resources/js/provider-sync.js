@@ -3,7 +3,7 @@ export function setProviderSyncPending(form, progress) {
 
     if (button) {
         button.disabled = true;
-        button.textContent = 'Synchronisiere …';
+        button.textContent = button.dataset?.pendingLabel ?? 'Synchronisiere …';
         button.setAttribute('aria-disabled', 'true');
     }
 

@@ -24,7 +24,7 @@ final class AuthenticatedSessionController extends Controller
             $request->boolean('remember'),
         )) {
             throw ValidationException::withMessages([
-                'email' => 'Die Zugangsdaten stimmen nicht.',
+                'email' => __('ui.auth.invalid_credentials'),
             ]);
         }
 

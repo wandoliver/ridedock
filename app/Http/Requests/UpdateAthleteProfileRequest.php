@@ -20,6 +20,7 @@ class UpdateAthleteProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'locale' => ['required', Rule::in(['de', 'en'])],
             'goal' => ['nullable', 'string', 'max:500'],
             'goal_date' => ['nullable', 'date'],
             'experience_level' => ['nullable', Rule::in(['beginner', 'intermediate', 'advanced'])],
@@ -38,6 +39,10 @@ class UpdateAthleteProfileRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        if (! $this->has('locale')) {
+            $this->merge(['locale' => $this->user()?->locale ?? 'en']);
+        }
+
         if (! $this->has('available_days')) {
             $this->merge(['available_days' => []]);
         }

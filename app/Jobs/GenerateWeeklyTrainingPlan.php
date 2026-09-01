@@ -17,6 +17,7 @@ class GenerateWeeklyTrainingPlan
     public function handle(WeeklyTrainingPlanner $trainingPlanner): void
     {
         $analysis = AiAnalysis::query()->findOrFail($this->analysisId);
+        app()->setLocale($analysis->user()->value('locale') ?? config('app.locale'));
 
         $analysis->update([
             'status' => AiAnalysisStatus::Processing,
@@ -40,9 +41,16 @@ class GenerateWeeklyTrainingPlan
 
     public function failed(?Throwable $exception): void
     {
-        AiAnalysis::query()->whereKey($this->analysisId)->update([
+        $analysis = AiAnalysis::query()->find($this->analysisId);
+
+        if ($analysis === null) {
+            return;
+        }
+
+        app()->setLocale($analysis->user()->value('locale') ?? config('app.locale'));
+        $analysis->update([
             'status' => AiAnalysisStatus::Failed,
-            'error' => 'Der Wochenplan konnte nicht erstellt werden.',
+            'error' => __('ui.messages.week_failed_stored'),
             'completed_at' => now(),
         ]);
     }

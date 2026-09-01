@@ -29,7 +29,7 @@ class ActivityAiAnalysisController extends Controller
         $model = Activity::query()->whereBelongsTo($user)->findOrFail($activity);
 
         if (! $trainingAdvisor->isConfigured()) {
-            return back()->with('analysis_error', 'Die KI-Analyse ist noch nicht konfiguriert.');
+            return back()->with('analysis_error', __('ui.messages.ai_not_configured'));
         }
 
         $isAlreadyRunning = $model->aiAnalyses()
@@ -37,7 +37,7 @@ class ActivityAiAnalysisController extends Controller
             ->exists();
 
         if ($isAlreadyRunning) {
-            return back()->with('status', 'Für diese Fahrt läuft bereits eine Analyse.');
+            return back()->with('status', __('ui.messages.analysis_running'));
         }
 
         $context = $contextBuilder->build($model);
@@ -57,13 +57,13 @@ class ActivityAiAnalysisController extends Controller
 
             $analysis->update([
                 'status' => AiAnalysisStatus::Failed,
-                'error' => 'Die Analyse konnte nicht abgeschlossen werden.',
+                'error' => __('ui.messages.analysis_error_stored'),
                 'completed_at' => now(),
             ]);
 
-            return back()->with('analysis_error', 'Die Fahrtanalyse konnte nicht abgeschlossen werden. Bitte versuche es erneut.');
+            return back()->with('analysis_error', __('ui.messages.ride_analysis_failed'));
         }
 
-        return back()->with('status', 'Die Fahrtanalyse ist abgeschlossen.');
+        return back()->with('status', __('ui.messages.ride_analysis_complete'));
     }
 }
