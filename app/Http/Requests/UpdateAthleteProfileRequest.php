@@ -40,7 +40,7 @@ class UpdateAthleteProfileRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         if (! $this->has('locale')) {
-            $this->merge(['locale' => $this->user()?->locale ?? 'en']);
+            $this->merge(['locale' => $this->user()->locale]);
         }
 
         if (! $this->has('available_days')) {
