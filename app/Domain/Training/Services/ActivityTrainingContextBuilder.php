@@ -9,7 +9,7 @@ use Illuminate\Support\Collection;
 
 final class ActivityTrainingContextBuilder
 {
-    public const SCHEMA_VERSION = 2;
+    public const SCHEMA_VERSION = 3;
 
     /** @return array<string, mixed> */
     public function build(Activity $activity): array
@@ -80,6 +80,9 @@ final class ActivityTrainingContextBuilder
             'started_at' => $activity->started_at->toIso8601String(),
             'duration_minutes' => $durationMinutes,
             'distance_km' => $this->rounded($activity->distance_m, 1000),
+            'average_speed_kmh' => $activity->average_speed_mps === null
+                ? null
+                : round($activity->average_speed_mps * 3.6, 1),
             'elevation_gain_m' => $this->rounded($activity->elevation_gain_m),
             'average_heart_rate_bpm' => $activity->average_heart_rate,
             'max_heart_rate_bpm' => $activity->max_heart_rate,

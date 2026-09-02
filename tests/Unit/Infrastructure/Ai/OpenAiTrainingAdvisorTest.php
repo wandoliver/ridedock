@@ -67,6 +67,7 @@ class OpenAiTrainingAdvisorTest extends TestCase
                 && $payload['text']['format']['type'] === 'json_schema'
                 && $payload['text']['format']['strict'] === true
                 && str_contains($payload['instructions'], 'optionale Zusatzsignale')
+                && str_contains($payload['instructions'], 'ausgewiesene Durchschnittstempo')
                 && str_contains($payload['instructions'], 'Nenne ihr Fehlen niemals als Datenlücke')
                 && str_contains($payload['input'][0]['content'][0]['text'], 'gps_coordinates_included');
         });

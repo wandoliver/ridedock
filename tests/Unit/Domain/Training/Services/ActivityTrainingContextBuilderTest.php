@@ -35,6 +35,7 @@ class ActivityTrainingContextBuilderTest extends TestCase
             'started_at' => '2026-08-30T08:00:00Z',
             'moving_time_s' => 5400,
             'distance_m' => 45000,
+            'average_speed_mps' => 8.333,
             'weighted_average_power' => 225,
             'average_heart_rate' => 152,
             'rpe' => 6,
@@ -55,8 +56,9 @@ class ActivityTrainingContextBuilderTest extends TestCase
 
         $context = app(ActivityTrainingContextBuilder::class)->build($activity);
 
-        $this->assertSame(2, $context['schema_version']);
+        $this->assertSame(3, $context['schema_version']);
         $this->assertSame(90.0, $context['activity']['duration_minutes']);
+        $this->assertSame(30.0, $context['activity']['average_speed_kmh']);
         $this->assertSame(0.9, $context['activity']['weighted_power_to_ftp_ratio']);
         $this->assertSame(540.0, $context['activity']['session_rpe_load']);
         $this->assertSame(3, $context['recent_training']['summary']['activity_count']);
@@ -84,6 +86,7 @@ class ActivityTrainingContextBuilderTest extends TestCase
             'started_at' => '2026-08-30T08:00:00Z',
             'average_heart_rate' => null,
             'max_heart_rate' => null,
+            'average_speed_mps' => null,
             'average_cadence' => null,
             'average_power' => null,
             'weighted_average_power' => null,
@@ -101,6 +104,7 @@ class ActivityTrainingContextBuilderTest extends TestCase
 
         $this->assertNull($context['athlete_profile']['ftp_watts']);
         $this->assertNull($context['activity']['average_cadence_rpm']);
+        $this->assertNull($context['activity']['average_speed_kmh']);
         $this->assertNull($context['activity']['average_power_watts']);
         $this->assertSame([], $context['data_gaps']);
     }

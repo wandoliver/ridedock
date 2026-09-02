@@ -23,6 +23,7 @@ class ActivityAiAnalysisControllerTest extends TestCase
         $activity = Activity::factory()->for($user)->create([
             'notes' => 'PRIVATE_RIDE_NOTE',
             'started_at' => '2026-08-30T08:00:00Z',
+            'average_speed_mps' => 8.333,
         ]);
         ActivityStream::factory()->for($activity)->create([
             'type' => 'latlng',
@@ -37,8 +38,9 @@ class ActivityAiAnalysisControllerTest extends TestCase
         $analysis = $activity->aiAnalyses()->firstOrFail();
         $this->assertSame(AiAnalysisStatus::Completed, $analysis->status);
         $this->assertSame('Direkt erstellte Analyse.', $analysis->output['summary']);
-        $this->assertSame(2, $analysis->context_schema_version);
-        $this->assertSame('activity-v2', $analysis->prompt_version);
+        $this->assertSame(3, $analysis->context_schema_version);
+        $this->assertSame('activity-v3', $analysis->prompt_version);
+        $this->assertSame(30, $analysis->context['activity']['average_speed_kmh']);
         $encodedContext = json_encode($analysis->context, JSON_THROW_ON_ERROR);
         $this->assertStringNotContainsString('PRIVATE_RIDE_NOTE', $encodedContext);
         $this->assertStringNotContainsString('46.4983', $encodedContext);
