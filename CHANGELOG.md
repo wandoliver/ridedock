@@ -4,6 +4,12 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.5] - 2026-09-02
+
+### Fixed
+
+- Activity analyses now receive the recorded average speed, preventing available pace data from being reported as missing.
+
 ## [0.0.4] - 2026-09-01
 
 ### Added
