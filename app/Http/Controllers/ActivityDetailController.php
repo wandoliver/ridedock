@@ -6,6 +6,7 @@ use App\Domain\Training\Contracts\TrainingAdvisor;
 use App\Domain\Training\Services\NextPlannedSessionResolver;
 use App\Models\Activity;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
@@ -39,12 +40,16 @@ class ActivityDetailController extends Controller
             $activityStreams[$stream->type] = array_values($stream->data);
         }
 
+        $today = CarbonImmutable::today(config('app.timezone'));
+        $activityDate = $model->started_at->setTimezone($model->timezone ?: config('app.timezone'));
+        $nextPlanDate = $activityDate->isSameDay($today) ? $today->addDay() : $today;
+
         return view('activities.show', [
             'activity' => $model,
             'activityStreams' => $activityStreams,
             'latestAiAnalysis' => $model->aiAnalyses()->latest()->first(),
             'aiConfigured' => $trainingAdvisor->isConfigured(),
-            'nextPlannedSession' => $nextPlannedSessionResolver->resolve($user),
+            'nextPlannedSession' => $nextPlannedSessionResolver->resolve($user, $nextPlanDate),
         ]);
     }
 }

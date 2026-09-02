@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - Activity analyses now receive the recorded average speed, preventing available pace data from being reported as missing.
+- Activity details now skip an already completed current-day session when showing the next day from the weekly plan.
 
 ## [0.0.4] - 2026-09-01
 

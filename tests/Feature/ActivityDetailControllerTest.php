@@ -12,12 +12,20 @@ use App\Models\ActivityStream;
 use App\Models\AiAnalysis;
 use App\Models\ProviderConnection;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 
 class ActivityDetailControllerTest extends TestCase
 {
     use LazilyRefreshDatabase;
+
+    protected function tearDown(): void
+    {
+        CarbonImmutable::setTestNow();
+
+        parent::tearDown();
+    }
 
     public function test_owner_sees_activity_metrics_streams_sources_and_events(): void
     {
@@ -284,6 +292,83 @@ class ActivityDetailControllerTest extends TestCase
             ->assertSee('Vollständige Erholung')
             ->assertSee('Radfrei und ausreichend schlafen.')
             ->assertDontSee('Lockere Regenerationsfahrt');
+    }
+
+    public function test_todays_activity_skips_todays_completed_plan_day(): void
+    {
+        CarbonImmutable::setTestNow('2026-09-02T12:00:00Z');
+        $this->app->instance(TrainingAdvisor::class, new class implements TrainingAdvisor
+        {
+            public function isConfigured(): bool
+            {
+                return true;
+            }
+
+            public function analyzeActivity(array $context): TrainingAdvice
+            {
+                throw new \LogicException('No provider request expected.');
+            }
+        });
+        $user = User::factory()->create();
+        $activity = Activity::factory()->for($user)->create([
+            'started_at' => '2026-09-02T06:00:00Z',
+            'timezone' => 'Europe/Rome',
+        ]);
+        AiAnalysis::factory()->for($user)->for($activity)->create([
+            'status' => AiAnalysisStatus::Completed,
+            'output' => [
+                'summary' => 'Heutige Fahrt abgeschlossen.',
+                'training_effect' => 'Aerober Reiz.',
+                'observations' => [],
+                'next_session' => [
+                    'title' => 'Fallback-Einheit',
+                    'duration_minutes' => 30,
+                    'intensity' => 'Locker',
+                    'details' => 'Locker fahren.',
+                    'rationale' => 'Erholung.',
+                ],
+                'data_gaps' => [],
+                'cautions' => [],
+            ],
+            'completed_at' => now(),
+        ]);
+        AiAnalysis::factory()->for($user)->create([
+            'activity_id' => null,
+            'type' => 'weekly_plan',
+            'status' => AiAnalysisStatus::Completed,
+            'output' => [
+                'days' => [
+                    [
+                        'date' => '2026-09-02',
+                        'title' => 'Heutige Grundlagenfahrt',
+                        'type' => 'ride',
+                        'duration_minutes' => 45,
+                        'intensity' => 'Locker',
+                        'details' => 'Heute locker fahren.',
+                        'rationale' => 'Grundlage.',
+                    ],
+                    [
+                        'date' => '2026-09-03',
+                        'title' => 'Morgige Tempo-Intervalle',
+                        'type' => 'ride',
+                        'duration_minutes' => 50,
+                        'intensity' => 'Zügig',
+                        'details' => 'Morgen kontrollierte Intervalle fahren.',
+                        'rationale' => 'Tempo entwickeln.',
+                    ],
+                ],
+            ],
+            'completed_at' => now(),
+        ]);
+
+        $this->withoutVite()
+            ->actingAs($user)
+            ->get(route('activities.show', $activity))
+            ->assertOk()
+            ->assertViewHas('nextPlannedSession', fn (array $session): bool => $session['date'] === '2026-09-03')
+            ->assertSee('Morgige Tempo-Intervalle')
+            ->assertDontSee('Heutige Grundlagenfahrt')
+            ->assertDontSee('Fallback-Einheit');
     }
 
     public function test_owner_sees_that_an_analysis_is_being_processed(): void
