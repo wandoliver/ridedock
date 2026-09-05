@@ -22,7 +22,7 @@ export function heatPointsFromRoutes(routes) {
 }
 
 export function setHeatmapPanelExpanded(frame, button, label, expanded) {
-    frame.classList.toggle('min-h-[28rem]', !expanded);
+    frame.classList.toggle('min-h-[380px]', !expanded);
     frame.classList.toggle('min-h-[42rem]', expanded);
     button.setAttribute('aria-pressed', String(expanded));
     label.textContent = expanded

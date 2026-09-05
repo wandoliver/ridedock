@@ -367,7 +367,8 @@ class ActivityDetailControllerTest extends TestCase
             ->assertOk()
             ->assertViewHas('nextPlannedSession', fn (array $session): bool => $session['date'] === '2026-09-03')
             ->assertSee('Morgige Tempo-Intervalle')
-            ->assertDontSee('Heutige Grundlagenfahrt')
+            ->assertSee('Heutige Grundlagenfahrt')
+            ->assertSee('Zugeordnet ✓')
             ->assertDontSee('Fallback-Einheit');
     }
 

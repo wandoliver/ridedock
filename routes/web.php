@@ -11,6 +11,7 @@ use App\Http\Controllers\CoachController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GoalTrainingPlanController;
 use App\Http\Controllers\OAuth\ProviderOAuthController;
+use App\Http\Controllers\PlanDayController;
 use App\Http\Controllers\Settings\ConnectionSettingsController;
 use App\Http\Controllers\Settings\TrainingSettingsController;
 use App\Http\Controllers\TrainingBlockController;
@@ -36,6 +37,8 @@ Route::middleware('guest')->group(function (): void {
 
 Route::middleware('auth')->group(function (): void {
     Route::get('/coach', CoachController::class)->name('coach.index');
+    Route::patch('/coach/plans/{plan}/days/{date}', PlanDayController::class)
+        ->middleware('throttle:30,1')->name('coach.days.update');
     Route::get('/activities', ActivityIndexController::class)->name('activities.index');
     Route::patch('/activities/{activity}/feedback', ActivityFeedbackController::class)
         ->middleware('throttle:30,1')

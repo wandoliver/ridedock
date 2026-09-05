@@ -1,7 +1,9 @@
-const activeClasses = ['bg-slate-950', 'text-white', 'shadow-sm'];
-const inactiveClasses = ['text-slate-600', 'hover:bg-slate-100', 'hover:text-slate-950'];
+const activeClasses = ['bg-surface', 'text-ink', 'shadow-sm'];
+const inactiveClasses = ['text-ink-50'];
 
 export function activateCoachSection(section, tabs, sections) {
+    const aliases = { roadmap: 'goal-plan', block: 'training-block', week: 'weekly-plan' };
+    section = aliases[section] ?? section;
     const availableSections = new Set(Array.from(tabs, (tab) => tab.dataset.coachTab));
     const activeSection = availableSections.has(section) ? section : 'goal-plan';
 
@@ -45,7 +47,7 @@ export function initializeCoachTabs() {
         tab.addEventListener('click', (event) => {
             event.preventDefault();
             const section = activateCoachSection(tab.dataset.coachTab, tabs, sections);
-            window.history.replaceState(null, '', `#${section}`);
+            window.history.replaceState(null, '', `#${({ 'goal-plan': 'roadmap', 'training-block': 'block', 'weekly-plan': 'week' })[section] ?? section}`);
         });
     });
 

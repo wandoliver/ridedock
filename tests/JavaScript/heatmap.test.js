@@ -30,7 +30,7 @@ test('rejects truncated polylines', () => {
 });
 
 test('updates the inline heatmap panel expansion state', () => {
-    const frame = fakeElement(['min-h-[28rem]']);
+    const frame = fakeElement(['min-h-[380px]']);
     const button = fakeElement();
     const label = fakeElement();
 
@@ -42,7 +42,7 @@ test('updates the inline heatmap panel expansion state', () => {
 
     setHeatmapPanelExpanded(frame, button, label, false);
 
-    assert.deepEqual([...frame.classes], ['min-h-[28rem]']);
+    assert.deepEqual([...frame.classes], ['min-h-[380px]']);
     assert.equal(button.attributes['aria-pressed'], 'false');
     assert.equal(label.textContent, 'Vergrößern');
 });

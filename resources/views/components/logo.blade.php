@@ -1,0 +1,2 @@
+<a href="{{ route('dashboard') }}" class="flex shrink-0 items-center gap-2.5 text-[15px] font-bold" aria-label="RideDock">
+<span class="grid size-[26px] place-items-center rounded-lg bg-plan text-white"><svg viewBox="0 0 24 24" class="size-[19px]" aria-hidden="true"><path d="M5 17.5 9.2 6h5.6L19 17.5M7 13h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>RideDock</a>

@@ -27,7 +27,7 @@ final class NextPlannedSessionResolver
         }
 
         foreach ($days as $day) {
-            if (! is_array($day) || ! is_string($day['date'] ?? null)) {
+            if (! is_array($day) || ! is_string($day['date'] ?? null) || ($day['completed'] ?? false)) {
                 continue;
             }
 

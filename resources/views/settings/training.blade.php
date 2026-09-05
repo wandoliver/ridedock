@@ -1,180 +1,84 @@
-<!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="{{ __('ui.settings.training_meta') }}">
-    <title>{{ __('ui.settings.training_title') }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="min-h-screen bg-stone-50 text-slate-950 antialiased">
-    <header class="border-b border-slate-200/80 bg-white/80 backdrop-blur">
-        <div class="mx-auto flex max-w-5xl items-center justify-between px-5 py-4 sm:px-8">
-            <a href="{{ route('dashboard') }}" class="flex items-center gap-3" aria-label="{{ __('ui.common.back_to_overview') }}">
-                <span class="grid size-9 place-items-center rounded-xl bg-emerald-600 text-white shadow-sm shadow-emerald-900/15">
-                    <svg viewBox="0 0 24 24" class="size-5" aria-hidden="true"><path d="M5 17.5 9.2 6h5.6L19 17.5M7 13h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </span>
-                <span class="text-lg font-semibold tracking-tight">RideDock</span>
-            </a>
-            <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950">
-                <svg viewBox="0 0 20 20" class="size-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m12 4-6 6 6 6"/></svg>
-                {{ __('ui.common.overview') }}
-            </a>
-        </div>
-    </header>
-
-    <main class="mx-auto max-w-5xl px-5 py-8 sm:px-8 sm:py-12">
-        @if (session('status'))
-            <div class="mb-8 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm text-emerald-900" role="status">
-                <span class="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-emerald-600 text-xs text-white">✓</span>
-                <p>{{ session('status') }}</p>
-            </div>
-        @endif
-
-        <section>
-            <p class="text-sm font-medium text-emerald-700">{{ __('ui.common.settings') }}</p>
-            <h1 class="mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">{{ __('ui.settings.training_heading') }}</h1>
-            <p class="mt-4 max-w-2xl text-base leading-7 text-slate-600">{{ __('ui.settings.training_intro') }}</p>
-        </section>
-
-        <nav class="mt-7 flex w-fit rounded-xl border border-slate-200 bg-white p-1 shadow-sm" aria-label="{{ __('ui.settings.areas') }}">
-            <a href="{{ route('settings.training') }}" class="rounded-lg bg-slate-950 px-3 py-2 text-sm font-medium text-white" aria-current="page">{{ __('ui.common.training_ai') }}</a>
-            <a href="{{ route('settings.connections') }}" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950">{{ __('ui.common.connections') }}</a>
-        </nav>
-
-        <section class="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-950/[0.03] sm:p-8">
-            <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-                <div>
-                    <p class="text-sm text-slate-500">{{ __('ui.settings.ai_status') }}</p>
-                    <h2 class="mt-1 text-xl font-semibold tracking-tight">{{ __('ui.settings.ride_analysis') }}</h2>
-                    <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600">{{ __('ui.settings.privacy_copy') }}</p>
-                </div>
-                <span class="w-fit rounded-full px-3 py-1.5 text-sm font-medium {{ $aiConfigured ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-800' }}">
-                    {{ $aiConfigured ? __('ui.settings.configured') : __('ui.settings.api_missing') }}
-                </span>
-            </div>
-            @unless ($aiConfigured)
-                <p class="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">{!! __('ui.settings.api_hint') !!}</p>
-            @endunless
-        </section>
-
-        <section class="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-950/[0.03] sm:p-8">
-            <div>
-                <p class="text-sm text-slate-500">{{ __('ui.settings.personalization') }}</p>
-                <h2 class="mt-1 text-xl font-semibold tracking-tight">{{ __('ui.settings.training_profile') }}</h2>
-            </div>
-
-            @if ($errors->any())
-                <div class="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900" role="alert">
-                    <p class="font-medium">{{ __('ui.settings.check_input') }}</p>
-                    <ul class="mt-2 list-disc space-y-1 pl-5">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            @php
-                $days = [
-                    'monday' => __('ui.settings.monday'), 'tuesday' => __('ui.settings.tuesday'), 'wednesday' => __('ui.settings.wednesday'),
-                    'thursday' => __('ui.settings.thursday'), 'friday' => __('ui.settings.friday'), 'saturday' => __('ui.settings.saturday'),
-                    'sunday' => __('ui.settings.sunday'),
-                ];
-                $selectedDays = (array) old('available_days', $profile?->available_days ?? []);
-            @endphp
-
-            <form method="POST" action="{{ route('settings.training.update') }}" class="mt-7 space-y-6">
-                @csrf
-                @method('PATCH')
-
-                <section class="rounded-2xl border border-slate-200 bg-stone-50/70 p-5 sm:p-6">
-                    <p class="text-sm text-slate-500">{{ __('ui.language.eyebrow') }}</p>
-                    <h3 class="mt-1 font-semibold tracking-tight">{{ __('ui.language.title') }}</h3>
-                    <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600">{{ __('ui.language.description') }}</p>
-                    <label class="mt-4 block max-w-sm">
-                        <span class="text-sm font-medium text-slate-700">{{ __('ui.language.label') }}</span>
-                        <select name="locale" class="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15">
-                            <option value="en" @selected(old('locale', auth()->user()->locale) === 'en')>{{ __('ui.language.english') }}</option>
-                            <option value="de" @selected(old('locale', auth()->user()->locale) === 'de')>{{ __('ui.language.german') }}</option>
-                        </select>
-                    </label>
-                </section>
-
-                <div class="grid gap-5 sm:grid-cols-2">
-                    <label class="sm:col-span-2">
-                        <span class="text-sm font-medium text-slate-700">{{ __('ui.settings.training_goal') }}</span>
-                        <textarea name="goal" rows="3" maxlength="500" class="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15" placeholder="{{ __('ui.settings.training_goal_placeholder') }}">{{ old('goal', $profile?->goal) }}</textarea>
-                    </label>
-
-                    <label>
-                        <span class="text-sm font-medium text-slate-700">{{ __('ui.settings.goal_date') }}</span>
-                        <input type="date" name="goal_date" value="{{ old('goal_date', $profile?->goal_date?->toDateString()) }}" class="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15">
-                    </label>
-
-                    <label>
-                        <span class="text-sm font-medium text-slate-700">{{ __('ui.settings.experience') }}</span>
-                        <select name="experience_level" class="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15">
+<x-layout :title="__('ui.settings.training_title')">
+<x-topbar>
+<x-slot:context><span class="text-[13px] font-semibold">{{ __('ui.common.settings') }}</span></x-slot:context>
+<x-slot:center><x-settings-nav /></x-slot:center>
+<x-slot:actions><x-button :href="route('settings.training')" secondary>{{ __('design.discard') }}</x-button><x-button form="training-profile">{{ __('ui.settings.save_profile') }}</x-button></x-slot:actions>
+</x-topbar>
+<x-flash />
+<div class="rd-shell">
+<main class="rd-workspace"><h1 class="sr-only">{{ __('ui.settings.training_profile') }}</h1>
+@php
+$days = ['monday'=>__('ui.settings.monday'),'tuesday'=>__('ui.settings.tuesday'),'wednesday'=>__('ui.settings.wednesday'),'thursday'=>__('ui.settings.thursday'),'friday'=>__('ui.settings.friday'),'saturday'=>__('ui.settings.saturday'),'sunday'=>__('ui.settings.sunday')];
+$selectedDays = (array) old('available_days', $profile?->available_days ?? []);
+@endphp
+<form id="training-profile" method="POST" action="{{ route('settings.training.update') }}" class="space-y-2">
+@csrf @method('PATCH')
+<section class="rd-form-group"><h2>{{ __('design.goal') }}</h2>
+<label class="block">
+                        <span class="text-xs font-semibold text-ink-50">{{ __('ui.settings.training_goal') }}</span>
+                        <textarea name="goal" rows="2" maxlength="500" class="mt-2 block w-full rounded-lg border border-border-input bg-white px-3.5 py-[9px] text-sm outline-none transition focus:border-plan-dash focus:ring-2 focus:ring-emerald-600/15" placeholder="{{ __('ui.settings.training_goal_placeholder') }}">{{ old('goal', $profile?->goal) }}</textarea>
+                    </label><div class="grid gap-3 sm:grid-cols-3"><label>
+                        <span class="text-xs font-semibold text-ink-50">{{ __('ui.settings.goal_date') }}</span>
+                        <input type="date" name="goal_date" value="{{ old('goal_date', $profile?->goal_date?->toDateString()) }}" class="mt-2 block w-full rounded-lg border border-border-input bg-white px-3.5 py-[9px] text-sm outline-none transition focus:border-plan-dash focus:ring-2 focus:ring-emerald-600/15">
+                    </label><label>
+                        <span class="text-xs font-semibold text-ink-50">{{ __('ui.settings.experience') }}</span>
+                        <select name="experience_level" class="mt-2 block w-full rounded-lg border border-border-input bg-white px-3.5 py-[9px] text-sm outline-none transition focus:border-plan-dash focus:ring-2 focus:ring-emerald-600/15">
                             <option value="">{{ __('ui.settings.not_specified') }}</option>
                             @foreach (['beginner' => __('ui.settings.beginner'), 'intermediate' => __('ui.settings.intermediate'), 'advanced' => __('ui.settings.advanced')] as $value => $label)
                                 <option value="{{ $value }}" @selected(old('experience_level', $profile?->experience_level) === $value)>{{ $label }}</option>
                             @endforeach
                         </select>
-                    </label>
-
-                    <label>
-                        <span class="text-sm font-medium text-slate-700">{{ __('ui.settings.hours_week') }} <span class="font-normal text-slate-400">({{ __('ui.common.optional') }})</span></span>
-                        <input type="number" name="weekly_hours" min="1" max="40" step="0.5" value="{{ old('weekly_hours', $profile?->weekly_hours) }}" class="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15">
-                        <span class="mt-2 block text-xs text-slate-500">{{ __('ui.settings.hours_hint') }}</span>
-                    </label>
-
-                    <label>
-                        <span class="text-sm font-medium text-slate-700">FTP <span class="font-normal text-slate-400">({{ __('ui.common.optional') }})</span></span>
+                    </label>                    <label class="block">
+                        <span class="text-xs font-semibold text-ink-50">{{ __('ui.language.title') }}</span>
+                        <select name="locale" class="mt-2 block w-full rounded-lg border border-border-input bg-white px-3.5 py-[9px] text-sm outline-none transition focus:border-plan-dash focus:ring-2 focus:ring-emerald-600/15">
+                            <option value="en" @selected(old('locale', auth()->user()->locale) === 'en')>{{ __('ui.language.english') }}</option>
+                            <option value="de" @selected(old('locale', auth()->user()->locale) === 'de')>{{ __('ui.language.german') }}</option>
+                        </select>
+                    </label></div></section>
+<section class="rd-form-group"><h2>{{ __('design.thresholds') }} <span class="font-normal text-ink-45">{{ __('ui.common.optional') }}</span></h2><div class="grid gap-3 sm:grid-cols-3"><label>
+                        <span class="text-xs font-semibold text-ink-50">{{ __('ui.settings.hours_week') }} <span class="font-normal text-ink-45">({{ __('ui.common.optional') }})</span></span>
+                        <input type="number" name="weekly_hours" min="1" max="40" step="0.5" value="{{ old('weekly_hours', $profile?->weekly_hours) }}" class="mt-2 block w-full rounded-lg border border-border-input bg-white px-3.5 py-[9px] text-sm outline-none transition focus:border-plan-dash focus:ring-2 focus:ring-emerald-600/15">
+                        <span class="mt-2 block text-xs text-ink-50">{{ __('ui.settings.hours_hint') }}</span>
+                    </label><label>
+                        <span class="text-xs font-semibold text-ink-50">FTP <span class="font-normal text-ink-45">({{ __('ui.common.optional') }})</span></span>
                         <div class="relative mt-2">
-                            <input type="number" name="ftp_watts" min="50" max="600" value="{{ old('ftp_watts', $profile?->ftp_watts) }}" class="block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 pr-12 text-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15">
-                            <span class="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-sm text-slate-400">W</span>
+                            <input type="number" name="ftp_watts" min="50" max="600" value="{{ old('ftp_watts', $profile?->ftp_watts) }}" class="block w-full rounded-lg border border-border-input bg-white px-3.5 py-3 pr-12 text-sm outline-none transition focus:border-plan-dash focus:ring-2 focus:ring-emerald-600/15">
+                            <span class="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-sm text-ink-45">W</span>
                         </div>
-                        <span class="mt-2 block text-xs text-slate-500">{{ __('ui.settings.ftp_hint') }}</span>
-                    </label>
-
-                    <label>
-                        <span class="text-sm font-medium text-slate-700">{{ __('ui.settings.max_hr') }} <span class="font-normal text-slate-400">({{ __('ui.common.optional') }})</span></span>
+                        <span class="mt-2 block text-xs text-ink-50">{{ __('ui.settings.ftp_hint') }}</span>
+                    </label><label>
+                        <span class="text-xs font-semibold text-ink-50">{{ __('ui.settings.max_hr') }} <span class="font-normal text-ink-45">({{ __('ui.common.optional') }})</span></span>
                         <div class="relative mt-2">
-                            <input type="number" name="max_heart_rate" min="100" max="230" value="{{ old('max_heart_rate', $profile?->max_heart_rate) }}" class="block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 pr-16 text-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15">
-                            <span class="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-sm text-slate-400">bpm</span>
+                            <input type="number" name="max_heart_rate" min="100" max="230" value="{{ old('max_heart_rate', $profile?->max_heart_rate) }}" class="block w-full rounded-lg border border-border-input bg-white px-3.5 py-3 pr-16 text-sm outline-none transition focus:border-plan-dash focus:ring-2 focus:ring-emerald-600/15">
+                            <span class="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-sm text-ink-45">bpm</span>
                         </div>
-                        <span class="mt-2 block text-xs text-slate-500">{{ __('ui.settings.hr_hint') }}</span>
-                    </label>
-                </div>
-
-                <fieldset>
-                    <legend class="text-sm font-medium text-slate-700">{{ __('ui.settings.available_days') }}</legend>
-                    <div class="mt-3 flex flex-wrap gap-2">
+                        <span class="mt-2 block text-xs text-ink-50">{{ __('ui.settings.hr_hint') }}</span>
+                    </label></div></section>
+<section class="rd-form-group"><h2>{{ __('design.availability') }}</h2>                <fieldset>
+                    <legend class="text-xs font-semibold text-ink-50">{{ __('ui.settings.available_days') }}</legend>
+                    <div class="mt-3 grid grid-cols-7 gap-1.5">
                         @foreach ($days as $value => $label)
                             <label class="cursor-pointer">
                                 <input type="checkbox" name="available_days[]" value="{{ $value }}" class="peer sr-only" @checked(in_array($value, $selectedDays, true))>
-                                <span class="block rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-600 transition peer-checked:border-emerald-600 peer-checked:bg-emerald-50 peer-checked:text-emerald-800">{{ $label }}</span>
+                                <span class="block rounded-lg border border-line px-1 py-2.5 text-center text-[13px] text-ink-60 transition peer-focus-visible:outline-2 peer-focus-visible:outline-plan peer-checked:border-plan peer-checked:bg-plan-soft peer-checked:text-plan-text"><abbr class="no-underline" title="{{ $label }}">{{ mb_substr($label, 0, 2) }}</abbr></span>
                             </label>
                         @endforeach
                     </div>
                 </fieldset>
 
                 <label class="block">
-                    <span class="text-sm font-medium text-slate-700">{{ __('ui.settings.constraints') }}</span>
-                    <textarea name="constraints" rows="3" maxlength="2000" class="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15" placeholder="{{ __('ui.settings.constraints_placeholder') }}">{{ old('constraints', $profile?->constraints) }}</textarea>
-                    <span class="mt-2 block text-xs leading-5 text-slate-500">{{ __('ui.settings.constraints_hint') }}</span>
+                    <span class="text-xs font-semibold text-ink-50">{{ __('ui.settings.constraints') }}</span>
+                    <textarea name="constraints" rows="2" maxlength="2000" class="mt-2 block w-full rounded-lg border border-border-input bg-white px-3.5 py-[9px] text-sm outline-none transition focus:border-plan-dash focus:ring-2 focus:ring-emerald-600/15" placeholder="{{ __('ui.settings.constraints_placeholder') }}">{{ old('constraints', $profile?->constraints) }}</textarea>
+                    <span class="mt-2 block text-xs leading-5 text-ink-50">{{ __('ui.settings.constraints_hint') }}</span>
                 </label>
 
-                <div class="flex justify-end border-t border-slate-100 pt-6">
-                    <button type="submit" class="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700">{{ __('ui.settings.save_profile') }}</button>
-                </div>
-            </form>
-        </section>
-
-        <footer class="mt-8 flex flex-col gap-2 border-t border-slate-200 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-            <p>{{ __('ui.settings.training_footer') }}</p>
-            <p>{{ __('ui.settings.analysis_on_request') }}</p>
-        </footer>
-    </main>
-</body>
-</html>
+</section>
+</form></main>
+<aside class="rd-panel">
+<div class="flex items-center justify-between gap-3"><span class="text-xs font-semibold text-ink-50">{{ __('ui.settings.ai_status') }}</span><span class="rounded-md px-2 py-1 text-[11px] {{ $aiConfigured ? 'bg-plan-soft text-plan-text' : 'bg-canvas text-ink-50' }}">{{ $aiConfigured ? __('ui.settings.configured') : __('ui.settings.api_missing') }}</span></div>
+<h1 class="mt-3 text-[17px] font-bold">{{ __('ui.settings.ride_analysis') }}</h1><p class="mt-2 text-[13px] leading-relaxed text-ink-70">{{ __('ui.settings.privacy_copy') }}</p>
+@unless($aiConfigured)<x-info-box class="mt-3">{!! __('ui.settings.api_hint') !!}</x-info-box>@endunless
+<section class="rd-panel-section"><x-panel-label>{{ __('design.values_usage') }}</x-panel-label>
+@foreach(['goal_usage','hours_usage','zones_usage','days_usage'] as $explanation)<x-info-box class="mt-2">{{ __('design.'.$explanation) }}</x-info-box>@endforeach
+</section><p class="mt-5 text-[11px] leading-relaxed text-ink-45">{{ __('design.changes_next') }}</p>
+</aside></div></x-layout>

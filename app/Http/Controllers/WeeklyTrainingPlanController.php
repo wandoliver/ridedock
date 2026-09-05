@@ -7,6 +7,7 @@ use App\Domain\Training\Enums\AiAnalysisStatus;
 use App\Domain\Training\Services\WeeklyTrainingContextBuilder;
 use App\Jobs\GenerateWeeklyTrainingPlan;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Throwable;
@@ -18,6 +19,7 @@ class WeeklyTrainingPlanController extends Controller
         WeeklyTrainingContextBuilder $contextBuilder,
         WeeklyTrainingPlanner $trainingPlanner,
     ): RedirectResponse {
+        $data = $request->validate(['plan_start' => ['nullable', 'date_format:Y-m-d']]);
         $user = $request->user();
 
         if (! $user instanceof User) {
@@ -43,7 +45,7 @@ class WeeklyTrainingPlanController extends Controller
             'status' => AiAnalysisStatus::Pending,
             'context_schema_version' => WeeklyTrainingContextBuilder::SCHEMA_VERSION,
             'prompt_version' => 'weekly-plan-v2',
-            'context' => $contextBuilder->build($user),
+            'context' => $contextBuilder->build($user, isset($data['plan_start']) ? CarbonImmutable::parse($data['plan_start'], config('app.timezone')) : null),
         ]);
 
         try {

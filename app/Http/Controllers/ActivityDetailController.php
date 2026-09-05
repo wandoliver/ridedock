@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Domain\Training\Contracts\TrainingAdvisor;
 use App\Domain\Training\Services\NextPlannedSessionResolver;
+use App\Domain\Training\Services\PlanActivityMatcher;
 use App\Models\Activity;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -41,10 +42,18 @@ class ActivityDetailController extends Controller
         }
 
         $today = CarbonImmutable::today(config('app.timezone'));
-        $activityDate = $model->started_at->setTimezone($model->timezone ?: config('app.timezone'));
+        $activityDate = $model->localStartedAt();
         $nextPlanDate = $activityDate->isSameDay($today) ? $today->addDay() : $today;
 
+        $weeklyPlan = $user->aiAnalyses()->where('type', 'weekly_plan')
+            ->where('status', 'completed')->latest()->first();
+        $days = app(PlanActivityMatcher::class)->days($weeklyPlan);
+        $matches = app(PlanActivityMatcher::class)->match($days, collect([$model]));
+        $matchedDay = $days->first(fn ($day) => $day['type'] === 'ride' && $matches->get($day['date'], collect())->isNotEmpty());
+
         return view('activities.show', [
+            'matchedDay' => $matchedDay,
+            'matchedPlan' => $weeklyPlan,
             'activity' => $model,
             'activityStreams' => $activityStreams,
             'latestAiAnalysis' => $model->aiAnalyses()->latest()->first(),

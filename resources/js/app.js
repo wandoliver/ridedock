@@ -1,4 +1,5 @@
 import L from 'leaflet';
+import { initializeSelectionPanels } from './selection-panels.js';
 import { initializeActivityAnalysis } from './activity-analysis.js';
 import { initializeActivityDetail } from './activity-detail.js';
 import { initializeCoachTabs } from './coach-tabs.js';
@@ -34,7 +35,7 @@ if (heatmapElement && heatmapDataElement) {
 
         for (const points of decodedRoutes) {
             L.polyline(points, {
-                color: '#a7f3d0',
+                color: '#1f9a6a',
                 opacity: 0.34,
                 weight: 1.25,
             }).addTo(routeLayer);
@@ -44,10 +45,10 @@ if (heatmapElement && heatmapDataElement) {
         L.heatLayer(heatPointsFromRoutes(decodedRoutes), {
             blur: 11,
             gradient: {
-                0.15: '#064e3b',
-                0.45: '#10b981',
-                0.75: '#6ee7b7',
-                1: '#ecfdf5',
+                0.15: '#177a54',
+                0.45: '#1f9a6a',
+                0.75: '#1f9a6a',
+                1: '#177a54',
             },
             minOpacity: 0.2,
             radius: 8,
@@ -81,3 +82,5 @@ initializeActivityAnalysis();
 initializeCoachTabs();
 initializeWeeklyPlan();
 initializeProviderSync();
+
+initializeSelectionPanels();

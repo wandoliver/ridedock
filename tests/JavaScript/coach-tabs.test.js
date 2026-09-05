@@ -35,6 +35,16 @@ test('falls back to the roadmap for an unknown section', () => {
     assert.equal(sections[1].hidden, true);
 });
 
+test('calendar zoom hashes preserve links from the previous coach tabs', () => {
+    const tabs = ['goal-plan', 'training-block', 'weekly-plan'].map(fakeTab);
+    const sections = ['goal-plan', 'training-block', 'weekly-plan'].map(fakeSection);
+    assert.equal(activateCoachSection('week', tabs, sections), 'weekly-plan');
+    assert.equal(sections[2].hidden, false);
+    assert.equal(activateCoachSection('block', tabs, sections), 'training-block');
+    assert.equal(sections[1].hidden, false);
+    assert.equal(activateCoachSection('roadmap', tabs, sections), 'goal-plan');
+});
+
 function fakeTab(section) {
     return {
         attributes: {},

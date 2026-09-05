@@ -1,87 +1,62 @@
-<!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="{{ __('ui.activities.meta') }}">
-    <title>{{ __('ui.activities.title') }} · RideDock</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="min-h-screen bg-stone-50 text-slate-950 antialiased">
-    <header class="border-b border-slate-200/80 bg-white/80 backdrop-blur">
-        <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
-            <a href="{{ route('dashboard', ['period' => $period->value]) }}" class="flex items-center gap-3" aria-label="{{ __('ui.common.back_to_overview') }}">
-                <span class="grid size-9 place-items-center rounded-xl bg-emerald-600 text-white shadow-sm shadow-emerald-900/15">
-                    <svg viewBox="0 0 24 24" class="size-5" aria-hidden="true"><path d="M5 17.5 9.2 6h5.6L19 17.5M7 13h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </span>
-                <span class="text-lg font-semibold tracking-tight">RideDock</span>
-            </a>
-            <a href="{{ route('dashboard', ['period' => $period->value]) }}" class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950">
-                <svg viewBox="0 0 20 20" class="size-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m12 4-6 6 6 6"/></svg>
-                {{ __('ui.common.overview') }}
-            </a>
-        </div>
-    </header>
-
-    <main class="mx-auto max-w-5xl px-5 py-8 sm:px-8 sm:py-12">
-        <section class="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
-            <div>
-                <p class="text-sm font-medium text-emerald-700">{{ __('ui.activities.archive') }}</p>
-                <h1 class="mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">{{ __('ui.activities.title') }}</h1>
-                <p class="mt-3 text-base text-slate-600">{{ $activities->total() === 1 ? __('ui.activities.count_one', ['count' => 1]) : __('ui.activities.count_many', ['count' => \Illuminate\Support\Number::format($activities->total(), locale: app()->getLocale())]) }} · {{ $periodLabel }}</p>
-            </div>
-            <nav class="flex w-fit rounded-xl border border-slate-200 bg-white p-1 shadow-sm" aria-label="{{ __('ui.dashboard.select_period') }}">
+<x-layout :title="__('ui.activities.title')"><x-topbar><x-slot:context><span class="text-[13px] font-semibold">{{ __('ui.activities.title') }}</span></x-slot:context><x-slot:center>            <x-segment aria-label="{{ __('ui.dashboard.select_period') }}">
                 @foreach ($periods as $option)
                     <a href="{{ route('activities.index', ['period' => $option->value]) }}"
-                        class="rounded-lg px-3 py-2 text-sm font-medium transition {{ $period === $option ? 'bg-slate-950 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950' }}"
+
                         @if ($period === $option) aria-current="page" @endif>
                         {{ $option->shortLabel($now) }}
                     </a>
                 @endforeach
-            </nav>
+            </x-segment></x-slot:center><x-slot:actions><x-button :href="route('coach.index')" secondary>Coach</x-button><x-button :href="route('settings.connections')" secondary>{{ __('ui.common.connections') }}</x-button></x-slot:actions></x-topbar>    <main class="mx-auto max-w-[1440px] px-5 py-6 sm:px-7">
+        <section class="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+            <div>
+                <p class="text-sm font-medium text-plan-text">{{ __('ui.activities.archive') }}</p>
+                <h1 class="mt-1 text-[22px] font-bold">{{ __('ui.activities.title') }}</h1>
+                <p class="mt-3 text-base text-ink-60">{{ $activities->total() === 1 ? __('ui.activities.count_one', ['count' => 1]) : __('ui.activities.count_many', ['count' => \Illuminate\Support\Number::format($activities->total(), locale: app()->getLocale())]) }} · {{ $periodLabel }}</p>
+            </div>
+
         </section>
 
-        <section class="mt-8 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm shadow-slate-950/[0.03]" aria-label="{{ __('ui.activities.list') }}">
+        <section class="mt-5 overflow-hidden rounded-lg border border-line bg-white  " aria-label="{{ __('ui.activities.list') }}">
             @forelse ($activities as $activity)
-                <a href="{{ route('activities.show', $activity) }}" class="group grid gap-4 border-b border-slate-100 px-6 py-5 transition last:border-0 hover:bg-emerald-50/40 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-emerald-600 sm:grid-cols-[1fr_auto] sm:items-center sm:px-8">
+                <a href="{{ route('activities.show', $activity) }}" class="group grid gap-4 border-b border-line px-4 py-3.5 transition last:border-0 hover:bg-plan-soft/40 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-emerald-600 sm:grid-cols-[1fr_auto] sm:items-center sm:px-8">
                     <div>
                         <div class="flex flex-wrap items-center gap-2">
-                            <h2 class="font-medium transition group-hover:text-emerald-800">{{ $activity->name }}</h2>
-                            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[0.7rem] font-medium text-slate-500">{{ str($activity->type)->replace('_', ' ')->headline() }}</span>
+                            <h2 class="font-medium transition group-hover:text-plan-text">{{ $activity->name }}</h2>
+                            <span class="rounded-full bg-canvas px-2 py-0.5 text-[0.7rem] font-medium text-ink-50">{{ str($activity->type)->replace('_', ' ')->headline() }}</span>
                             @include('activities._analysis-status', ['status' => $activity->latestAiAnalysis?->status->value])
                         </div>
-                        <p class="mt-1 text-sm text-slate-500">{{ $activity->started_at->locale(app()->getLocale())->isoFormat('ddd, D. MMM YYYY · HH:mm') }}</p>
+                        <p class="mt-1 text-sm text-ink-50">{{ $activity->started_at->locale(app()->getLocale())->isoFormat('ddd, D. MMM YYYY · HH:mm') }}</p>
                     </div>
                     <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-                        <span><strong class="font-medium text-slate-900">{{ $activity->distance_m === null ? '–' : number_format($activity->distance_m / 1000, 1, ',', '.') }}</strong> <span class="text-slate-500">km</span></span>
-                        <span><strong class="font-medium text-slate-900">{{ $activity->elevation_gain_m === null ? '–' : number_format($activity->elevation_gain_m, 0, ',', '.') }}</strong> <span class="text-slate-500">hm</span></span>
-                        <span><strong class="font-medium text-slate-900">{{ $activity->moving_time_s === null ? '–' : sprintf('%d:%02d', intdiv($activity->moving_time_s, 3600), intdiv($activity->moving_time_s % 3600, 60)) }}</strong> <span class="text-slate-500">h</span></span>
-                        <svg viewBox="0 0 20 20" class="hidden size-4 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-emerald-700 sm:block" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m7 4 6 6-6 6"/></svg>
+                        <span><strong class="font-medium text-ink">{{ $activity->distance_m === null ? '–' : number_format($activity->distance_m / 1000, 1, ',', '.') }}</strong> <span class="text-ink-50">km</span></span>
+                        <span><strong class="font-medium text-ink">{{ $activity->elevation_gain_m === null ? '–' : number_format($activity->elevation_gain_m, 0, ',', '.') }}</strong> <span class="text-ink-50">hm</span></span>
+                        <span><strong class="font-medium text-ink">{{ $activity->moving_time_s === null ? '–' : sprintf('%d:%02d', intdiv($activity->moving_time_s, 3600), intdiv($activity->moving_time_s % 3600, 60)) }}</strong> <span class="text-ink-50">h</span></span>
+                        <svg viewBox="0 0 20 20" class="hidden size-4 text-ink-45 transition group-hover:translate-x-0.5 group-hover:text-plan-text sm:block" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m7 4 6 6-6 6"/></svg>
                     </div>
                 </a>
             @empty
                 <div class="px-6 py-16 text-center sm:px-8">
-                    <span class="mx-auto grid size-12 place-items-center rounded-2xl bg-emerald-50 text-emerald-700">
+                    <span class="mx-auto grid size-12 place-items-center rounded-lg bg-plan-soft text-plan-text">
                         <svg viewBox="0 0 24 24" class="size-6" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14"/></svg>
                     </span>
                     <h2 class="mt-4 font-medium">{{ __('ui.activities.none') }}</h2>
-                    <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">{{ __('ui.activities.none_copy') }}</p>
+                    <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-ink-50">{{ __('ui.activities.none_copy') }}</p>
                 </div>
             @endforelse
         </section>
 
         @if ($activities->hasPages())
-            <nav class="mt-6 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between" aria-label="{{ __('ui.activities.pagination') }}">
-                <p class="text-sm text-slate-500">{{ __('ui.common.range_of', ['first' => $activities->firstItem(), 'last' => $activities->lastItem(), 'total' => \Illuminate\Support\Number::format($activities->total(), locale: app()->getLocale())]) }}</p>
+            <nav class="mt-6 flex flex-col gap-3 rounded-lg border border-line bg-white px-4 py-3  sm:flex-row sm:items-center sm:justify-between" aria-label="{{ __('ui.activities.pagination') }}">
+                <p class="text-sm text-ink-50">{{ __('ui.common.range_of', ['first' => $activities->firstItem(), 'last' => $activities->lastItem(), 'total' => \Illuminate\Support\Number::format($activities->total(), locale: app()->getLocale())]) }}</p>
                 <div class="flex items-center gap-2">
                     @if ($activities->onFirstPage())
                         <span class="rounded-lg px-3 py-2 text-sm font-medium text-slate-300">{{ __('ui.common.back') }}</span>
                     @else
-                        <a href="{{ $activities->previousPageUrl() }}" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950">{{ __('ui.common.back') }}</a>
+                        <a href="{{ $activities->previousPageUrl() }}" class="rounded-lg px-3 py-2 text-sm font-medium text-ink-60 transition hover:bg-canvas hover:text-ink">{{ __('ui.common.back') }}</a>
                     @endif
-                    <span class="px-2 text-sm text-slate-500">{{ __('ui.common.page_of', ['current' => $activities->currentPage(), 'last' => $activities->lastPage()]) }}</span>
+                    <span class="px-2 text-sm text-ink-50">{{ __('ui.common.page_of', ['current' => $activities->currentPage(), 'last' => $activities->lastPage()]) }}</span>
                     @if ($activities->hasMorePages())
-                        <a href="{{ $activities->nextPageUrl() }}" class="rounded-lg bg-slate-950 px-3 py-2 text-sm font-medium text-white transition hover:bg-emerald-700">{{ __('ui.common.next') }}</a>
+                        <a href="{{ $activities->nextPageUrl() }}" class="rounded-lg bg-ink px-3 py-2 text-sm font-medium text-white transition hover:opacity-90">{{ __('ui.common.next') }}</a>
                     @else
                         <span class="rounded-lg px-3 py-2 text-sm font-medium text-slate-300">{{ __('ui.common.next') }}</span>
                     @endif
@@ -89,10 +64,9 @@
             </nav>
         @endif
 
-        <footer class="mt-8 flex flex-col gap-2 border-t border-slate-200 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+        <footer class="mt-8 flex flex-col gap-2 border-t border-line pt-6 text-xs text-ink-50 sm:flex-row sm:items-center sm:justify-between">
             <p>{{ __('ui.activities.footer_left') }}</p>
             <p>{{ __('ui.activities.footer_right') }}</p>
         </footer>
     </main>
-</body>
-</html>
+</x-layout>

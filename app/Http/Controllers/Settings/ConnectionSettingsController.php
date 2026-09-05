@@ -24,7 +24,9 @@ class ConnectionSettingsController extends Controller
         $connections = $user->providerConnections()
             ->whereIn('provider', [ProviderName::Hammerhead, ProviderName::Wahoo])
             ->orderByDesc('last_synced_at')
-            ->get(['id', 'user_id', 'provider', 'status', 'last_synced_at']);
+            ->select(['id', 'user_id', 'provider', 'status', 'last_synced_at', 'created_at'])
+            ->withCount('sources')
+            ->get();
 
         return view('settings.connections', ['connections' => $connections]);
     }

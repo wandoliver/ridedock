@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\CarbonImmutable;
+use Carbon\Exceptions\InvalidTimeZoneException;
 use Database\Factories\ActivityFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -57,6 +58,15 @@ class Activity extends Model
 {
     /** @use HasFactory<ActivityFactory> */
     use HasFactory, HasUuids;
+
+    public function localStartedAt(): CarbonImmutable
+    {
+        try {
+            return $this->started_at->setTimezone($this->timezone ?: config('app.timezone'));
+        } catch (InvalidTimeZoneException) {
+            return $this->started_at->setTimezone(config('app.timezone'));
+        }
+    }
 
     protected function casts(): array
     {

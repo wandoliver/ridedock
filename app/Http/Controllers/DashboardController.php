@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Domain\Activities\Enums\ActivityPeriod;
 use App\Domain\Activities\Enums\ConnectionStatus;
+use App\Domain\Training\Services\PlanActivityMatcher;
 use App\Models\Activity;
 use App\Modules\Heatmap\Contracts\RouteGeometryProvider;
 use Carbon\CarbonImmutable;
@@ -47,7 +48,43 @@ class DashboardController extends Controller
 
         $heatmapRoutes = iterator_to_array($routeGeometry->routes($user, $range['from'], $range['to']));
 
+        $weeklyPlan = $user->aiAnalyses()->where('type', 'weekly_plan')
+            ->where('status', 'completed')->latest()->first();
+        $planDays = app(PlanActivityMatcher::class)->days($weeklyPlan);
+        $today = $now->toDateString();
+        $todayPlan = $planDays->firstWhere('date', $today)
+            ?? $planDays->first(fn ($day) => $day['date'] >= $today && $day['type'] === 'ride');
+        $volumeActivities = (clone $activityQuery)->get(['started_at', 'moving_time_s']);
+        $weeklyVolume = $volumeActivities->groupBy(fn ($activity) => $activity->started_at->startOfWeek()->toDateString())
+            ->map(fn ($rides) => $rides->sum('moving_time_s') / 3600)->sortKeys();
+        $planActivities = $user->activities()->whereBetween('started_at', [
+            CarbonImmutable::parse($planDays->min('date') ?? $today)->subDay(),
+            CarbonImmutable::parse($planDays->max('date') ?? $today)->addDays(2),
+        ])->get(['id', 'name', 'started_at', 'timezone', 'moving_time_s']);
+        $planMatches = app(PlanActivityMatcher::class)->match($planDays, $planActivities);
+        $todayRides = $todayPlan ? $planMatches->get($todayPlan['date'], collect()) : collect();
+        $planRiddenMinutes = $planActivities->filter(fn ($ride) => $ride->localStartedAt()->toDateString() >= ($planDays->min('date') ?? $today)
+            && $ride->localStartedAt()->toDateString() <= ($planDays->max('date') ?? $today))->sum('moving_time_s') / 60;
+        $block = $user->aiAnalyses()->where('type', 'training_block')->where('status', 'completed')->latest()->first();
+        $goal = $user->aiAnalyses()->where('type', 'goal_plan')->where('status', 'completed')->latest()->first();
+        $plannedVolume = collect();
+        if ($block && ($block->context['goal_plan_analysis_id'] ?? null) === $goal?->id) {
+            foreach (is_array($block->output['weeks'] ?? null) ? $block->output['weeks'] : [] as $week) {
+                if (is_array($week) && isset($week['week_start'], $week['target_duration_minutes'])) {
+                    $plannedVolume->put(CarbonImmutable::parse($week['week_start'])->startOfWeek()->toDateString(), $week['target_duration_minutes'] / 60);
+                }
+            }
+        }
+        $recentCount = $user->activities()->where('started_at', '>=', $now->subDays(7))->count();
+
         return view('dashboard', [
+            'todayRides' => $todayRides,
+            'planRiddenMinutes' => $planRiddenMinutes,
+            'plannedVolume' => $plannedVolume,
+            'weeklyPlan' => $weeklyPlan,
+            'todayPlan' => $todayPlan,
+            'weeklyVolume' => $weeklyVolume,
+            'recentCount' => $recentCount,
             'activityCount' => (int) $totals->getAttribute('activity_count'),
             'distanceKilometres' => (float) $totals->getAttribute('distance_m') / 1000,
             'elevationMetres' => (float) $totals->getAttribute('elevation_gain_m'),

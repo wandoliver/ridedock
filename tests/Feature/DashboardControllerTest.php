@@ -24,7 +24,7 @@ class DashboardControllerTest extends TestCase
         $this->withoutVite()
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('Understand your rides. Keep your data.')
+            ->assertSee('Understand your rides. Follow your plan. Own your data.')
             ->assertSee('Sign in')
             ->assertSee(route('login.store'), false)
             ->assertSee('name="email"', false)

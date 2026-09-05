@@ -1,183 +1,80 @@
-<!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="{{ __('ui.dashboard.meta') }}">
-    <title>RideDock</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="min-h-screen bg-stone-50 text-slate-950 antialiased">
-    <header class="border-b border-slate-200/80 bg-white/80 backdrop-blur">
-        <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
-            <a href="{{ route('dashboard') }}" class="flex items-center gap-3" aria-label="{{ __('ui.dashboard.home') }}">
-                <span class="grid size-9 place-items-center rounded-xl bg-emerald-600 text-white shadow-sm shadow-emerald-900/15">
-                    <svg viewBox="0 0 24 24" class="size-5" aria-hidden="true">
-                        <path d="M5 17.5 9.2 6h5.6L19 17.5M7 13h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </span>
-                <span class="text-lg font-semibold tracking-tight">RideDock</span>
-            </a>
-            <div class="flex items-center gap-2">
-                @auth
-                    <span class="hidden text-sm text-slate-500 sm:inline">{{ auth()->user()->name }}</span>
-                    <a href="{{ route('coach.index') }}" class="rounded-xl px-3 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50 hover:text-emerald-900">{{ __('ui.dashboard.coach') }}</a>
-                    <a href="{{ route('settings.connections') }}" class="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950">{{ __('ui.common.settings') }}</a>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950">{{ __('ui.dashboard.sign_out') }}</button>
-                    </form>
-                @else
-                    <a href="{{ route('register') }}" class="rounded-xl bg-emerald-600 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-emerald-700">{{ __('ui.auth.create_account') }}</a>
-                @endauth
-            </div>
-        </div>
-    </header>
-
-    <main class="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-14">
-        @if (session('status'))
-            <div class="mb-8 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm text-emerald-900" role="status">
-                <span class="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-emerald-600 text-xs text-white">✓</span>
-                <p>{{ session('status') }}</p>
-            </div>
-        @endif
-
-        @guest
-            <section class="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_26rem] lg:gap-16">
-                <div class="pt-4 lg:pt-12">
-                <p class="mb-3 text-sm font-medium text-emerald-700">{{ __('ui.dashboard.eyebrow') }}</p>
-                <h1 class="max-w-2xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">{{ __('ui.dashboard.headline') }}</h1>
-                <p class="mt-4 max-w-2xl text-base leading-7 text-slate-600">{{ __('ui.dashboard.copy') }}</p>
-                </div>
-
-                <section class="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm shadow-slate-950/[0.03] sm:p-9" aria-labelledby="dashboard-login-heading">
-                    <p class="text-sm font-medium text-emerald-700">{{ __('ui.auth.welcome_back') }}</p>
-                    <h2 id="dashboard-login-heading" class="mt-2 text-3xl font-semibold tracking-tight">{{ __('ui.auth.sign_in') }}</h2>
-                    <p class="mt-3 text-sm leading-6 text-slate-500">{{ __('ui.auth.sign_in_copy') }}</p>
-                    <div class="mt-7">
-                        @include('auth._login-form')
-                    </div>
-                    <p class="mt-6 text-center text-sm text-slate-500">{{ __('ui.auth.no_account') }} <a href="{{ route('register') }}" class="font-medium text-emerald-700 hover:text-emerald-900">{{ __('ui.auth.create_account') }}</a></p>
-                </section>
-            </section>
-        @else
-            @if ($connectionErrorCount > 0)
-                <a href="{{ route('settings.connections') }}" class="mb-8 flex items-center justify-between gap-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3.5 text-sm text-rose-900 transition hover:bg-rose-100">
-                    <span>{{ $connectionErrorCount === 1 ? __('ui.dashboard.one_connection_error') : __('ui.dashboard.many_connection_errors', ['count' => $connectionErrorCount]) }}</span>
-                    <span class="font-medium">{{ __('ui.dashboard.check_connections') }}</span>
-                </a>
-            @endif
-
-        <section class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end" aria-label="{{ __('ui.dashboard.period_filter') }}">
-            <div>
-                <p class="text-sm text-slate-500">{{ __('ui.dashboard.metrics_heatmap') }}</p>
-                <h2 class="mt-1 text-xl font-semibold tracking-tight">{{ $periodLabel }}</h2>
-            </div>
-            <nav class="flex w-fit rounded-xl border border-slate-200 bg-white p-1 shadow-sm" aria-label="{{ __('ui.dashboard.select_period') }}">
-                @foreach ($periods as $option)
-                    <a href="{{ route('dashboard', ['period' => $option->value]) }}"
-                        class="rounded-lg px-3 py-2 text-sm font-medium transition {{ $period === $option ? 'bg-slate-950 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950' }}"
-                        @if ($period === $option) aria-current="page" @endif>
-                        {{ $option->shortLabel($now) }}
-                    </a>
-                @endforeach
-            </nav>
-        </section>
-
-        <section class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="{{ __('ui.dashboard.period_overview', ['period' => $periodLabel]) }}">
-            @foreach ([
-                ['label' => __('ui.dashboard.activities'), 'value' => \Illuminate\Support\Number::format($activityCount, locale: app()->getLocale())],
-                ['label' => __('ui.dashboard.distance'), 'value' => \Illuminate\Support\Number::format(round($distanceKilometres), 0, locale: app()->getLocale()).' km'],
-                ['label' => __('ui.dashboard.elevation'), 'value' => \Illuminate\Support\Number::format($elevationMetres, 0, locale: app()->getLocale()).' m'],
-                ['label' => __('ui.dashboard.saddle_time'), 'value' => \Illuminate\Support\Number::format($movingHours, 1, locale: app()->getLocale()).' h'],
-            ] as $metric)
-                <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-950/[0.03]">
-                    <p class="text-sm text-slate-500">{{ $metric['label'] }}</p>
-                    <p class="mt-2 text-2xl font-semibold tracking-tight">{{ $metric['value'] }}</p>
-                </article>
-            @endforeach
-        </section>
-
-        <section class="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50 px-6 py-5 sm:flex sm:items-center sm:justify-between sm:gap-6 sm:px-8" aria-label="RideDock Coach">
-            <div>
-                <p class="text-sm font-medium text-emerald-700">RideDock Coach</p>
-                <h2 class="mt-1 text-xl font-semibold tracking-tight">{{ __('ui.dashboard.analyze_training') }}</h2>
-                <p class="mt-2 text-sm leading-6 text-emerald-950/70">{{ __('ui.dashboard.coach_copy') }}</p>
-            </div>
-            <a href="{{ route('coach.index') }}" class="mt-4 inline-flex shrink-0 items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700 sm:mt-0">
-                {{ __('ui.dashboard.open_coach') }}
-                <svg viewBox="0 0 20 20" class="size-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m7 4 6 6-6 6"/></svg>
-            </a>
-        </section>
-
-        <section class="mt-6">
-            <article class="overflow-hidden rounded-3xl border border-slate-200 bg-slate-950 text-white shadow-sm">
-                <div class="relative min-h-[28rem]" data-heatmap-frame>
-                    <div id="ride-heatmap" class="absolute inset-0" aria-label="{{ __('ui.dashboard.interactive_heatmap') }}"></div>
-                    <script type="application/json" id="ride-heatmap-data">{!! json_encode($heatmapRoutes, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
-                    <div class="pointer-events-none absolute inset-x-0 top-0 z-[500] flex items-start justify-between gap-3 p-4 sm:p-5">
-                        <span class="rounded-full bg-slate-950/70 px-3 py-1.5 text-xs text-slate-100 ring-1 ring-white/15 backdrop-blur">{{ count($heatmapRoutes) === 1 ? __('ui.dashboard.one_route') : __('ui.dashboard.many_routes', ['count' => count($heatmapRoutes)]) }}</span>
-                        <button type="button" class="pointer-events-auto inline-flex items-center gap-2 rounded-xl bg-white/95 px-3 py-2 text-xs font-medium text-slate-800 shadow-sm ring-1 ring-slate-950/10 backdrop-blur transition hover:bg-white" data-heatmap-expand data-expand-label="{{ __('ui.dashboard.expand') }}" data-collapse-label="{{ __('ui.dashboard.collapse') }}" aria-pressed="false">
-                            <svg viewBox="0 0 20 20" class="size-4" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M7 3H3v4M13 3h4v4M7 17H3v-4m10 4h4v-4"/></svg>
-                            <span data-heatmap-expand-label>{{ __('ui.dashboard.expand') }}</span>
-                        </button>
-                    </div>
-                    <div class="pointer-events-none absolute bottom-5 left-5 z-[500] flex flex-wrap gap-2 text-xs text-slate-100 sm:bottom-6 sm:left-6">
-                        <span class="rounded-lg bg-slate-950/70 px-2.5 py-1.5 ring-1 ring-white/10 backdrop-blur">{{ number_format($privacyTrimMetres, 0, ',', '.') }} m Privacy-Trim</span>
-                    </div>
-                </div>
-            </article>
-        </section>
-
-        <section class="mt-6 rounded-3xl border border-slate-200 bg-white shadow-sm shadow-slate-950/[0.03]">
-            <div class="flex flex-col justify-between gap-4 border-b border-slate-100 px-6 py-5 sm:flex-row sm:items-center sm:px-8">
-                <div>
-                    <p class="text-sm text-slate-500">{{ __('ui.dashboard.selected_period') }}</p>
-                    <h2 class="mt-1 text-xl font-semibold tracking-tight">{{ __('ui.dashboard.activities') }}</h2>
-                </div>
-                <div class="flex items-center gap-3">
-                    <span class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600">{{ __('ui.dashboard.latest_five') }}</span>
-                    <a href="{{ route('activities.index', ['period' => $period->value]) }}" class="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 transition hover:text-emerald-900">
-                        {{ __('ui.dashboard.all_activities') }}
-                        <svg viewBox="0 0 20 20" class="size-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m7 4 6 6-6 6"/></svg>
-                    </a>
-                </div>
-            </div>
-
+@guest
+@include('auth.login')
+@else
+<x-layout title="RideDock">
+<x-topbar>
+<x-slot:context><nav class="flex flex-wrap items-center gap-4 text-[13px]"><a href="{{ route('dashboard') }}" class="font-semibold" aria-current="page">{{ __('ui.common.overview') }}</a><a href="{{ route('coach.index') }}" class="text-ink-50">Coach</a><a href="{{ route('settings.connections') }}" class="text-ink-50">{{ __('ui.common.settings') }}</a></nav></x-slot:context>
+<x-slot:center><x-segment aria-label="{{ __('ui.dashboard.select_period') }}">@foreach ($periods as $option)<a href="{{ route('dashboard', ['period' => $option->value]) }}" @if($period === $option) aria-current="page" @endif>{{ $option->shortLabel($now) }}</a>@endforeach</x-segment></x-slot:center>
+<x-slot:actions><span class="hidden text-[13px] text-ink-50 xl:block">{{ auth()->user()->name }}</span><x-button :href="route('settings.connections')">{{ __('ui.common.connections') }}</x-button><form method="POST" action="{{ route('logout') }}">@csrf<button class="text-xs text-ink-50">{{ __('ui.dashboard.sign_out') }}</button></form></x-slot:actions>
+</x-topbar>
+<x-flash />
+<div class="rd-shell"><main class="rd-workspace">
+@if($connectionErrorCount > 0)<x-info-box><a href="{{ route('settings.connections') }}">{{ $connectionErrorCount === 1 ? __('ui.dashboard.one_connection_error') : __('ui.dashboard.many_connection_errors', ['count' => $connectionErrorCount]) }} · {{ __('ui.dashboard.check_connections') }} ›</a></x-info-box>@endif
+<h1 class="sr-only">{{ $periodLabel }}</h1>
+<section class="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="{{ __('ui.dashboard.metrics_heatmap') }}">
+@foreach ([
+['label' => __('ui.dashboard.activities'), 'value' => $activityCount, 'unit' => '', 'detail' => __('design.recent_count', ['count' => $recentCount])],
+['label' => __('ui.dashboard.distance'), 'value' => \Illuminate\Support\Number::format(round($distanceKilometres), 0, locale: app()->getLocale()), 'unit'=>'km', 'detail'=> $activityCount ? __('design.per_ride',['distance'=>\Illuminate\Support\Number::format($distanceKilometres/$activityCount,1,locale:app()->getLocale())]) : ''],
+['label' => __('ui.dashboard.elevation'), 'value' => \Illuminate\Support\Number::format($elevationMetres, 0, locale: app()->getLocale()), 'unit'=>'m', 'detail'=>''],
+['label' => __('ui.dashboard.saddle_time'), 'value' => \Illuminate\Support\Number::format($movingHours, 1, locale: app()->getLocale()), 'unit'=>'h', 'detail'=>''],
+] as $metric)
+<article class="rd-surface px-4 py-3.5"><p class="text-xs font-semibold text-ink-50">{{ $metric['label'] }}</p><p aria-label="{{ $metric['value'] }} {{ $metric['unit'] }}" class="mt-1 text-[28px] font-bold tracking-[-.02em]">{{ $metric['value'] }} <span class="text-sm font-medium text-ink-50">{{ $metric['unit'] }}</span></p>@if($metric['detail'])<p class="text-xs text-ink-50">{{ $metric['detail'] }}</p>@endif</article>
+@endforeach</section>
+<section class="rd-surface overflow-hidden">
+<div class="flex flex-wrap items-center justify-between gap-2 border-b border-line px-3.5 py-2.5 text-xs"><div class="flex flex-wrap gap-3"><h2 class="font-bold">Heatmap</h2><span class="text-ink-50">{{ count($heatmapRoutes) === 1 ? __('ui.dashboard.one_route') : __('ui.dashboard.many_routes', ['count'=>count($heatmapRoutes)]) }} · {{ number_format($privacyTrimMetres,0,',','.') }} m Privacy-Trim</span></div>
+<button type="button" class="rounded-md bg-canvas px-2 py-1 font-semibold" data-heatmap-expand data-expand-label="{{ __('ui.dashboard.expand') }}" data-collapse-label="{{ __('ui.dashboard.collapse') }}" aria-pressed="false">⤢ <span data-heatmap-expand-label>{{ __('ui.dashboard.expand') }}</span></button></div>
+<div class="relative min-h-[380px]" data-heatmap-frame><div id="ride-heatmap" class="absolute inset-0" aria-label="{{ __('ui.dashboard.interactive_heatmap') }}"></div></div>
+<script type="application/json" id="ride-heatmap-data">{!! json_encode($heatmapRoutes, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
+</section>
+<section class="rd-surface px-3.5 py-3"><div class="flex justify-between gap-3 text-xs"><h2 class="font-bold">{{ __('design.weekly_volume') }} · {{ $periodLabel }}</h2><span class="text-ink-50">{{ __('design.hours_week') }}</span></div>
+@php
+    $volumeDates = $weeklyVolume->keys()->merge($plannedVolume->keys())->unique()->sort()->values();
+    $volumeMax = max(.1, $weeklyVolume->max() ?? 0, $plannedVolume->max() ?? 0);
+@endphp
+@if($volumeDates->isNotEmpty())
+<div class="mt-3 flex h-10 items-end gap-[3px]" role="img" aria-label="{{ __('design.weekly_volume') }}">
+@foreach($volumeDates as $date)<div class="relative h-full min-w-0 flex-1" title="{{ $date }} · {{ round($weeklyVolume->get($date, 0),1) }} h {{ __('design.ridden') }} · {{ round($plannedVolume->get($date,0),1) }} h {{ __('design.planned') }}">
+@if($plannedVolume->has($date))<div class="absolute inset-x-0 bottom-0 rounded-sm border-[1.5px] border-dashed border-plan-dash" style="height: {{ $plannedVolume->get($date)/$volumeMax*100 }}%"></div>@endif
+<div class="absolute inset-x-0 bottom-0 rounded-sm {{ $date === $now->startOfWeek()->toDateString() ? 'bg-plan' : 'bg-plan-bar' }}" style="height: {{ $weeklyVolume->get($date,0)/$volumeMax*100 }}%"></div>
+<span class="sr-only">{{ $date }}: {{ round($weeklyVolume->get($date,0),1) }} h {{ __('design.ridden') }}, {{ round($plannedVolume->get($date,0),1) }} h {{ __('design.planned') }}</span></div>@endforeach</div>
+<div class="mt-2 flex justify-between text-[11px] text-ink-45"><span>{{ $volumeDates->first() }}</span><span>{{ $volumeDates->last() }} @if($plannedVolume->isNotEmpty()) · ▱ {{ __('design.planned') }}@endif</span></div>
+@else<p class="py-6 text-sm text-ink-50">{{ __('ui.dashboard.no_activities') }}</p>@endif
+</section>
+</main><aside class="rd-panel">
+<div class="flex flex-wrap items-center justify-between gap-2 text-xs"><span class="font-semibold text-ink-50">{{ $now->locale(app()->getLocale())->isoFormat('dddd, D. MMMM') }}</span><a class="font-semibold text-plan-text" href="{{ route('coach.index') }}#week">{{ __('ui.dashboard.open_coach') }} ›</a></div>
+@if($todayPlan)
+<x-plan-block class="mt-3 p-3.5"><p class="font-semibold">{{ $todayPlan['date'] === $now->toDateString() ? __('design.planned_today') : __('design.next_planned') }} · {{ $todayPlan['duration_minutes'] ?? 0 }} min</p><a class="mt-1 block text-[17px] font-bold text-ink" href="{{ route('coach.index', ['plan'=>$weeklyPlan->id, 'day'=>$todayPlan['date']]) }}#week">{{ $todayPlan['title'] }} ›</a><p class="mt-1 text-[13px] text-ink-60">{{ $todayPlan['intensity'] }}</p>@foreach($todayRides as $ride)<a class="mt-3 block border-t border-line pt-2 text-xs font-semibold" href="{{ route('activities.show', $ride) }}">● {{ $ride->name }} · {{ round($ride->moving_time_s / 60) }} min {{ __('design.ridden') }} ›</a>@endforeach</x-plan-block>
+<x-info-box class="mt-2"><b>{{ $weeklyPlan->output['weekly_goal'] ?? '' }}</b> · {{ round($planRiddenMinutes) }} / {{ $weeklyPlan->output['total_duration_minutes'] ?? 0 }} min {{ __('design.ridden') }}</x-info-box>
+@else<x-info-box class="mt-3">{{ __('design.no_week') }} <a class="font-semibold text-plan-text" href="{{ route('coach.index') }}#week">{{ __('ui.dashboard.open_coach') }} ›</a></x-info-box>@endif
+<div class="mt-6 flex items-center justify-between gap-2"><h2 class="!text-xs font-semibold text-ink-50">{{ __('design.recent_activities') }}</h2><a href="{{ route('activities.index', ['period'=>$period->value]) }}" class="text-xs font-semibold text-plan-text">{{ __('ui.dashboard.all_activities') }} ›</a></div>
             @forelse ($activities as $activity)
-                <a href="{{ route('activities.show', $activity) }}" class="group grid gap-4 border-b border-slate-100 px-6 py-5 transition last:border-0 hover:bg-emerald-50/40 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-emerald-600 sm:grid-cols-[1fr_auto] sm:items-center sm:px-8">
+                <a href="{{ route('activities.show', $activity) }}" class="group grid gap-4 border-b border-line px-0 py-[11px] transition last:border-0 hover:bg-plan-soft/40 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-emerald-600 grid-cols-[1fr_auto] sm:items-center ">
                     <div>
                         <div class="flex flex-wrap items-center gap-2">
-                            <p class="font-medium transition group-hover:text-emerald-800">{{ $activity->name }}</p>
+                            <p class="text-sm font-semibold transition group-hover:text-plan-text">{{ $activity->name }}</p>
                             @include('activities._analysis-status', ['status' => $activity->latestAiAnalysis?->status->value])
                         </div>
-                        <p class="mt-1 text-sm text-slate-500">{{ $activity->started_at->locale(app()->getLocale())->isoFormat('ddd, D. MMM · HH:mm') }}</p>
+                        <p class="mt-1 text-xs text-ink-50">{{ $activity->started_at->locale(app()->getLocale())->isoFormat('ddd, D. MMM · HH:mm') }}</p>
                     </div>
-                    <div class="flex items-center gap-6 text-sm">
-                        <span><strong class="font-medium text-slate-900">{{ number_format($activity->distance_m / 1000, 1, ',', '.') }}</strong> <span class="text-slate-500">km</span></span>
-                        <span><strong class="font-medium text-slate-900">{{ number_format($activity->elevation_gain_m, 0, ',', '.') }}</strong> <span class="text-slate-500">hm</span></span>
+                    <div class="flex items-center gap-2 text-xs">
+                        <span><strong class="font-medium text-ink">{{ number_format($activity->distance_m / 1000, 1, ',', '.') }}</strong> <span class="text-ink-50">km</span></span>
+                        <span><strong class="font-medium text-ink">{{ number_format($activity->elevation_gain_m, 0, ',', '.') }}</strong> <span class="text-ink-50">hm</span></span>
                         @if ($activity->average_power)
-                            <span><strong class="font-medium text-slate-900">{{ number_format($activity->average_power, 0, ',', '.') }}</strong> <span class="text-slate-500">W</span></span>
+                            <span><strong class="font-medium text-ink">{{ number_format($activity->average_power, 0, ',', '.') }}</strong> <span class="text-ink-50">W</span></span>
                         @endif
-                        <svg viewBox="0 0 20 20" class="hidden size-4 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-emerald-700 sm:block" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m7 4 6 6-6 6"/></svg>
+                        <svg viewBox="0 0 20 20" class="hidden size-4 text-ink-45 transition group-hover:translate-x-0.5 group-hover:text-plan-text sm:block" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m7 4 6 6-6 6"/></svg>
                     </div>
                 </a>
             @empty
-                <div class="px-6 py-14 text-center sm:px-8">
-                    <span class="mx-auto grid size-12 place-items-center rounded-2xl bg-emerald-50 text-emerald-700">
+                <div class="px-6 py-14 text-center ">
+                    <span class="mx-auto grid size-12 place-items-center rounded-lg bg-plan-soft text-plan-text">
                         <svg viewBox="0 0 24 24" class="size-6" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14"/></svg>
                     </span>
                     <h3 class="mt-4 font-medium">{{ __('ui.dashboard.no_activities') }}</h3>
-                    <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">{{ __('ui.dashboard.no_activities_copy') }}</p>
+                    <p class="mx-auto mt-2 max-w-md text-xs leading-6 text-ink-50">{{ __('ui.dashboard.no_activities_copy') }}</p>
                 </div>
             @endforelse
-        </section>
-        @endguest
 
-        <footer class="mt-8 flex flex-col gap-2 border-t border-slate-200 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-            <p>{{ __('ui.dashboard.footer_left') }}</p>
-            <p>{{ __('ui.dashboard.footer_right') }}</p>
-        </footer>
-    </main>
-</body>
-</html>
+<footer class="mt-6 border-t border-line pt-4 text-[11px] leading-relaxed text-ink-45"><p>{{ __('ui.dashboard.footer_left') }}</p><p>{{ __('ui.dashboard.footer_right') }}</p></footer>
+</aside></div></x-layout>
+@endguest
