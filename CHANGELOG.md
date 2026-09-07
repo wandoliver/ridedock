@@ -4,6 +4,30 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.6] - 2026-09-07
+
+### Added
+
+- Calendar-based Coach with roadmap, block and week zoom levels, selectable detail panels and navigation through saved weekly plans.
+- Planned-versus-recorded training views with automatic date matching and manual activity assignment.
+- Persistent plan-day completion with undo, plus session swaps between days without changing the planned total duration.
+- Weekly volume charts with planned targets on the dashboard and combined speed, heart-rate and elevation charts on activity details.
+
+### Changed
+
+- Dashboard, activity archive and details, Coach, settings, login and registration now share the light calendar design with Hanken Grotesk, consistent components and responsive detail panels.
+- Activity details show linked plan sessions and a segmented RPE control that saves rating changes immediately.
+- Weekly plans can be generated for a selected start date.
+
+### Fixed
+
+- Invalid imported activity timezones fall back to the application timezone instead of breaking calendar and activity views.
+- Sessions explicitly marked as completed are skipped when resolving the next planned session.
+
+### Security
+
+- Plan-day changes and manual activity assignments are validated and restricted to the owning user.
+
 ## [0.0.5] - 2026-09-02
 
 ### Fixed
