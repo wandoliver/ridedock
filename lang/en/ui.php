@@ -27,6 +27,8 @@ return [
         'german' => 'German',
     ],
     'messages' => [
+        'provider_disconnected' => ':provider disconnected. Imported rides are retained.',
+        'provider_disconnected_locally' => ':provider disconnected locally. Provider revocation failed; also remove RideDock in your provider account.',
         'ai_not_configured' => 'AI analysis is not configured yet.',
         'analysis_running' => 'An analysis is already running for this ride.',
         'analysis_error_stored' => 'The analysis could not be completed.',
@@ -194,6 +196,7 @@ return [
         'footer' => 'Analyses are only created when you request them.',
     ],
     'settings' => [
+        'disconnect' => 'Disconnect', 'disconnect_provider' => 'Disconnect :provider',
         'areas' => 'Settings sections',
         'training_meta' => 'Configure your training profile and AI analysis in RideDock.',
         'training_title' => 'Training · Settings · RideDock',

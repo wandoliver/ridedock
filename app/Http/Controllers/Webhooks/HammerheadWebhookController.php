@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Webhooks;
 
+use App\Domain\Activities\Enums\ConnectionStatus;
 use App\Domain\Activities\Enums\ProviderName;
 use App\Http\Controllers\Controller;
 use App\Jobs\ImportProviderActivity;
@@ -22,6 +23,7 @@ class HammerheadWebhookController extends Controller
         $payload = $request->validate(['activityId' => ['required', 'string'], 'userId' => ['required', 'string']]);
         $connection = ProviderConnection::query()
             ->where('provider', ProviderName::Hammerhead)
+            ->where('status', '!=', ConnectionStatus::Revoked)
             ->where('external_user_id', $payload['userId'])
             ->first();
 

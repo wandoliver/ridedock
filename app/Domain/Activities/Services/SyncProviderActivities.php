@@ -21,6 +21,10 @@ final class SyncProviderActivities
 
     public function handle(ProviderConnection $connection): int
     {
+        if (! $connection->stillConnected()) {
+            return 0;
+        }
+
         $connection = $this->tokens->ensureFresh($connection);
         $provider = $this->providers->get($connection->provider);
         $cursor = $connection->sync_cursor;
@@ -31,13 +35,19 @@ final class SyncProviderActivities
         $imported = 0;
         $pageCount = 0;
 
-        $connection->forceFill(['status' => ConnectionStatus::Syncing, 'last_error' => null])->save();
+        $connection->updateWhileConnected(['status' => ConnectionStatus::Syncing, 'last_error' => null]);
 
         try {
             do {
+                if (! $connection->stillConnected()) {
+                    return $imported;
+                }
                 $page = $provider->activities($connection, $since, $cursor);
 
                 foreach ($page->activities as $payload) {
+                    if (! $connection->stillConnected()) {
+                        return $imported;
+                    }
                     $source = $this->importer->import($connection, $payload);
                     $imported++;
 
@@ -54,7 +64,7 @@ final class SyncProviderActivities
                 }
 
                 $cursor = $page->nextCursor;
-                $connection->forceFill(['sync_cursor' => $cursor])->save();
+                $connection->updateWhileConnected(['sync_cursor' => $cursor]);
                 $pageCount++;
             } while ($cursor !== null && $pageCount < config('activity-providers.sync.max_pages'));
 
@@ -62,19 +72,19 @@ final class SyncProviderActivities
                 throw new \RuntimeException('Sync page limit reached; resume the connection sync to continue.');
             }
 
-            $connection->forceFill([
+            $connection->updateWhileConnected([
                 'status' => ConnectionStatus::Active,
                 'sync_cursor' => null,
                 'last_synced_at' => now(),
                 'last_error' => null,
-            ])->save();
+            ]);
 
             return $imported;
         } catch (Throwable $exception) {
-            $connection->forceFill([
+            $connection->updateWhileConnected([
                 'status' => ConnectionStatus::Error,
                 'last_error' => mb_substr($exception->getMessage(), 0, 2000),
-            ])->save();
+            ]);
 
             throw $exception;
         }

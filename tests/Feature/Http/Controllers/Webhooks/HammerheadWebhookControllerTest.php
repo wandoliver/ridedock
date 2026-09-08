@@ -37,6 +37,22 @@ class HammerheadWebhookControllerTest extends TestCase
         });
     }
 
+    public function test_revoked_connection_does_not_queue_an_import(): void
+    {
+        config()->set('activity-providers.hammerhead.webhook_secret', 'webhook-secret');
+        ProviderConnection::factory()->hammerhead()->create([
+            'external_user_id' => '1000',
+            'status' => \App\Domain\Activities\Enums\ConnectionStatus::Revoked,
+        ]);
+        Queue::fake();
+        $content = json_encode(['activityId' => 'old-ride', 'userId' => '1000'], JSON_THROW_ON_ERROR);
+        $this->call('POST', '/api/v1/webhooks/hammerhead', server: [
+            'CONTENT_TYPE' => 'application/json',
+            'HTTP_X_HMAC_SIGNATURE' => hash_hmac('sha256', $content, 'webhook-secret'),
+        ], content: $content)->assertOk();
+        Queue::assertNothingPushed();
+    }
+
     public function test_returns_401_when_signature_is_invalid(): void
     {
         config()->set('activity-providers.hammerhead.webhook_secret', 'webhook-secret');

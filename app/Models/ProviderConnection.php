@@ -18,7 +18,7 @@ use Illuminate\Support\Collection;
  * @property int $user_id
  * @property ProviderName $provider
  * @property string|null $external_user_id
- * @property string $access_token
+ * @property string|null $access_token
  * @property string|null $refresh_token
  * @property CarbonImmutable|null $token_expires_at
  * @property list<string>|null $scopes
@@ -56,6 +56,33 @@ class ProviderConnection extends Model
             'capabilities' => 'array',
             'metadata' => 'array',
         ];
+    }
+
+    public function isConnected(): bool
+    {
+        return $this->status !== ConnectionStatus::Revoked;
+    }
+
+    public function stillConnected(): bool
+    {
+        return self::query()->whereKey($this->id)
+            ->where('status', '!=', ConnectionStatus::Revoked)
+            ->where('access_token', $this->getRawOriginal('access_token'))->exists();
+    }
+
+    /** @param array<string, mixed> $attributes */
+    public function updateWhileConnected(array $attributes): bool
+    {
+        $token = $this->getRawOriginal('access_token');
+        $this->forceFill($attributes);
+        $updated = self::query()->whereKey($this->id)
+            ->where('status', '!=', ConnectionStatus::Revoked)
+            ->where('access_token', $token)->update($this->getDirty());
+        if ($updated > 0) {
+            $this->refresh();
+        }
+
+        return $updated > 0;
     }
 
     /** @return BelongsTo<User, $this> */

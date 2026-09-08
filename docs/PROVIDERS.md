@@ -29,6 +29,10 @@ Implemented as a read-only Wahoo Cloud API adapter:
 
 The connector does not request write scopes and ignores planned, incomplete and non-cycling workouts. Webhooks remain disabled until a public webhook endpoint is configured.
 
+## Disconnect
+
+Disconnect clears local credentials and marks the retained connection `revoked`. Existing activity sources remain attached for deduplication after reconnect. Wahoo implements the optional `RevocableActivityProvider` contract using [`DELETE /v1/permissions`](https://cloud-api.wahooligan.com/#deauthorize). Failures never prevent local cleanup and are shown to the user without storing provider exception details. No verified revocation endpoint is available in the current Hammerhead adapter, so it uses local cleanup.
+
 ## Adding a provider
 
 1. Implement `ActivityProvider` and optionally `OAuthActivityProvider` / `ActivityFileProvider`.

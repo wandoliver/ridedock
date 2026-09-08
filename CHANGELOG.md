@@ -4,6 +4,19 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.7] - 2026-09-08
+
+### Added
+
+- Disconnect controls for Hammerhead and Wahoo, with authenticated web and API endpoints, disconnected status and reconnect support.
+- Wahoo permission revocation with local cleanup even when the provider is unavailable.
+- RideDock SVG, ICO and Apple touch icons derived from the existing green logo.
+
+### Security
+
+- Disconnect clears stored access/refresh tokens, account identity, scopes and connection metadata while preserving imported rides.
+- Queued imports and syncs skip disconnected connections; conditional updates prevent stale syncs and token refreshes from restoring credentials or connection status.
+
 ## [0.0.6] - 2026-09-07
 
 ### Added

@@ -17,6 +17,8 @@ return array_replace_recursive($en, [
         'label' => 'Sprache', 'english' => 'Englisch', 'german' => 'Deutsch',
     ],
     'messages' => [
+        'provider_disconnected' => ':provider wurde getrennt. Importierte Fahrten bleiben erhalten.',
+        'provider_disconnected_locally' => ':provider wurde lokal getrennt. Der Widerruf beim Anbieter ist fehlgeschlagen; entferne RideDock zusätzlich in deinem Anbieter-Konto.',
         'ai_not_configured' => 'Die KI-Analyse ist noch nicht konfiguriert.', 'analysis_running' => 'Für diese Fahrt läuft bereits eine Analyse.',
         'analysis_error_stored' => 'Die Analyse konnte nicht abgeschlossen werden.',
         'ride_analysis_failed' => 'Die Fahrtanalyse konnte nicht abgeschlossen werden. Bitte versuche es erneut.',
@@ -135,6 +137,7 @@ return array_replace_recursive($en, [
         'footer' => 'Analysen entstehen nur auf deine Anfrage.',
     ],
     'settings' => [
+        'disconnect' => 'Verbindung trennen', 'disconnect_provider' => ':provider: Verbindung trennen',
         'areas' => 'Einstellungsbereiche', 'training_meta' => 'Trainingsprofil und KI-Analyse für RideDock konfigurieren.',
         'training_title' => 'Training · Einstellungen · RideDock', 'training_heading' => 'Training',
         'training_intro' => 'Deine Ziele und Schwellenwerte bilden den Kontext für nachvollziehbare Analysen und spätere Trainingspläne.',

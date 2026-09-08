@@ -14,6 +14,10 @@ final class ProviderTokenManager
 
     public function ensureFresh(ProviderConnection $connection): ProviderConnection
     {
+        if (! $connection->stillConnected()) {
+            throw new RuntimeException('The provider connection is disconnected.');
+        }
+
         if ($connection->token_expires_at === null || $connection->token_expires_at->isAfter(now()->addMinute())) {
             return $connection;
         }
@@ -26,12 +30,16 @@ final class ProviderTokenManager
 
         $this->persist($connection, $provider->refreshAccessToken($connection));
 
+        if (! $connection->stillConnected()) {
+            throw new RuntimeException('The provider connection is disconnected.');
+        }
+
         return $connection->refresh();
     }
 
     public function persist(ProviderConnection $connection, ProviderToken $token): void
     {
-        $connection->forceFill([
+        $connection->updateWhileConnected([
             'access_token' => $token->accessToken,
             'refresh_token' => $token->refreshToken ?: $connection->refresh_token,
             'token_expires_at' => $token->expiresAt,
@@ -39,6 +47,6 @@ final class ProviderTokenManager
             'scopes' => $token->scopes ?: $connection->scopes,
             'status' => ConnectionStatus::Active,
             'last_error' => null,
-        ])->save();
+        ]);
     }
 }

@@ -139,7 +139,7 @@ final class HammerheadProvider implements ActivityFileProvider, OAuthActivityPro
             ->connectTimeout(5)
             ->timeout(30)
             ->acceptJson()
-            ->withToken($connection->access_token)
+            ->withToken((string) $connection->access_token)
             ->retry(2, 250, throw: false);
     }
 

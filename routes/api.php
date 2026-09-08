@@ -25,6 +25,7 @@ Route::prefix('v1')->group(function (): void {
 
         Route::middleware(CheckAbilities::class.':connections:write')->group(function (): void {
             Route::get('/connections', [ProviderConnectionController::class, 'index']);
+            Route::delete('/connections/{provider}', [ProviderConnectionController::class, 'destroy']);
             Route::post('/connections/{provider}/sync', [ProviderConnectionController::class, 'sync']);
             Route::get('/connections/{provider}/connect', [ProviderOAuthController::class, 'connect']);
         });

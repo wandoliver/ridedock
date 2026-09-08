@@ -4,6 +4,7 @@ namespace App\Infrastructure\Providers\Wahoo;
 
 use App\Domain\Activities\Contracts\ActivityFileProvider;
 use App\Domain\Activities\Contracts\OAuthActivityProvider;
+use App\Domain\Activities\Contracts\RevocableActivityProvider;
 use App\Domain\Activities\Data\ProviderActivity;
 use App\Domain\Activities\Data\ProviderPage;
 use App\Domain\Activities\Data\ProviderToken;
@@ -14,7 +15,7 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
-final class WahooProvider implements ActivityFileProvider, OAuthActivityProvider
+final class WahooProvider implements ActivityFileProvider, OAuthActivityProvider, RevocableActivityProvider
 {
     /** @var list<int> */
     private const CYCLING_WORKOUT_TYPES = [0, 11, 12, 13, 14, 15, 16, 49, 61, 64, 68, 70];
@@ -27,6 +28,14 @@ final class WahooProvider implements ActivityFileProvider, OAuthActivityProvider
     public function capabilities(): array
     {
         return ['oauth', 'activities', 'activity_fit'];
+    }
+
+    public function revokeAccess(ProviderConnection $connection): void
+    {
+        Http::baseUrl(config('activity-providers.wahoo.api_url'))
+            ->connectTimeout(5)->timeout(10)->acceptJson()
+            ->withToken((string) $connection->access_token)
+            ->delete('/permissions')->throw();
     }
 
     public function authorizationUrl(string $state): string
@@ -193,7 +202,7 @@ final class WahooProvider implements ActivityFileProvider, OAuthActivityProvider
 
     private function client(ProviderConnection $connection): PendingRequest
     {
-        return $this->clientWithToken($connection->access_token);
+        return $this->clientWithToken((string) $connection->access_token);
     }
 
     private function clientWithToken(string $accessToken): PendingRequest

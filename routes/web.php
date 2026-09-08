@@ -62,6 +62,8 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/connections/{provider}/connect', [ProviderOAuthController::class, 'connect'])
         ->middleware('throttle:20,1')
         ->name('provider.connect');
+    Route::delete('/connections/{provider}', [ProviderConnectionController::class, 'destroy'])
+        ->middleware('throttle:20,1')->name('provider.disconnect');
     Route::post('/connections/{provider}/sync', [ProviderConnectionController::class, 'sync'])
         ->middleware('throttle:20,1')
         ->name('provider.sync');

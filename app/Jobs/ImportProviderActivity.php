@@ -28,9 +28,16 @@ class ImportProviderActivity implements ShouldQueue
         ActivityFileArchiver $files,
         ActivitySourceEnricher $enricher,
     ): void {
+        if (! $this->providerConnection->stillConnected()) {
+            return;
+        }
+
         $connection = $tokens->ensureFresh($this->providerConnection);
         $provider = $providers->get($connection->provider);
         $payload = $provider->activity($connection, $this->externalId);
+        if (! $connection->stillConnected()) {
+            return;
+        }
         $source = $importer->import($connection, $payload);
 
         if (config('activity-providers.sync.store_source_files')

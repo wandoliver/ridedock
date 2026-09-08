@@ -1,11 +1,17 @@
 # RideDock
 
-![Release](https://img.shields.io/badge/release-v0.0.6-blue)
+![Release](https://img.shields.io/badge/release-v0.0.7-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 RideDock is an open-source, self-hosted cycling training platform. It imports raw activity data directly from supported bike computers, normalizes FIT recordings, and turns rides into a private activity archive with detailed measurements, route heatmaps, and training insights.
 
 Its integrated AI coach can analyze individual rides and build a three-level training plan: a long-term roadmap to the target date, a current four-week block, and a concrete seven-day schedule. GPS coordinates, FIT files, provider payloads, and activity notes remain inside RideDock and are not sent to the AI provider.
+
+## Managing connections
+
+In Settings → Connections, use Disconnect to remove all locally stored provider credentials. Imported rides and FIT files remain available. Wahoo also receives a permission revocation request; if it fails, RideDock confirms local disconnection and asks you to remove access in your Wahoo account. Hammerhead is disconnected locally. Use Connect to authorize again. Disconnected connections cannot be synchronized. API clients can call `DELETE /api/v1/connections/{provider}` with the `connections:write` ability.
+
+After updating, run `php artisan migrate --force` to allow cleared access tokens.
 
 ## Architecture
 
