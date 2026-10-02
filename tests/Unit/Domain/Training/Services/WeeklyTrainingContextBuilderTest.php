@@ -53,7 +53,7 @@ class WeeklyTrainingContextBuilderTest extends TestCase
             CarbonImmutable::parse('2026-08-31'),
         );
 
-        $this->assertSame(2, $context['schema_version']);
+        $this->assertSame(3, $context['schema_version']);
         $this->assertSame('2026-08-31', $context['plan_start']);
         $this->assertSame('2026-09-06', $context['plan_end']);
         $this->assertCount(7, $context['plan_days']);
@@ -71,4 +71,38 @@ class WeeklyTrainingContextBuilderTest extends TestCase
         $this->assertStringNotContainsString('PRIVATE_WEEKLY_NOTE', $encodedContext);
         $this->assertStringNotContainsString('PRIVATE_WEEKLY_ROUTE', $encodedContext);
     }
+    public function test_unrated_load_is_unknown_and_future_recordings_are_excluded(): void
+    {
+        CarbonImmutable::setTestNow('2026-08-30T12:00:00Z');
+        $user = User::factory()->create();
+        Activity::factory()->for($user)->create([
+            'started_at' => '2026-08-29T10:00:00Z', 'moving_time_s' => 3600, 'rpe' => null,
+        ]);
+        Activity::factory()->for($user)->create([
+            'started_at' => '2026-08-31T00:00:00Z', 'moving_time_s' => 3600, 'rpe' => 10,
+        ]);
+        $context = app(WeeklyTrainingContextBuilder::class)->build($user, CarbonImmutable::parse('2026-08-31'));
+        $summary = $context['recent_training']['six_week_summary'];
+        $this->assertSame(1, $summary['activity_count']);
+        $this->assertNull($summary['session_rpe_load']);
+        $this->assertFalse($summary['load_complete']);
+        $this->assertSame(0.0, $summary['rpe_coverage_percent']);
+        $this->assertCount(6, $context['recent_training']['weeks']);
+        $this->assertNull($context['recent_training']['last_seven_days']['session_rpe_load']);
+    }
+
+    public function test_planning_a_future_week_uses_actual_recent_training(): void
+    {
+        CarbonImmutable::setTestNow('2026-08-30T12:00:00Z');
+        $user = User::factory()->create();
+        Activity::factory()->for($user)->create([
+            'started_at' => '2026-08-29T10:00:00Z', 'moving_time_s' => 3600, 'rpe' => 4,
+        ]);
+        $context = app(WeeklyTrainingContextBuilder::class)->build($user, CarbonImmutable::parse('2026-12-01'));
+        $this->assertSame('2026-12-01', $context['plan_start']);
+        $this->assertSame('2026-08-30', $context['recent_training']['window_end']);
+        $this->assertSame(1, $context['recent_training']['six_week_summary']['activity_count']);
+        $this->assertSame(240.0, $context['recent_training']['last_seven_days']['session_rpe_load']);
+    }
+
 }

@@ -1,6 +1,6 @@
 # RideDock
 
-![Release](https://img.shields.io/badge/release-v0.0.8-blue)
+![Release](https://img.shields.io/badge/release-v0.0.9-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 RideDock is an open-source, self-hosted cycling training platform. It imports raw activity data directly from supported bike computers, normalizes FIT recordings, and turns rides into a private activity archive with detailed measurements, route heatmaps, and training insights.
@@ -132,6 +132,18 @@ RideDock does not send OAuth credentials, provider payloads, FIT files, GPS coor
 ### Cost and hosted use
 
 API usage is billed to the OpenAI project behind `OPENAI_API_KEY`. A personal installation is controlled by its operator. A managed multiuser service must add per-user quotas, rate limits, usage accounting and operator spend alerts before public access. End users of a managed service should not be asked to paste the operator's API key into the browser. See [HOSTING.md](HOSTING.md) for the managed-service roadmap.
+
+## Training overview
+
+The dashboard includes the last six calendar weeks of recorded training, independently of the archive period selector. It shows weekly hours and distance, recorded RPE load, and the share of known ride time with a usable rating. Weeks start on Monday; rides are grouped by their recording timezone, with the application timezone as a fallback.
+
+RideDock calculates a session-RPE-style load as **moving minutes × whole-ride RPE (1–10)**. This uses the approach of combining duration and perceived effort described by [Foster et al.](https://pubmed.ncbi.nlm.nih.gov/8693756/), with RideDock's moving time as the duration measure. Missing ratings or durations remain unknown and are explicitly marked; they do not imply zero load. Weeks with no recorded rides retain zero recorded volume and load.
+
+Effort distribution assigns each ride's entire duration to a fixed RPE group: easy (1–3), moderate (4–6), hard (7–10), or unrated. These groups do not measure time in heart-rate or power zones and do not separate intervals within a ride.
+
+Volume and load changes compare the last completed week with the average of the preceding four weeks, retaining empty weeks. The current week is excluded from this comparison. Percentage changes require earlier recorded history, known durations and a nonzero baseline; load comparisons also require complete ratings. These describe the recorded archive, rather than fitness or recovery. The methodology and a weekly table are available directly in the dashboard.
+
+The AI coach uses the same summaries and rating coverage. Analyses already stored are preserved; newly requested analyses and plans use the updated context and prompt versions.
 
 ## Deployment options
 

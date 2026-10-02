@@ -56,7 +56,7 @@ class ActivityTrainingContextBuilderTest extends TestCase
 
         $context = app(ActivityTrainingContextBuilder::class)->build($activity);
 
-        $this->assertSame(3, $context['schema_version']);
+        $this->assertSame(4, $context['schema_version']);
         $this->assertSame(90.0, $context['activity']['duration_minutes']);
         $this->assertSame(30.0, $context['activity']['average_speed_kmh']);
         $this->assertSame(0.9, $context['activity']['weighted_power_to_ftp_ratio']);

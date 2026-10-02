@@ -4,6 +4,18 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.9] - 2026-10-02
+
+### Added
+
+- A six-week training overview with weekly volume, duration-weighted whole-ride RPE distribution, recorded load, rating coverage and accessible weekly details in English and German.
+- Completed-week volume and load comparisons against the previous four weeks, with explicit handling of partial data and zero baselines.
+
+### Changed
+
+- Activity analyses and all planning levels share the same training statistics and expose missing load as unknown, with updated context and prompt versions.
+- Future training plans use actual recent history, rather than an empty history window relative to a distant planning date.
+
 ## [0.0.8] - 2026-10-02
 
 ### Changed

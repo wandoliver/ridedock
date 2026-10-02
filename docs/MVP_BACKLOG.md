@@ -23,8 +23,10 @@
 - [x] Define the first AI use case and its user-visible output
 - [x] Build a compact, schema-versioned training context from normalized data
 - [ ] Add heart-rate and power zones/profile history
-- [ ] Calculate weekly volume, intensity distribution and efficiency trends
-- [ ] Add transparent training-load, monotony and freshness estimates
+- [x] Calculate weekly volume and whole-ride RPE effort distribution
+- [ ] Add sensor-based intensity distribution and comparable efficiency trends
+- [x] Add transparent recorded session-RPE load and completed-week trends
+- [ ] Evaluate monotony and freshness estimates with suitable data
 - [x] Integrate an AI assistant without exposing provider credentials or raw location data by default
 - [x] Generate a seven-day plan from goals, available time and recent training
 - [x] Queue activity analyses and all planning levels with progress and safe failures

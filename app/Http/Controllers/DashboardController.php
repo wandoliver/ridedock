@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Domain\Activities\Enums\ActivityPeriod;
 use App\Domain\Activities\Enums\ConnectionStatus;
 use App\Domain\Training\Services\PlanActivityMatcher;
+use App\Domain\Training\Services\TrainingStatistics;
 use App\Models\Activity;
 use App\Modules\Heatmap\Contracts\RouteGeometryProvider;
 use Carbon\CarbonImmutable;
@@ -78,6 +79,7 @@ class DashboardController extends Controller
         $recentCount = $user->activities()->where('started_at', '>=', $now->subDays(7))->count();
 
         return view('dashboard', [
+            'trainingStatistics' => app(TrainingStatistics::class)->report($user, $now),
             'todayRides' => $todayRides,
             'planRiddenMinutes' => $planRiddenMinutes,
             'plannedVolume' => $plannedVolume,

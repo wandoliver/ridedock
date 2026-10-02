@@ -175,4 +175,36 @@ class DashboardControllerTest extends TestCase
             ->assertSee(route('settings.connections'), false)
             ->assertDontSee('Synchronisierung fehlgeschlagen');
     }
+    public function test_training_overview_shows_coverage_and_is_independent_of_the_archive_filter(): void
+    {
+        Carbon::setTestNow('2026-10-02 12:00:00');
+        $user = User::factory()->create();
+        Activity::factory()->for($user)->create([
+            'started_at' => '2026-09-30T10:00:00Z', 'moving_time_s' => 3600, 'rpe' => null,
+        ]);
+        Activity::factory()->for($user)->create([
+            'started_at' => '2026-09-29T10:00:00Z', 'moving_time_s' => 1800, 'rpe' => 4,
+        ]);
+        Activity::factory()->create([
+            'started_at' => '2026-09-29T10:00:00Z', 'moving_time_s' => 99999, 'rpe' => 10,
+        ]);
+        foreach (['30d', 'year', 'all'] as $period) {
+            $this->withoutVite()->actingAs($user)->get(route('dashboard', ['period' => $period]))
+                ->assertOk()->assertSee('Trainingsauswertung')->assertSee('Anstrengungsverteilung')
+                ->assertSee('1 von 2 Fahrten mit RPE und Fahrzeit')
+                ->assertSee('33% der bekannten Fahrzeit bewertet')
+                ->assertSee('Wochen im Detail')->assertSee('Wie wird das berechnet?')
+                ->assertViewHas('trainingStatistics', fn ($stats) => $stats['summary']['activity_count'] === 2
+                    && $stats['summary']['session_rpe_load'] === 120.0);
+        }
+    }
+
+    public function test_training_overview_has_an_english_empty_state(): void
+    {
+        $user = User::factory()->create(['locale' => 'en']);
+        $this->withoutVite()->actingAs($user)->get(route('dashboard'))->assertOk()
+            ->assertSee('Training overview')->assertSee('No rides have been recorded in the last six weeks yet.')
+            ->assertDontSee('training.title')->assertDontSee('Trainingsauswertung');
+    }
+
 }

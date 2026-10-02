@@ -11,7 +11,7 @@ use Illuminate\Support\Collection;
 
 final class WeeklyTrainingContextBuilder
 {
-    public const SCHEMA_VERSION = 2;
+    public const SCHEMA_VERSION = 3;
 
     /** @return array<string, mixed> */
     public function build(User $user, ?CarbonImmutable $planStartsAt = null): array
@@ -19,16 +19,17 @@ final class WeeklyTrainingContextBuilder
         $user->loadMissing('athleteProfile');
         $profile = $user->athleteProfile;
         $planStartsAt ??= CarbonImmutable::today(config('app.timezone'))->addDay();
-        $historyStartsAt = $planStartsAt->subWeeks(6);
+        $historyEndsAt = $planStartsAt->subMicrosecond()->min(CarbonImmutable::now());
+        $historyStartsAt = $historyEndsAt->subWeeks(6);
 
         /** @var Collection<int, Activity> $activities */
         $activities = $user->activities()
-            ->whereBetween('started_at', [$historyStartsAt, $planStartsAt])
+            ->whereBetween('started_at', [$historyStartsAt, $historyEndsAt])
             ->oldest('started_at')
             ->get([
                 'id', 'user_id', 'type', 'started_at', 'distance_m', 'moving_time_s',
                 'elevation_gain_m', 'average_heart_rate', 'average_cadence',
-                'average_power', 'weighted_average_power', 'rpe',
+                'average_power', 'weighted_average_power', 'rpe', 'timezone',
             ]);
 
         return [
@@ -42,10 +43,11 @@ final class WeeklyTrainingContextBuilder
             'plan_days' => $this->planDays($planStartsAt, $profile->available_days ?? []),
             'recent_training' => [
                 'window_start' => $historyStartsAt->toDateString(),
-                'window_end' => $planStartsAt->subDay()->toDateString(),
+                'window_end' => $historyEndsAt->toDateString(),
+                'weeks' => app(TrainingStatistics::class)->weeks($activities, $historyEndsAt),
                 'six_week_summary' => $this->summary($activities),
                 'last_seven_days' => $this->summary($activities->filter(
-                    fn (Activity $activity): bool => $activity->started_at->greaterThanOrEqualTo($planStartsAt->subDays(7)),
+                    fn (Activity $activity): bool => $activity->started_at->greaterThanOrEqualTo($historyEndsAt->subDays(7)),
                 )),
                 'sessions' => $activities->take(-12)->map(fn (Activity $activity): array => $this->session($activity))->values()->all(),
             ],
@@ -120,29 +122,18 @@ final class WeeklyTrainingContextBuilder
     }
 
     /** @param Collection<int, Activity> $activities
-     * @return array{activity_count: int, duration_hours: float, distance_km: float, elevation_gain_m: float, average_rpe: float|null, session_rpe_load: float}
+     * @return array<string, mixed>
      */
     private function summary(Collection $activities): array
     {
-        $ratedActivities = $activities->filter(fn (Activity $activity): bool => $activity->rpe !== null);
-
-        return [
-            'activity_count' => $activities->count(),
-            'duration_hours' => round($activities->sum(fn (Activity $activity): float => ($activity->moving_time_s ?? 0) / 3600), 1),
-            'distance_km' => round($activities->sum(fn (Activity $activity): float => ($activity->distance_m ?? 0) / 1000), 1),
-            'elevation_gain_m' => round($activities->sum(fn (Activity $activity): float => $activity->elevation_gain_m ?? 0), 0),
-            'average_rpe' => $ratedActivities->isEmpty() ? null : round((float) $ratedActivities->avg('rpe'), 1),
-            'session_rpe_load' => round($activities->sum(
-                fn (Activity $activity): float => (($activity->moving_time_s ?? 0) / 60) * ($activity->rpe ?? 0),
-            ), 1),
-        ];
+        return app(TrainingStatistics::class)->summary($activities);
     }
 
     /** @return array<string, mixed> */
     private function session(Activity $activity): array
     {
         return [
-            'date' => $activity->started_at->toDateString(),
+            'date' => $activity->localStartedAt()->toDateString(),
             'type' => $activity->type,
             'duration_minutes' => $activity->moving_time_s === null ? null : round($activity->moving_time_s / 60, 1),
             'distance_km' => $activity->distance_m === null ? null : round($activity->distance_m / 1000, 1),

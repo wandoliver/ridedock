@@ -8,7 +8,7 @@ use RuntimeException;
 
 final class GoalTrainingContextBuilder
 {
-    public const SCHEMA_VERSION = 1;
+    public const SCHEMA_VERSION = 2;
 
     public function __construct(private readonly WeeklyTrainingContextBuilder $weeklyContextBuilder) {}
 

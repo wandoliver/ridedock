@@ -9,7 +9,7 @@ use Illuminate\Support\Collection;
 
 final class ActivityTrainingContextBuilder
 {
-    public const SCHEMA_VERSION = 3;
+    public const SCHEMA_VERSION = 4;
 
     /** @return array<string, mixed> */
     public function build(Activity $activity): array
@@ -29,7 +29,7 @@ final class ActivityTrainingContextBuilder
                 'id', 'user_id', 'name', 'type', 'started_at', 'distance_m',
                 'moving_time_s', 'elevation_gain_m', 'average_heart_rate',
                 'max_heart_rate', 'average_cadence', 'average_power',
-                'weighted_average_power', 'max_power', 'energy_kj', 'rpe',
+                'weighted_average_power', 'max_power', 'energy_kj', 'rpe', 'timezone',
             ]);
 
         return [
@@ -109,50 +109,19 @@ final class ActivityTrainingContextBuilder
     }
 
     /** @param Collection<int, Activity> $activities
-     * @return array<string, int|float|null>
+     * @return array<string, mixed>
      */
     private function summary(Collection $activities): array
     {
-        $durationMinutes = $activities->sum(fn (Activity $item): int => $item->moving_time_s ?? 0) / 60;
-        $ratedActivities = $activities->filter(fn (Activity $item): bool => $item->rpe !== null);
-
-        return [
-            'activity_count' => $activities->count(),
-            'duration_hours' => round($durationMinutes / 60, 1),
-            'distance_km' => round($activities->sum(fn (Activity $item): float => $item->distance_m ?? 0.0) / 1000, 1),
-            'elevation_gain_m' => round($activities->sum(fn (Activity $item): float => $item->elevation_gain_m ?? 0.0), 0),
-            'average_rpe' => $ratedActivities->isEmpty() ? null : round((float) $ratedActivities->avg('rpe'), 1),
-            'session_rpe_load' => round($activities->sum(
-                fn (Activity $item): float => (($item->moving_time_s ?? 0) / 60) * ($item->rpe ?? 0),
-            ), 1),
-        ];
+        return app(TrainingStatistics::class)->summary($activities);
     }
 
     /** @param Collection<int, Activity> $activities
-     * @return list<array<string, int|float|string>>
+     * @return list<array<string, mixed>>
      */
     private function weeks(Collection $activities, CarbonImmutable $windowEndsAt): array
     {
-        $weeks = [];
-        $currentWeek = $windowEndsAt->startOfWeek();
-
-        for ($weeksAgo = 5; $weeksAgo >= 0; $weeksAgo--) {
-            $weekStartsAt = $currentWeek->subWeeks($weeksAgo);
-            $weekEndsAt = $weekStartsAt->endOfWeek();
-            $weekActivities = $activities->filter(
-                fn (Activity $item): bool => $item->started_at->betweenIncluded($weekStartsAt, $weekEndsAt),
-            );
-            $summary = $this->summary($weekActivities);
-            $weeks[] = [
-                'week_start' => $weekStartsAt->toDateString(),
-                'activity_count' => $summary['activity_count'],
-                'duration_hours' => $summary['duration_hours'],
-                'distance_km' => $summary['distance_km'],
-                'session_rpe_load' => $summary['session_rpe_load'],
-            ];
-        }
-
-        return $weeks;
+        return app(TrainingStatistics::class)->weeks($activities, $windowEndsAt);
     }
 
     /** @param Collection<int, Activity> $history

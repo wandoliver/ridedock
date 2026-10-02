@@ -48,7 +48,7 @@ class ActivityAiAnalysisController extends Controller
             'type' => 'activity',
             'status' => AiAnalysisStatus::Pending,
             'context_schema_version' => ActivityTrainingContextBuilder::SCHEMA_VERSION,
-            'prompt_version' => 'activity-v3',
+            'prompt_version' => 'activity-v4',
             'context' => $context,
         ]);
 
