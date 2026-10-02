@@ -4,6 +4,18 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.11] - 2026-10-02
+
+### Added
+
+- Time-weighted power and heart-rate zone distributions on activity details and the six-week dashboard, including sensor coverage and unknown time.
+- Aggregate sensor distributions in activity analysis and planning contexts, using each ride’s dated reference profile.
+
+### Changed
+
+- Keep exactly maximum heart rate inside H5 and expose above-reference measurements separately.
+- Bump AI context and prompt versions for measured sensor aggregates.
+
 ## [0.0.10] - 2026-10-02
 
 ### Added

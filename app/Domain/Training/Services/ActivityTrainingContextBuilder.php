@@ -9,7 +9,7 @@ use Illuminate\Support\Collection;
 
 final class ActivityTrainingContextBuilder
 {
-    public const SCHEMA_VERSION = 5;
+    public const SCHEMA_VERSION = 6;
 
     /** @return array<string, mixed> */
     public function build(Activity $activity): array
@@ -37,6 +37,7 @@ final class ActivityTrainingContextBuilder
             'purpose' => 'activity_analysis',
             'generated_at' => CarbonImmutable::now()->toIso8601String(),
             'athlete_profile' => $this->profile($profile),
+            'sensor_zone_distribution' => app(SensorZoneDistribution::class)->activity($activity),
             'zone_profile' => app(TrainingZones::class)->context(app(TrainingZones::class)->forActivity($activity)),
             'activity' => $this->activityMetrics($activity, $profile),
             'recent_training' => [

@@ -136,6 +136,7 @@
                         <button type="submit" class="mt-4 w-full rounded-lg bg-ink px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90">{{ __('ui.activity.save_feeling') }}</button></details><noscript><button type="submit" class="rd-button mt-3">{{ __('ui.activity.save_feeling') }}</button></noscript>
                     </form></section>
 @if($matchedDay)<x-plan-block class="mt-4 p-3.5">{{ __('design.planned') }} · {{ $matchedDay['title'] }}, {{ $matchedDay['duration_minutes'] }} min · {{ $matchedDay['intensity'] }}<a href="{{ route('coach.index', ['plan'=>$matchedPlan->id, 'day'=>$matchedDay['date']]) }}#week" class="mt-1 block font-semibold">{{ __('design.linked') }} ›</a></x-plan-block>@endif
+@include('activities._sensor-zones')
 <section class="rd-panel-section" aria-labelledby="ai-analysis-heading"><p class="text-xs text-plan-text">RideDock Coach</p><h2 id="ai-analysis-heading" class="!text-sm text-plan-text">{{ __('ui.activity.analyze_ride') }}</h2>            <div class="py-3" data-activity-analysis-progress role="status" aria-live="polite" aria-busy="true" hidden>
                 <div class="flex items-start justify-between gap-4">
                     <div>

@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'sensor_title' => 'Zeit in Sensorzonen',
+    'sensor_hint' => 'Aufgezeichnete Zeit nach dem für die Fahrt gültigen Profil. Prozentwerte beziehen sich auf zugeordnete Sensorzeit; Pausen können enthalten sein. Lücken über 30 Sekunden und das Ende ohne nächste Messung werden nicht extrapoliert.',
+    'reference_missing' => 'Für diese Fahrt fehlt ein gültiger datierter Referenzwert.',
+    'samples_missing' => 'Keine zuordenbaren Sensormessungen vorhanden.',
+    'sensor_coverage' => ':percent% der Zeitachse zugeordnet · :minutes min unbekannt',
     'title' => 'Zonen & Messwert-Historie',
     'hint' => 'Leistung: sechs durchgehende FTP-Bereiche mit Grenzen bei 55, 75, 90, 105 und 120 %. Puls: fünf HRmax-Bereiche von 50 bis 100 % plus unterhalb/oberhalb. Die Bereiche dienen der Einordnung aufgezeichneter Werte.',
     'power' => 'Leistungsbereiche', 'heart_rate' => 'Pulsbereiche',

@@ -9,7 +9,7 @@ use RuntimeException;
 
 final class TrainingBlockContextBuilder
 {
-    public const SCHEMA_VERSION = 3;
+    public const SCHEMA_VERSION = 4;
 
     public function __construct(private readonly WeeklyTrainingContextBuilder $weeklyContextBuilder) {}
 

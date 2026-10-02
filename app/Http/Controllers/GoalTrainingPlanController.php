@@ -46,7 +46,7 @@ class GoalTrainingPlanController extends Controller
             'type' => 'goal_plan',
             'status' => AiAnalysisStatus::Pending,
             'context_schema_version' => GoalTrainingContextBuilder::SCHEMA_VERSION,
-            'prompt_version' => 'goal-plan-v3',
+            'prompt_version' => 'goal-plan-v4',
             'context' => $contextBuilder->build($user, $tomorrow),
         ]);
 

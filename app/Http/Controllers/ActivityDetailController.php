@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Domain\Training\Contracts\TrainingAdvisor;
 use App\Domain\Training\Services\NextPlannedSessionResolver;
 use App\Domain\Training\Services\PlanActivityMatcher;
+use App\Domain\Training\Services\SensorZoneDistribution;
 use App\Models\Activity;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -52,6 +53,7 @@ class ActivityDetailController extends Controller
         $matchedDay = $days->first(fn ($day) => $day['type'] === 'ride' && $matches->get($day['date'], collect())->isNotEmpty());
 
         return view('activities.show', [
+            'sensorZones' => app(SensorZoneDistribution::class)->activity($model),
             'matchedDay' => $matchedDay,
             'matchedPlan' => $weeklyPlan,
             'activity' => $model,

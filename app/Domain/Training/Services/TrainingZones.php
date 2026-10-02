@@ -48,10 +48,20 @@ final class TrainingZones
         $boundaries = $sensor === 'power' ? [0, .55, .75, .90, 1.05, 1.20] : [0, .50, .60, .70, .80, .90, 1.00];
         $ranges = [];
         foreach ($boundaries as $index => $ratio) {
+            $lower = $index === 0 ? 0 : (int) ceil($reference * $ratio);
+            $upper = isset($boundaries[$index + 1]) ? (int) ceil($reference * $boundaries[$index + 1]) - 1 : null;
+            if ($sensor !== 'power') {
+                if ($index === 5) {
+                    $upper = $reference;
+                }
+                if ($index === 6) {
+                    $lower = $reference + 1;
+                }
+            }
             $ranges[] = [
                 'label' => $sensor === 'power' ? 'P'.($index + 1) : ($index === 0 ? 'HR<50' : ($index === 6 ? 'HR>100' : 'H'.$index)),
-                'lower' => $index === 0 ? 0 : (int) ceil($reference * $ratio),
-                'upper' => isset($boundaries[$index + 1]) ? (int) ceil($reference * $boundaries[$index + 1]) - 1 : null,
+                'lower' => $lower,
+                'upper' => $upper,
             ];
         }
         return $ranges;

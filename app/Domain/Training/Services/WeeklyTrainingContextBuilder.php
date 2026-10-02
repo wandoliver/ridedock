@@ -11,7 +11,7 @@ use Illuminate\Support\Collection;
 
 final class WeeklyTrainingContextBuilder
 {
-    public const SCHEMA_VERSION = 4;
+    public const SCHEMA_VERSION = 5;
 
     /** @return array<string, mixed> */
     public function build(User $user, ?CarbonImmutable $planStartsAt = null): array
@@ -45,6 +45,7 @@ final class WeeklyTrainingContextBuilder
             'recent_training' => [
                 'window_start' => $historyStartsAt->toDateString(),
                 'window_end' => $historyEndsAt->toDateString(),
+                'sensor_zone_distribution' => app(SensorZoneDistribution::class)->history($user, $historyEndsAt),
                 'weeks' => app(TrainingStatistics::class)->weeks($activities, $historyEndsAt),
                 'six_week_summary' => $this->summary($activities),
                 'last_seven_days' => $this->summary($activities->filter(
