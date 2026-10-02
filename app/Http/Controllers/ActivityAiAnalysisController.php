@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Domain\Training\Contracts\TrainingAdvisor;
 use App\Domain\Training\Enums\AiAnalysisStatus;
 use App\Domain\Training\Services\ActivityTrainingContextBuilder;
+use App\Domain\Training\Services\ReserveAiAnalysis;
 use App\Jobs\GenerateActivityAnalysis;
 use App\Models\Activity;
 use App\Models\User;
@@ -41,7 +42,8 @@ class ActivityAiAnalysisController extends Controller
         }
 
         $context = $contextBuilder->build($model);
-        $analysis = $model->aiAnalyses()->create([
+        $analysis = app(ReserveAiAnalysis::class)->reserve($user, [
+            'activity_id' => $model->id,
             'user_id' => $user->id,
             'type' => 'activity',
             'status' => AiAnalysisStatus::Pending,
@@ -51,7 +53,10 @@ class ActivityAiAnalysisController extends Controller
         ]);
 
         try {
-            GenerateActivityAnalysis::dispatchSync($analysis->id);
+            if ($analysis->wasRecentlyCreated) {
+                GenerateActivityAnalysis::dispatch($analysis->id)
+                    ->onConnection(config('ai.queue_connection'))->onQueue('ai');
+            }
         } catch (Throwable $exception) {
             report($exception);
 
@@ -64,6 +69,7 @@ class ActivityAiAnalysisController extends Controller
             return back()->with('analysis_error', __('ui.messages.ride_analysis_failed'));
         }
 
-        return back()->with('status', __('ui.messages.ride_analysis_complete'));
+        return back()->with('status', __($analysis->refresh()->status === AiAnalysisStatus::Completed
+            ? 'ui.messages.ride_analysis_complete' : 'ui.messages.ai_queued'));
     }
 }

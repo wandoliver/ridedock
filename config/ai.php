@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'queue_connection' => env('AI_QUEUE_CONNECTION', 'ai'),
+
     'provider' => env('AI_PROVIDER', 'openai'),
 
     'providers' => [

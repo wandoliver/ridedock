@@ -63,6 +63,9 @@ class CoachController extends Controller
         }
 
         return view('coach.index', [
+            'planAttempts' => $user->aiAnalyses()
+                ->whereIn('type', ['goal_plan', 'training_block', 'weekly_plan'])
+                ->latest()->orderByDesc('id')->get(['id', 'type', 'status', 'error'])->unique('type')->keyBy('type'),
             'weeklyPlans' => $weeklyPlans,
             'calendarActivities' => $calendarActivities,
             'profile' => $user->athleteProfile,

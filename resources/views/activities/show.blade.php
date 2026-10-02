@@ -1,5 +1,5 @@
 <x-layout :title="$activity->name">
-@if ($latestAiAnalysis && in_array($latestAiAnalysis->status->value, ['pending', 'processing'], true))<meta http-equiv="refresh" content="5">@endif
+@if ($latestAiAnalysis && in_array($latestAiAnalysis->status->value, ['pending', 'processing'], true))<span hidden data-ai-status-url="{{ route('ai-analyses.status', $latestAiAnalysis) }}"></span><noscript><meta http-equiv="refresh" content="10"></noscript>@endif
 <x-topbar><x-slot:context><a href="{{ route('activities.index') }}" class="text-[13px] text-ink-50">‹ {{ __('ui.dashboard.activities') }}</a></x-slot:context>
 <x-slot:center><div><h1 class="text-[15px] font-bold">{{ $activity->name }}</h1><p class="text-xs text-ink-50">{{ $activity->started_at->locale(app()->getLocale())->isoFormat('ddd, D. MMMM YYYY · HH:mm') }} · {{ $activity->sources->pluck('connection.provider.value')->unique()->map(fn($p)=>ucfirst($p))->implode(' · ') }}</p></div></x-slot:center>
 <x-slot:actions>                @if ($aiConfigured && (! $latestAiAnalysis || in_array($latestAiAnalysis->status->value, ['completed', 'failed'], true)))

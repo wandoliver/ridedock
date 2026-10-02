@@ -26,12 +26,14 @@
 - [ ] Calculate weekly volume, intensity distribution and efficiency trends
 - [ ] Add transparent training-load, monotony and freshness estimates
 - [x] Integrate an AI assistant without exposing provider credentials or raw location data by default
-- [ ] Generate a seven-day plan from goals, available time and recent training
+- [x] Generate a seven-day plan from goals, available time and recent training
+- [x] Queue activity analyses and all planning levels with progress and safe failures
 
 ## Product follow-up
 
 - [x] Add Wahoo as a second activity provider
-- [ ] Add provider disconnect/deauthorization endpoints and retention choices
+- [x] Add provider disconnect endpoints and Wahoo deauthorization
+- [ ] Add user-controlled retention choices
 - [ ] Add rate-limit-aware scheduling, distributed locks and per-user sync status
 - [ ] Decode SRAM AXS developer fields into `shift` events using real fixtures
 - [ ] Add explicit private-zone masking and opt-in route export

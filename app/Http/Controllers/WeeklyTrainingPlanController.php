@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Domain\Training\Contracts\WeeklyTrainingPlanner;
 use App\Domain\Training\Enums\AiAnalysisStatus;
 use App\Domain\Training\Services\WeeklyTrainingContextBuilder;
+use App\Domain\Training\Services\ReserveAiAnalysis;
 use App\Jobs\GenerateWeeklyTrainingPlan;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -39,7 +40,7 @@ class WeeklyTrainingPlanController extends Controller
                 ->with('analysis_error', __('ui.messages.choose_days'));
         }
 
-        $analysis = $user->aiAnalyses()->create([
+        $analysis = app(ReserveAiAnalysis::class)->reserve($user, [
             'activity_id' => null,
             'type' => 'weekly_plan',
             'status' => AiAnalysisStatus::Pending,
@@ -49,7 +50,10 @@ class WeeklyTrainingPlanController extends Controller
         ]);
 
         try {
-            GenerateWeeklyTrainingPlan::dispatchSync($analysis->id);
+            if ($analysis->wasRecentlyCreated) {
+                GenerateWeeklyTrainingPlan::dispatch($analysis->id)
+                    ->onConnection(config('ai.queue_connection'))->onQueue('ai');
+            }
         } catch (Throwable $exception) {
             report($exception);
 
@@ -66,6 +70,7 @@ class WeeklyTrainingPlanController extends Controller
 
         return redirect()
             ->to(route('coach.index').'#weekly-plan')
-            ->with('status', __('ui.messages.week_complete'));
+            ->with('status', __($analysis->refresh()->status === AiAnalysisStatus::Completed
+            ? 'ui.messages.week_complete' : 'ui.messages.ai_queued'));
     }
 }

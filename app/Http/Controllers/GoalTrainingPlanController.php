@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Domain\Training\Contracts\GoalTrainingPlanner;
 use App\Domain\Training\Enums\AiAnalysisStatus;
 use App\Domain\Training\Services\GoalTrainingContextBuilder;
+use App\Domain\Training\Services\ReserveAiAnalysis;
 use App\Jobs\GenerateGoalTrainingPlan;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -40,7 +41,7 @@ class GoalTrainingPlanController extends Controller
                 ->with('analysis_error', __('ui.messages.goal_required'));
         }
 
-        $analysis = $user->aiAnalyses()->create([
+        $analysis = app(ReserveAiAnalysis::class)->reserve($user, [
             'activity_id' => null,
             'type' => 'goal_plan',
             'status' => AiAnalysisStatus::Pending,
@@ -50,7 +51,10 @@ class GoalTrainingPlanController extends Controller
         ]);
 
         try {
-            GenerateGoalTrainingPlan::dispatchSync($analysis->id);
+            if ($analysis->wasRecentlyCreated) {
+                GenerateGoalTrainingPlan::dispatch($analysis->id)
+                    ->onConnection(config('ai.queue_connection'))->onQueue('ai');
+            }
         } catch (Throwable $exception) {
             report($exception);
 
@@ -67,6 +71,7 @@ class GoalTrainingPlanController extends Controller
 
         return redirect()
             ->to(route('coach.index').'#goal-plan')
-            ->with('status', __('ui.messages.roadmap_complete'));
+            ->with('status', __($analysis->refresh()->status === AiAnalysisStatus::Completed
+            ? 'ui.messages.roadmap_complete' : 'ui.messages.ai_queued'));
     }
 }

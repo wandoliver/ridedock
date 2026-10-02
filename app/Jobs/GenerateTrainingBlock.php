@@ -5,19 +5,44 @@ namespace App\Jobs;
 use App\Domain\Training\Contracts\TrainingBlockPlanner;
 use App\Domain\Training\Enums\AiAnalysisStatus;
 use App\Models\AiAnalysis;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Throwable;
 
-class GenerateTrainingBlock
+class GenerateTrainingBlock implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public readonly string $analysisId) {}
+    public int $tries = 3;
+
+    public int $timeout;
+
+    public bool $failOnTimeout = true;
+
+    public int $uniqueFor = 900;
+
+    /** @var list<int> */
+    public array $backoff = [15, 60, 180];
+
+    public function __construct(public readonly string $analysisId)
+    {
+        $this->timeout = max(120, (int) config('ai.providers.openai.timeout_seconds') + 10);
+    }
+
+    public function uniqueId(): string
+    {
+        return $this->analysisId;
+    }
 
     public function handle(TrainingBlockPlanner $trainingPlanner): void
     {
         $analysis = AiAnalysis::query()->findOrFail($this->analysisId);
         app()->setLocale($analysis->user()->value('locale') ?? config('app.locale'));
+
+        if ($analysis->status === AiAnalysisStatus::Completed) {
+            return;
+        }
 
         $analysis->update([
             'status' => AiAnalysisStatus::Processing,
@@ -43,7 +68,7 @@ class GenerateTrainingBlock
     {
         $analysis = AiAnalysis::query()->find($this->analysisId);
 
-        if ($analysis === null) {
+        if ($analysis === null || $analysis->status === AiAnalysisStatus::Completed) {
             return;
         }
 

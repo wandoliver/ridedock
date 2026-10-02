@@ -1,6 +1,6 @@
 # RideDock
 
-![Release](https://img.shields.io/badge/release-v0.0.7-blue)
+![Release](https://img.shields.io/badge/release-v0.0.8-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 RideDock is an open-source, self-hosted cycling training platform. It imports raw activity data directly from supported bike computers, normalizes FIT recordings, and turns rides into a private activity archive with detailed measurements, route heatmaps, and training insights.
@@ -54,7 +54,11 @@ php artisan migrate
 php artisan app:create-owner-token you@example.com
 ```
 
-RideDock processes provider imports synchronously by default (`QUEUE_CONNECTION=sync`), so no queue worker is required for local use. A hosted installation may select an asynchronous queue connection such as `database`; only then must it also run `php artisan queue:work`. AI activity analyses and training plans currently execute synchronously even when another queue connection is selected; moving these flows fully behind the queue is a managed-hosting readiness item.
+Provider imports run synchronously by default (`QUEUE_CONNECTION=sync`). AI activity analyses and all training plans use a separate persistent database queue by default (`AI_QUEUE_CONNECTION=ai`). `composer run dev` starts its worker automatically. When starting the web server separately, also run `php artisan queue:work ai --queue=ai --sleep=1 --timeout=120`. Provider imports may independently use an asynchronous connection such as `database`, with their own worker. See [DEPLOYMENT.md](DEPLOYMENT.md) for supervision and retry settings.
+
+### Updating to v0.0.8
+
+AI generation now requires a persistent worker by default, including installations that keep provider imports synchronous. Clear cached configuration with `php artisan config:clear` after updating. Restart `composer run dev` locally; in production, supervise `php artisan queue:work ai --queue=ai --sleep=1 --timeout=120` and restart existing workers. No new database migration is required for this release. `AI_QUEUE_CONNECTION=sync` remains available for explicitly synchronous installations.
 
 ### Local HTTPS
 
@@ -83,6 +87,7 @@ Never expose the key in browser code, a mobile application, screenshots or the r
 Set these values in the deployment's `.env` file or secret manager:
 
 ```dotenv
+AI_QUEUE_CONNECTION=ai
 AI_PROVIDER=openai
 OPENAI_API_KEY=replace-with-a-project-api-key
 OPENAI_MODEL=replace-with-a-responses-api-model
@@ -110,7 +115,7 @@ php artisan config:clear
 
 The seven-day plan remains useful on its own, but it uses the current roadmap and matching four-week block automatically when they exist. Creating a new roadmap makes an older block stale, so RideDock asks for a new block before using it for subsequent weekly plans.
 
-Configuration or provider failures are shown without replacing the athlete's stored activity data. AI requests currently run synchronously, so public hosting should move them behind a persistent worker before allowing unrestricted use. The current worker setup and this limitation are described in [DEPLOYMENT.md](DEPLOYMENT.md).
+Requests return immediately with a queued status. Ride and Coach pages check progress automatically and reload when the job completes or fails. Duplicate requests reuse the outstanding analysis; provider failures allow up to three attempts and then show a safe error without replacing stored activities or completed plans. The worker setup is described in [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ### Data sent to OpenAI
 
@@ -130,7 +135,7 @@ API usage is billed to the OpenAI project behind `OPENAI_API_KEY`. A personal in
 
 ## Deployment options
 
-- **Local development:** SQLite and synchronous jobs are sufficient for evaluating RideDock.
+- **Local development:** SQLite with the AI worker started by `composer run dev` is sufficient for evaluating RideDock.
 - **Production self-hosting:** use HTTPS, PostgreSQL, persistent private storage, backups and a supervised queue worker. Follow [DEPLOYMENT.md](DEPLOYMENT.md).
 - **Managed RideDock:** a public multiuser service requires additional identity, privacy, lifecycle, billing and operational controls. Follow [HOSTING.md](HOSTING.md).
 

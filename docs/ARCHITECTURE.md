@@ -31,7 +31,7 @@ Imports may fill fields that are still null, but RPE and notes are never overwri
 
 ## Processing and failure behavior
 
-Provider imports run synchronously by default, without a separate queue worker. A failed sync records a bounded error on the connection and retains its page cursor. Re-running the sync is safe because source keys and activity fingerprints are unique. Deployments may opt into an asynchronous provider queue; that requires a worker and does not change the domain services. Requested AI analyses, goal roadmaps, training blocks and weekly plans currently dispatch synchronously from their web controllers and must be moved fully onto the queue before unrestricted managed hosting.
+Provider imports run synchronously by default, without a separate queue worker. A failed sync records a bounded error on the connection and retains its page cursor. Re-running the sync is safe because source keys and activity fingerprints are unique. Deployments may opt into an asynchronous provider queue; that requires a worker and does not change the domain services. AI analyses, goal roadmaps, training blocks and weekly plans use the separate persistent `ai` database queue by default. Owner-scoped reservations prevent duplicate outstanding requests; unique jobs retry provider failures and record safe terminal errors. The UI polls an authenticated status-only endpoint and refreshes on completion or failure. `composer run dev` starts the AI worker automatically; production must supervise it independently of provider workers.
 
 ## FIT enrichment
 

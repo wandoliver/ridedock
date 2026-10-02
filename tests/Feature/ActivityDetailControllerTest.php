@@ -228,7 +228,8 @@ class ActivityDetailControllerTest extends TestCase
             ->assertSee('Wartet auf Verarbeitung')
             ->assertSee('role="progressbar"', false)
             ->assertSee('aria-valuetext="Wartet auf Verarbeitung"', false)
-            ->assertSee('<meta http-equiv="refresh" content="5">', false)
+            ->assertSee('data-ai-status-url', false)
+            ->assertSee('<noscript><meta http-equiv="refresh" content="10"></noscript>', false)
             ->assertDontSee('aria-valuenow=', false);
     }
 

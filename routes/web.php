@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AiAnalysisStatusController;
 use App\Http\Controllers\ActivityAiAnalysisController;
 use App\Http\Controllers\ActivityDetailController;
 use App\Http\Controllers\ActivityFeedbackController;
@@ -36,6 +37,8 @@ Route::middleware('guest')->group(function (): void {
 });
 
 Route::middleware('auth')->group(function (): void {
+    Route::get('/ai-analyses/{analysis}/status', AiAnalysisStatusController::class)
+        ->middleware('throttle:120,1')->name('ai-analyses.status');
     Route::get('/coach', CoachController::class)->name('coach.index');
     Route::patch('/coach/plans/{plan}/days/{date}', PlanDayController::class)
         ->middleware('throttle:30,1')->name('coach.days.update');

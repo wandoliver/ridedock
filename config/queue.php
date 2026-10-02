@@ -31,6 +31,15 @@ return [
 
     'connections' => [
 
+        'ai' => [
+            'driver' => 'database',
+            'connection' => env('DB_QUEUE_CONNECTION'),
+            'table' => env('DB_QUEUE_TABLE', 'jobs'),
+            'queue' => 'ai',
+            'retry_after' => max(180, (int) env('OPENAI_TIMEOUT_SECONDS', 60) + 60),
+            'after_commit' => false,
+        ],
+
         'sync' => [
             'driver' => 'sync',
         ],

@@ -1,4 +1,5 @@
 import L from 'leaflet';
+import { initializeAiStatus } from './ai-status.js';
 import { initializeSelectionPanels } from './selection-panels.js';
 import { initializeActivityAnalysis } from './activity-analysis.js';
 import { initializeActivityDetail } from './activity-detail.js';
@@ -79,6 +80,7 @@ if (heatmapElement && heatmapDataElement) {
 
 initializeActivityDetail(L);
 initializeActivityAnalysis();
+initializeAiStatus();
 initializeCoachTabs();
 initializeWeeklyPlan();
 initializeProviderSync();

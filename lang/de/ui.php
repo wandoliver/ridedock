@@ -17,6 +17,7 @@ return array_replace_recursive($en, [
         'label' => 'Sprache', 'english' => 'Englisch', 'german' => 'Deutsch',
     ],
     'messages' => [
+        'ai_queued' => 'Der KI-Auftrag wird im Hintergrund erstellt. Du kannst diese Seite verlassen.',
         'provider_disconnected' => ':provider wurde getrennt. Importierte Fahrten bleiben erhalten.',
         'provider_disconnected_locally' => ':provider wurde lokal getrennt. Der Widerruf beim Anbieter ist fehlgeschlagen; entferne RideDock zusätzlich in deinem Anbieter-Konto.',
         'ai_not_configured' => 'Die KI-Analyse ist noch nicht konfiguriert.', 'analysis_running' => 'Für diese Fahrt läuft bereits eine Analyse.',

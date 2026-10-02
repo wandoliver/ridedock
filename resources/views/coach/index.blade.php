@@ -45,7 +45,10 @@
         <x-button :href="route('settings.training')" secondary>{{ __('ui.settings.training_profile') }}</x-button>
         @foreach ($actions as $section => $action)
         <div data-coach-section="{{ $section }}" @if($section !== 'goal-plan') hidden @endif>
-            @if ($action['ready'])
+            @php $attempt = $planAttempts->get(str_replace('-', '_', $section)); @endphp
+            @if ($attempt && in_array($attempt->status->value, ['pending', 'processing'], true))
+                <x-button disabled aria-disabled="true">{{ __('ui.coach.plan_pending') }}</x-button>
+            @elseif ($action['ready'])
             <form method="POST" action="{{ route($action['route']) }}" data-training-plan-form data-pending-label="{{ __('ui.coach.plan_pending') }}">@csrf @if($section === 'weekly-plan' && !$latestWeeklyPlan)<input type="hidden" name="plan_start" value="{{ $weekStart }}">@endif
                 <x-button>{{ $action['label'] }}</x-button>
             </form>
@@ -57,6 +60,18 @@
     </x-slot:actions>
 </x-topbar>
 <x-flash />
+@foreach ($planAttempts as $attempt)
+    @if (in_array($attempt->status->value, ['pending', 'processing'], true))
+        <div class="mx-7 my-3 text-sm" role="status" aria-live="polite" data-ai-status-url="{{ route('ai-analyses.status', $attempt) }}">
+            <p>{{ __('ui.coach.'.(['goal_plan' => 'roadmap_pending', 'training_block' => 'block_pending', 'weekly_plan' => 'plan_pending'][$attempt->type])) }}</p>
+            <p class="text-ink-50">{{ __('ui.messages.ai_queued') }}</p>
+            <div class="mt-2 h-[3px] overflow-hidden bg-plan-soft"><span class="analysis-progress-bar block h-full w-1/3 bg-plan"></span></div>
+        </div>
+        <noscript><meta http-equiv="refresh" content="10"></noscript>
+    @elseif ($attempt->status->value === 'failed')
+        <p class="mx-7 my-3 text-sm" role="alert">{{ $attempt->error }}</p>
+    @endif
+@endforeach
 <h1 class="sr-only">{{ __('ui.coach.headline') }}</h1>
 <div class="mx-7 my-3 text-sm" data-weekly-plan-progress role="status" aria-live="polite" hidden>
     <p data-plan-progress-title>{{ __('ui.coach.plan_progress') }}</p><p class="text-ink-50" data-plan-progress-copy>{{ __('ui.coach.plan_progress_copy') }}</p>

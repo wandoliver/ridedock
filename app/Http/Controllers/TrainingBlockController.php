@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Domain\Training\Contracts\TrainingBlockPlanner;
 use App\Domain\Training\Enums\AiAnalysisStatus;
 use App\Domain\Training\Services\TrainingBlockContextBuilder;
+use App\Domain\Training\Services\ReserveAiAnalysis;
 use App\Jobs\GenerateTrainingBlock;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -40,7 +41,7 @@ class TrainingBlockController extends Controller
                 ->with('analysis_error', __('ui.messages.roadmap_first'));
         }
 
-        $analysis = $user->aiAnalyses()->create([
+        $analysis = app(ReserveAiAnalysis::class)->reserve($user, [
             'activity_id' => null,
             'type' => 'training_block',
             'status' => AiAnalysisStatus::Pending,
@@ -50,7 +51,10 @@ class TrainingBlockController extends Controller
         ]);
 
         try {
-            GenerateTrainingBlock::dispatchSync($analysis->id);
+            if ($analysis->wasRecentlyCreated) {
+                GenerateTrainingBlock::dispatch($analysis->id)
+                    ->onConnection(config('ai.queue_connection'))->onQueue('ai');
+            }
         } catch (Throwable $exception) {
             report($exception);
 
@@ -67,6 +71,7 @@ class TrainingBlockController extends Controller
 
         return redirect()
             ->to(route('coach.index').'#training-block')
-            ->with('status', __('ui.messages.block_complete'));
+            ->with('status', __($analysis->refresh()->status === AiAnalysisStatus::Completed
+            ? 'ui.messages.block_complete' : 'ui.messages.ai_queued'));
     }
 }

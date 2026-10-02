@@ -16,14 +16,19 @@ class GenerateActivityAnalysis implements ShouldBeUnique, ShouldQueue
 
     public int $tries = 3;
 
-    public int $timeout = 120;
+    public int $timeout;
 
-    public int $uniqueFor = 600;
+    public bool $failOnTimeout = true;
+
+    public int $uniqueFor = 900;
 
     /** @var list<int> */
     public array $backoff = [15, 60, 180];
 
-    public function __construct(public readonly string $analysisId) {}
+    public function __construct(public readonly string $analysisId)
+    {
+        $this->timeout = max(120, (int) config('ai.providers.openai.timeout_seconds') + 10);
+    }
 
     public function handle(TrainingAdvisor $trainingAdvisor): void
     {
@@ -58,7 +63,7 @@ class GenerateActivityAnalysis implements ShouldBeUnique, ShouldQueue
     {
         $analysis = AiAnalysis::query()->find($this->analysisId);
 
-        if ($analysis === null) {
+        if ($analysis === null || $analysis->status === AiAnalysisStatus::Completed) {
             return;
         }
 

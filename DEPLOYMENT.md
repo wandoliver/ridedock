@@ -90,7 +90,15 @@ php artisan queue:work --sleep=1 --tries=3 --timeout=120
 
 Restart workers after every deployment so they load the new code and configuration. Monitor `failed_jobs`, worker restarts, queue age and repeated provider failures. Increase concurrency only after confirming provider rate limits and ensuring unique jobs still behave as expected.
 
-AI activity analyses, goal roadmaps, four-week blocks and weekly plans currently use synchronous dispatch from their web controllers. A queue worker does not make those requests asynchronous yet. RideDock raises PHP's per-request execution limit to `OPENAI_TIMEOUT_SECONDS` plus ten seconds when PHP is configured with a shorter non-zero limit. The web server or hosting platform may enforce a separate hard timeout, which must also exceed this value. Convert these controller flows and generators to proper queued jobs before opening a managed service to unrestricted traffic; until then, size web timeouts conservatively and keep the user group limited.
+AI activity analyses, goal roadmaps, four-week blocks and weekly plans use the dedicated `ai` database connection and `ai` queue by default, independently of `QUEUE_CONNECTION`. Supervise its worker even when provider imports use `sync`:
+
+```bash
+php artisan queue:work ai --queue=ai --sleep=1 --timeout=120
+```
+
+Each AI job allows three attempts with 15- and 60-second retry delays. Its timeout is the greater of 120 seconds and `OPENAI_TIMEOUT_SECONDS + 10`; timeouts fail the analysis visibly. The built-in `ai` connection reserves jobs for at least 180 seconds, or `OPENAI_TIMEOUT_SECONDS + 60`, so the reservation outlives the job timeout. For a custom `AI_QUEUE_CONNECTION` (for example `redis`), set that connection's `retry_after` or visibility timeout above the job timeout and run its worker with `--queue=ai`. Do not use `sync`, `deferred`, or a nonpersistent connection in production. `AI_QUEUE_CONNECTION=sync` is available for tests and explicitly synchronous installations.
+
+Requests reserve one outstanding analysis per owner and type (per ride for activity analyses). Completion status is owner-scoped and contains no AI context or provider details. Pages preserve completed plans while replacement jobs run, and show a safe error after final failure. Inspect `php artisan queue:failed` for operational details and use `php artisan queue:retry JOB_ID` after resolving a failure. Restart both AI and provider workers after deployments.
 
 RideDock currently has no mandatory scheduled command. Add a scheduler process only when recurring synchronization, cleanup or retention jobs are introduced.
 

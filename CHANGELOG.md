@@ -4,6 +4,18 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.8] - 2026-10-02
+
+### Changed
+
+- AI activity analyses, roadmaps, four-week blocks and weekly plans run on a dedicated persistent database queue by default; local development starts its worker automatically.
+- Ride and Coach pages track outstanding requests and refresh automatically when results or final errors are available, while retaining completed plans during regeneration.
+
+### Fixed
+
+- Duplicate submissions reuse outstanding AI analyses, and completed jobs do not call the provider again on redelivery.
+- AI jobs allow three attempts for provider failures, record safe final errors, and use reservation and worker timeouts consistent with the configured provider timeout.
+
 ## [0.0.7] - 2026-09-08
 
 ### Added

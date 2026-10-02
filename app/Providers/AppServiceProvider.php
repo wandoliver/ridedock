@@ -63,6 +63,10 @@ class AppServiceProvider extends ServiceProvider
             DevCommands::register('node scripts/https-proxy.mjs', 'https')->green();
         }
 
+        if (config('ai.queue_connection') !== 'sync') {
+            DevCommands::artisan('queue:work '.config('ai.queue_connection').' --queue=ai --sleep=1 --timeout=120', 'ai-worker');
+        }
+
         if (config('queue.default') === 'sync') {
             DevCommands::except('queue');
         }

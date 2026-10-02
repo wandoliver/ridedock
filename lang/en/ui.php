@@ -27,6 +27,7 @@ return [
         'german' => 'German',
     ],
     'messages' => [
+        'ai_queued' => 'Your AI request is being processed in the background. You can leave this page.',
         'provider_disconnected' => ':provider disconnected. Imported rides are retained.',
         'provider_disconnected_locally' => ':provider disconnected locally. Provider revocation failed; also remove RideDock in your provider account.',
         'ai_not_configured' => 'AI analysis is not configured yet.',
