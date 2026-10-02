@@ -4,6 +4,18 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.10] - 2026-10-02
+
+### Added
+
+- Dated FTP and maximum-heart-rate snapshots, append-only measurement history, and continuous power/heart-rate reference bands in training settings.
+- Owner-scoped historical measurements with validation and current-reference preservation when backdating.
+
+### Changed
+
+- Activity reference ratios use the values effective at ride start; normal profile edits affect subsequent rides. Existing values are migrated as known from the migration time, without inventing earlier measurement dates.
+- AI contexts and prompts are versioned for dated reference profiles. Run `php artisan migrate` after updating.
+
 ## [0.0.9] - 2026-10-02
 
 ### Added

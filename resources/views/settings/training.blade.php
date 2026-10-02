@@ -73,7 +73,9 @@ $selectedDays = (array) old('available_days', $profile?->available_days ?? []);
                 </label>
 
 </section>
-</form></main>
+</form>
+@include('settings._zones')
+</main>
 <aside class="rd-panel">
 <div class="flex items-center justify-between gap-3"><span class="text-xs font-semibold text-ink-50">{{ __('ui.settings.ai_status') }}</span><span class="rounded-md px-2 py-1 text-[11px] {{ $aiConfigured ? 'bg-plan-soft text-plan-text' : 'bg-canvas text-ink-50' }}">{{ $aiConfigured ? __('ui.settings.configured') : __('ui.settings.api_missing') }}</span></div>
 <h1 class="mt-3 text-[17px] font-bold">{{ __('ui.settings.ride_analysis') }}</h1><p class="mt-2 text-[13px] leading-relaxed text-ink-70">{{ __('ui.settings.privacy_copy') }}</p>

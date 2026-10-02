@@ -22,7 +22,7 @@
 
 - [x] Define the first AI use case and its user-visible output
 - [x] Build a compact, schema-versioned training context from normalized data
-- [ ] Add heart-rate and power zones/profile history
+- [x] Add heart-rate and power reference bands with dated profile history
 - [x] Calculate weekly volume and whole-ride RPE effort distribution
 - [ ] Add sensor-based intensity distribution and comparable efficiency trends
 - [x] Add transparent recorded session-RPE load and completed-week trends

@@ -45,6 +45,12 @@ class User extends Authenticatable
         return $this->hasOne(AthleteProfile::class);
     }
 
+    /** @return HasMany<TrainingZoneProfile, $this> */
+    public function trainingZoneProfiles(): HasMany
+    {
+        return $this->hasMany(TrainingZoneProfile::class);
+    }
+
     /** @return HasMany<AiAnalysis, $this> */
     public function aiAnalyses(): HasMany
     {

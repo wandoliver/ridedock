@@ -11,7 +11,7 @@ use Illuminate\Support\Collection;
 
 final class WeeklyTrainingContextBuilder
 {
-    public const SCHEMA_VERSION = 3;
+    public const SCHEMA_VERSION = 4;
 
     /** @return array<string, mixed> */
     public function build(User $user, ?CarbonImmutable $planStartsAt = null): array
@@ -38,6 +38,7 @@ final class WeeklyTrainingContextBuilder
             'generated_at' => CarbonImmutable::now()->toIso8601String(),
             'plan_start' => $planStartsAt->toDateString(),
             'plan_end' => $planStartsAt->addDays(6)->toDateString(),
+            'zone_profile' => app(TrainingZones::class)->context(app(TrainingZones::class)->at($user, CarbonImmutable::now())),
             'athlete_profile' => $this->profile($profile),
             'strategy' => $this->strategy($user),
             'plan_days' => $this->planDays($planStartsAt, $profile->available_days ?? []),

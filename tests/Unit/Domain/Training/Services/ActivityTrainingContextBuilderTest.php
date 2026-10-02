@@ -30,6 +30,7 @@ class ActivityTrainingContextBuilderTest extends TestCase
             'max_heart_rate' => 190,
             'weekly_hours' => 8,
         ]);
+        app(\App\Domain\Training\Services\TrainingZones::class)->record($user, CarbonImmutable::parse('2026-01-01'), 250, 190);
         $activity = Activity::factory()->for($user)->create([
             'name' => 'Tempo Ride',
             'started_at' => '2026-08-30T08:00:00Z',
@@ -56,7 +57,7 @@ class ActivityTrainingContextBuilderTest extends TestCase
 
         $context = app(ActivityTrainingContextBuilder::class)->build($activity);
 
-        $this->assertSame(4, $context['schema_version']);
+        $this->assertSame(5, $context['schema_version']);
         $this->assertSame(90.0, $context['activity']['duration_minutes']);
         $this->assertSame(30.0, $context['activity']['average_speed_kmh']);
         $this->assertSame(0.9, $context['activity']['weighted_power_to_ftp_ratio']);

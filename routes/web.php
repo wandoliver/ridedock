@@ -15,6 +15,7 @@ use App\Http\Controllers\OAuth\ProviderOAuthController;
 use App\Http\Controllers\PlanDayController;
 use App\Http\Controllers\Settings\ConnectionSettingsController;
 use App\Http\Controllers\Settings\TrainingSettingsController;
+use App\Http\Controllers\Settings\TrainingZoneProfileController;
 use App\Http\Controllers\TrainingBlockController;
 use App\Http\Controllers\WeeklyTrainingPlanController;
 use Illuminate\Support\Facades\Route;
@@ -48,6 +49,8 @@ Route::middleware('auth')->group(function (): void {
         ->name('activities.feedback.update');
     Route::get('/settings/connections', ConnectionSettingsController::class)->name('settings.connections');
     Route::get('/settings/training', [TrainingSettingsController::class, 'show'])->name('settings.training');
+    Route::post('/settings/training/zones', TrainingZoneProfileController::class)
+        ->middleware('throttle:20,1')->name('settings.training.zones.store');
     Route::patch('/settings/training', [TrainingSettingsController::class, 'update'])->name('settings.training.update');
     Route::post('/activities/{activity}/ai-analysis', ActivityAiAnalysisController::class)
         ->middleware('throttle:10,1')

@@ -9,7 +9,7 @@ use RuntimeException;
 
 final class TrainingBlockContextBuilder
 {
-    public const SCHEMA_VERSION = 2;
+    public const SCHEMA_VERSION = 3;
 
     public function __construct(private readonly WeeklyTrainingContextBuilder $weeklyContextBuilder) {}
 
@@ -36,6 +36,7 @@ final class TrainingBlockContextBuilder
             'block_start' => $blockStartsAt->toDateString(),
             'block_end' => $blockStartsAt->addDays(27)->toDateString(),
             'block_weeks' => $this->weeks($blockStartsAt),
+            'zone_profile' => $baseContext['zone_profile'],
             'athlete_profile' => $baseContext['athlete_profile'],
             'goal_plan_analysis_id' => $goalPlan->id,
             'goal_plan' => $goalPlan->output,

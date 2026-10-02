@@ -9,7 +9,7 @@ use Illuminate\Support\Collection;
 
 final class ActivityTrainingContextBuilder
 {
-    public const SCHEMA_VERSION = 4;
+    public const SCHEMA_VERSION = 5;
 
     /** @return array<string, mixed> */
     public function build(Activity $activity): array
@@ -37,6 +37,7 @@ final class ActivityTrainingContextBuilder
             'purpose' => 'activity_analysis',
             'generated_at' => CarbonImmutable::now()->toIso8601String(),
             'athlete_profile' => $this->profile($profile),
+            'zone_profile' => app(TrainingZones::class)->context(app(TrainingZones::class)->forActivity($activity)),
             'activity' => $this->activityMetrics($activity, $profile),
             'recent_training' => [
                 'window_start' => $windowStartsAt->toDateString(),
@@ -72,6 +73,7 @@ final class ActivityTrainingContextBuilder
     private function activityMetrics(Activity $activity, ?AthleteProfile $profile): array
     {
         $durationMinutes = $this->minutes($activity->moving_time_s);
+        $zoneProfile = app(TrainingZones::class)->forActivity($activity);
 
         return [
             'id' => $activity->id,
@@ -96,14 +98,14 @@ final class ActivityTrainingContextBuilder
                 ? round($durationMinutes * $activity->rpe, 1)
                 : null,
             'weighted_power_to_ftp_ratio' => $activity->weighted_average_power !== null
-                && $profile?->ftp_watts !== null
-                && $profile->ftp_watts > 0
-                    ? round($activity->weighted_average_power / $profile->ftp_watts, 3)
+                && $zoneProfile?->ftp_watts !== null
+                && $zoneProfile->ftp_watts > 0
+                    ? round($activity->weighted_average_power / $zoneProfile->ftp_watts, 3)
                     : null,
             'average_heart_rate_to_max_ratio' => $activity->average_heart_rate !== null
-                && $profile?->max_heart_rate !== null
-                && $profile->max_heart_rate > 0
-                    ? round($activity->average_heart_rate / $profile->max_heart_rate, 3)
+                && $zoneProfile?->max_heart_rate !== null
+                && $zoneProfile->max_heart_rate > 0
+                    ? round($activity->average_heart_rate / $zoneProfile->max_heart_rate, 3)
                     : null,
         ];
     }

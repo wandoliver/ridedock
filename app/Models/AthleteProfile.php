@@ -36,6 +36,8 @@ class AthleteProfile extends Model
         return [
             'goal_date' => 'immutable_date',
             'weekly_hours' => 'float',
+            'ftp_watts' => 'integer',
+            'max_heart_rate' => 'integer',
             'available_days' => 'array',
         ];
     }

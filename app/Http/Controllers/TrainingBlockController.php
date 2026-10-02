@@ -46,7 +46,7 @@ class TrainingBlockController extends Controller
             'type' => 'training_block',
             'status' => AiAnalysisStatus::Pending,
             'context_schema_version' => TrainingBlockContextBuilder::SCHEMA_VERSION,
-            'prompt_version' => 'training-block-v2',
+            'prompt_version' => 'training-block-v3',
             'context' => $contextBuilder->build($user),
         ]);
 

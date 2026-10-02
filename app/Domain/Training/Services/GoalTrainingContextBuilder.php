@@ -8,7 +8,7 @@ use RuntimeException;
 
 final class GoalTrainingContextBuilder
 {
-    public const SCHEMA_VERSION = 2;
+    public const SCHEMA_VERSION = 3;
 
     public function __construct(private readonly WeeklyTrainingContextBuilder $weeklyContextBuilder) {}
 
@@ -32,6 +32,7 @@ final class GoalTrainingContextBuilder
             'plan_start' => $planStartsAt->toDateString(),
             'plan_end' => $goalDate->toDateString(),
             'planning_days' => (int) $planStartsAt->diffInDays($goalDate) + 1,
+            'zone_profile' => $baseContext['zone_profile'],
             'athlete_profile' => $baseContext['athlete_profile'],
             'recent_training' => $baseContext['recent_training'],
             'data_gaps' => $baseContext['data_gaps'],

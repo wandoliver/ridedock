@@ -1,6 +1,6 @@
 # RideDock
 
-![Release](https://img.shields.io/badge/release-v0.0.9-blue)
+![Release](https://img.shields.io/badge/release-v0.0.10-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 RideDock is an open-source, self-hosted cycling training platform. It imports raw activity data directly from supported bike computers, normalizes FIT recordings, and turns rides into a private activity archive with detailed measurements, route heatmaps, and training insights.
@@ -207,3 +207,9 @@ Security issues should be reported privately as described in [SECURITY.md](SECUR
 ```bash
 composer test
 ```
+
+## Dated training zones
+
+Training settings show dated FTP and maximum-heart-rate references. Normal threshold edits append a snapshot effective when saved. A separate dated-entry form supports explicit historical measurements; backdating does not replace later current references. Each entry supplies both values, with blanks meaning unknown. History is append-only, and ties at the same instant resolve to the latest entry. Existing values migrate as known at migration time; earlier references remain unknown until supplied.
+
+Power uses six continuous percentage-of-FTP bands with transitions at 55, 75, 90, 105 and 120 percent, adapted from [Coggan's power levels](https://www.trainingpeaks.com/blog/power-training-levels/). A separate neuromuscular band is not inferred from FTP. Heart rate uses [five HRmax percentage bands](https://www.polar.com/en/guide/heart-rate-zones) from 50–100%, with separate below/above-range buckets. Integer boundaries are rounded upward and are lower-inclusive, upper-exclusive. These are reference bands, rather than measured individual physiological thresholds. Ride analysis uses the snapshot effective at the recording's start, while planning uses the current snapshot.
