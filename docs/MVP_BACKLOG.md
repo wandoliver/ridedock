@@ -25,7 +25,7 @@
 - [x] Add heart-rate and power reference bands with dated profile history
 - [x] Calculate weekly volume and whole-ride RPE effort distribution
 - [x] Add measured sensor-based intensity distribution
-- [ ] Add comparable efficiency trends
+- [x] Add comparable efficiency trends
 - [x] Add transparent recorded session-RPE load and completed-week trends
 - [ ] Evaluate monotony and freshness estimates with suitable data
 - [x] Integrate an AI assistant without exposing provider credentials or raw location data by default

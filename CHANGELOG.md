@@ -4,6 +4,18 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.12] - 2026-10-02
+
+### Added
+
+- Private, user-controlled activity comparison groups and a six-week efficiency comparison table.
+- Time-weighted W/bpm measurements from continuous, steady power/heart-rate windows, with explicit eligibility and comparable-workload checks.
+- Qualified numerical efficiency aggregates in activity AI contexts; group labels are excluded.
+
+### Changed
+
+- Bump AI context and prompt versions for the descriptive efficiency metric and its limitations.
+
 ## [0.0.11] - 2026-10-02
 
 ### Added

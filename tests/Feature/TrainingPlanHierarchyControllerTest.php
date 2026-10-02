@@ -43,7 +43,7 @@ class TrainingPlanHierarchyControllerTest extends TestCase
 
         $goalPlan = $user->aiAnalyses()->where('type', 'goal_plan')->firstOrFail();
         $this->assertSame(AiAnalysisStatus::Completed, $goalPlan->status);
-        $this->assertSame('goal-plan-v4', $goalPlan->prompt_version);
+        $this->assertSame('goal-plan-v5', $goalPlan->prompt_version);
         $this->assertSame('2026-09-01', $goalPlan->context['plan_start']);
         $this->assertSame('2026-12-31', $goalPlan->context['plan_end']);
 
@@ -54,7 +54,7 @@ class TrainingPlanHierarchyControllerTest extends TestCase
 
         $block = $user->aiAnalyses()->where('type', 'training_block')->firstOrFail();
         $this->assertSame(AiAnalysisStatus::Completed, $block->status);
-        $this->assertSame('training-block-v4', $block->prompt_version);
+        $this->assertSame('training-block-v5', $block->prompt_version);
         $this->assertSame($goalPlan->id, $block->context['goal_plan_analysis_id']);
         $this->assertSame($goalPlan->output, $block->context['goal_plan']);
         $this->assertCount(4, $block->output['weeks']);

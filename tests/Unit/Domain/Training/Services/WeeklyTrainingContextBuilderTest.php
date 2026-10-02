@@ -53,7 +53,7 @@ class WeeklyTrainingContextBuilderTest extends TestCase
             CarbonImmutable::parse('2026-08-31'),
         );
 
-        $this->assertSame(5, $context['schema_version']);
+        $this->assertSame(6, $context['schema_version']);
         $this->assertSame('2026-08-31', $context['plan_start']);
         $this->assertSame('2026-09-06', $context['plan_end']);
         $this->assertCount(7, $context['plan_days']);

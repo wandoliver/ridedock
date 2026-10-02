@@ -1,6 +1,6 @@
 # RideDock
 
-![Release](https://img.shields.io/badge/release-v0.0.11-blue)
+![Release](https://img.shields.io/badge/release-v0.0.12-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 RideDock is an open-source, self-hosted cycling training platform. It imports raw activity data directly from supported bike computers, normalizes FIT recordings, and turns rides into a private activity archive with detailed measurements, route heatmaps, and training insights.
@@ -217,3 +217,9 @@ Power uses six continuous percentage-of-FTP bands with transitions at 55, 75, 90
 ## Measured time in zones
 
 Activity details and the dashboard show recorded power and heart-rate time by the dated reference bands. Timestamped samples are weighted by time until the next sample, with gaps over 30 seconds, invalid values and the final sample without a successor left unknown. Zero watts count as coasting; zero heart rate is invalid. Scalar series require an explicit sampling interval. Time is clipped to recorded elapsed duration. Zone percentages describe classified time, while coverage and unknown minutes describe the complete elapsed recording. Dashboard totals cover the same six calendar weeks as the training statistics and use each ride’s historical references. AI contexts receive aggregates only, with coverage, never raw sensor samples.
+
+## Comparable efficiency
+
+Assign a comparison group on each activity detail (for example, the same indoor setup or repeated endurance route). An empty value removes it. The six-week dashboard compares only your rides of the same type and group, taking the latest eligible predecessor in the preceding six weeks. Windows must match within 20% duration and 10% mean absolute power.
+
+The descriptive W/bpm proxy uses time-weighted mean power divided by mean heart rate during the longest qualifying continuous window: at least 20 minutes, after the first 10 minutes, entirely within 55–75% of the dated FTP, with power coefficient of variation no greater than 10%. Both sensors must overlap throughout; gaps break a window. These eligibility cutoffs are product choices, not validated physiological thresholds. Unlike [TrainingPeaks Efficiency Factor](https://help.trainingpeaks.com/hc/en-us/articles/204071724-Aerobic-Decoupling-Pw-Hr-and-Pa-HR-and-Efficiency-Factor-EF), this uses mean power rather than normalized power. Group labels stay out of AI contexts, which receive only numerical aggregates. Differences are descriptive and can reflect temperature, fatigue, device setup or other conditions; they are not a fitness or recovery score.

@@ -38,7 +38,7 @@ class WeeklyTrainingPlanControllerTest extends TestCase
         $plan = $user->aiAnalyses()->where('type', 'weekly_plan')->firstOrFail();
         $this->assertNull($plan->activity_id);
         $this->assertSame(AiAnalysisStatus::Completed, $plan->status);
-        $this->assertSame('weekly-plan-v5', $plan->prompt_version);
+        $this->assertSame('weekly-plan-v6', $plan->prompt_version);
         $this->assertCount(7, $plan->output['days']);
         $encodedContext = json_encode($plan->context, JSON_THROW_ON_ERROR);
         $this->assertStringNotContainsString('PRIVATE_WEEKLY_NOTE', $encodedContext);

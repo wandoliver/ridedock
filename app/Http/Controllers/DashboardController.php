@@ -7,6 +7,7 @@ use App\Domain\Activities\Enums\ConnectionStatus;
 use App\Domain\Training\Services\PlanActivityMatcher;
 use App\Domain\Training\Services\TrainingStatistics;
 use App\Domain\Training\Services\SensorZoneDistribution;
+use App\Domain\Training\Services\ComparableEfficiency;
 use App\Models\Activity;
 use App\Modules\Heatmap\Contracts\RouteGeometryProvider;
 use Carbon\CarbonImmutable;
@@ -80,6 +81,7 @@ class DashboardController extends Controller
         $recentCount = $user->activities()->where('started_at', '>=', $now->subDays(7))->count();
 
         return view('dashboard', [
+            'efficiencyTrends' => app(ComparableEfficiency::class)->history($user, $now),
             'sensorZones' => app(SensorZoneDistribution::class)->history($user, $now),
             'trainingStatistics' => app(TrainingStatistics::class)->report($user, $now),
             'todayRides' => $todayRides,

@@ -37,6 +37,7 @@ use Illuminate\Support\Collection;
  * @property float|null $max_power
  * @property float|null $energy_kj
  * @property int|null $rpe
+ * @property string|null $comparison_group
  * @property string|null $notes
  * @property string|null $summary_polyline
  * @property array<string, mixed>|null $metadata
@@ -52,7 +53,7 @@ use Illuminate\Support\Collection;
     'distance_m', 'moving_time_s', 'elapsed_time_s', 'elevation_gain_m',
     'average_speed_mps', 'max_speed_mps', 'average_heart_rate', 'max_heart_rate',
     'average_cadence', 'max_cadence', 'average_power', 'weighted_average_power',
-    'max_power', 'energy_kj', 'rpe', 'notes', 'summary_polyline', 'metadata',
+    'max_power', 'energy_kj', 'rpe', 'comparison_group', 'notes', 'summary_polyline', 'metadata',
 ])]
 class Activity extends Model
 {

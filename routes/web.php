@@ -3,6 +3,7 @@
 use App\Http\Controllers\AiAnalysisStatusController;
 use App\Http\Controllers\ActivityAiAnalysisController;
 use App\Http\Controllers\ActivityDetailController;
+use App\Http\Controllers\ActivityComparisonController;
 use App\Http\Controllers\ActivityFeedbackController;
 use App\Http\Controllers\ActivityIndexController;
 use App\Http\Controllers\Api\ProviderConnectionController;
@@ -44,6 +45,8 @@ Route::middleware('auth')->group(function (): void {
     Route::patch('/coach/plans/{plan}/days/{date}', PlanDayController::class)
         ->middleware('throttle:30,1')->name('coach.days.update');
     Route::get('/activities', ActivityIndexController::class)->name('activities.index');
+    Route::patch('/activities/{activity}/comparison', ActivityComparisonController::class)
+        ->middleware('throttle:30,1')->name('activities.comparison.update');
     Route::patch('/activities/{activity}/feedback', ActivityFeedbackController::class)
         ->middleware('throttle:30,1')
         ->name('activities.feedback.update');

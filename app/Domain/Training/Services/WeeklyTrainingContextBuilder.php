@@ -11,7 +11,7 @@ use Illuminate\Support\Collection;
 
 final class WeeklyTrainingContextBuilder
 {
-    public const SCHEMA_VERSION = 5;
+    public const SCHEMA_VERSION = 6;
 
     /** @return array<string, mixed> */
     public function build(User $user, ?CarbonImmutable $planStartsAt = null): array
