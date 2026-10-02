@@ -45,7 +45,7 @@ class WeeklyTrainingPlanController extends Controller
             'type' => 'weekly_plan',
             'status' => AiAnalysisStatus::Pending,
             'context_schema_version' => WeeklyTrainingContextBuilder::SCHEMA_VERSION,
-            'prompt_version' => 'weekly-plan-v6',
+            'prompt_version' => 'weekly-plan-v7',
             'context' => $contextBuilder->build($user, isset($data['plan_start']) ? CarbonImmutable::parse($data['plan_start'], config('app.timezone')) : null),
         ]);
 

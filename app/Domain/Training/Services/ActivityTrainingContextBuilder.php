@@ -9,7 +9,7 @@ use Illuminate\Support\Collection;
 
 final class ActivityTrainingContextBuilder
 {
-    public const SCHEMA_VERSION = 7;
+    public const SCHEMA_VERSION = 8;
 
     /** @return array<string, mixed> */
     public function build(Activity $activity): array
@@ -42,6 +42,7 @@ final class ActivityTrainingContextBuilder
             'zone_profile' => app(TrainingZones::class)->context(app(TrainingZones::class)->forActivity($activity)),
             'activity' => $this->activityMetrics($activity, $profile),
             'recent_training' => [
+                'recorded_load_balance' => app(RecordedLoadBalance::class)->report($activity->user, $windowEndsAt, $activity->localStartedAt()->toDateString()),
                 'window_start' => $windowStartsAt->toDateString(),
                 'window_end' => $windowEndsAt->toDateString(),
                 'summary' => $this->summary($history),

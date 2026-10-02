@@ -38,8 +38,8 @@ class ActivityAiAnalysisControllerTest extends TestCase
         $analysis = $activity->aiAnalyses()->firstOrFail();
         $this->assertSame(AiAnalysisStatus::Completed, $analysis->status);
         $this->assertSame('Direkt erstellte Analyse.', $analysis->output['summary']);
-        $this->assertSame(7, $analysis->context_schema_version);
-        $this->assertSame('activity-v7', $analysis->prompt_version);
+        $this->assertSame(8, $analysis->context_schema_version);
+        $this->assertSame('activity-v8', $analysis->prompt_version);
         $this->assertSame(30, $analysis->context['activity']['average_speed_kmh']);
         $encodedContext = json_encode($analysis->context, JSON_THROW_ON_ERROR);
         $this->assertStringNotContainsString('PRIVATE_RIDE_NOTE', $encodedContext);

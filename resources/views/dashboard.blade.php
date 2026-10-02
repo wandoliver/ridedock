@@ -23,6 +23,7 @@
 @include('dashboard._training-statistics')
 @include('activities._sensor-zones')
                 @include('dashboard._efficiency')
+                @include('dashboard._load-balance')
 <section class="rd-surface overflow-hidden">
 <div class="flex flex-wrap items-center justify-between gap-2 border-b border-line px-3.5 py-2.5 text-xs"><div class="flex flex-wrap gap-3"><h2 class="font-bold">Heatmap</h2><span class="text-ink-50">{{ count($heatmapRoutes) === 1 ? __('ui.dashboard.one_route') : __('ui.dashboard.many_routes', ['count'=>count($heatmapRoutes)]) }} · {{ number_format($privacyTrimMetres,0,',','.') }} m Privacy-Trim</span></div>
 <button type="button" class="rounded-md bg-canvas px-2 py-1 font-semibold" data-heatmap-expand data-expand-label="{{ __('ui.dashboard.expand') }}" data-collapse-label="{{ __('ui.dashboard.collapse') }}" aria-pressed="false">⤢ <span data-heatmap-expand-label>{{ __('ui.dashboard.expand') }}</span></button></div>

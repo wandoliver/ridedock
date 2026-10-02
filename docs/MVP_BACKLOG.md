@@ -27,7 +27,7 @@
 - [x] Add measured sensor-based intensity distribution
 - [x] Add comparable efficiency trends
 - [x] Add transparent recorded session-RPE load and completed-week trends
-- [ ] Evaluate monotony and freshness estimates with suitable data
+- [x] Evaluate monotony and freshness: gated recorded-load metrics; no inferred readiness score without recovery data
 - [x] Integrate an AI assistant without exposing provider credentials or raw location data by default
 - [x] Generate a seven-day plan from goals, available time and recent training
 - [x] Queue activity analyses and all planning levels with progress and safe failures

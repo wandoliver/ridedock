@@ -4,6 +4,19 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.13] - 2026-10-02
+
+### Added
+
+- Seven-day recorded-load monotony and strain, and descriptive 42-day versus seven-day load balance on the dashboard.
+- Daily values, rating coverage, formulas and explicit unavailable states for short history, missing ratings, no load or zero variation.
+- Complete-day load aggregates in activity analyses and all planning levels, excluding subsequent recordings.
+
+### Changed
+
+- Complete the monotony/freshness evaluation: recovery and training readiness remain explicitly unmeasured, with no inferred freshness score.
+- Bump AI context and prompt versions to preserve the data limitations.
+
 ## [0.0.12] - 2026-10-02
 
 ### Added

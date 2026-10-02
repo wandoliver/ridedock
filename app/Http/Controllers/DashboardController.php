@@ -6,6 +6,7 @@ use App\Domain\Activities\Enums\ActivityPeriod;
 use App\Domain\Activities\Enums\ConnectionStatus;
 use App\Domain\Training\Services\PlanActivityMatcher;
 use App\Domain\Training\Services\TrainingStatistics;
+use App\Domain\Training\Services\RecordedLoadBalance;
 use App\Domain\Training\Services\SensorZoneDistribution;
 use App\Domain\Training\Services\ComparableEfficiency;
 use App\Models\Activity;
@@ -83,6 +84,7 @@ class DashboardController extends Controller
         return view('dashboard', [
             'efficiencyTrends' => app(ComparableEfficiency::class)->history($user, $now),
             'sensorZones' => app(SensorZoneDistribution::class)->history($user, $now),
+            'loadBalance' => app(RecordedLoadBalance::class)->report($user, $now),
             'trainingStatistics' => app(TrainingStatistics::class)->report($user, $now),
             'todayRides' => $todayRides,
             'planRiddenMinutes' => $planRiddenMinutes,

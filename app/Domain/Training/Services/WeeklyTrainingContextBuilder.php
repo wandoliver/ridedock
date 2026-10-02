@@ -11,7 +11,7 @@ use Illuminate\Support\Collection;
 
 final class WeeklyTrainingContextBuilder
 {
-    public const SCHEMA_VERSION = 6;
+    public const SCHEMA_VERSION = 7;
 
     /** @return array<string, mixed> */
     public function build(User $user, ?CarbonImmutable $planStartsAt = null): array
@@ -43,6 +43,7 @@ final class WeeklyTrainingContextBuilder
             'strategy' => $this->strategy($user),
             'plan_days' => $this->planDays($planStartsAt, $profile->available_days ?? []),
             'recent_training' => [
+                'recorded_load_balance' => app(RecordedLoadBalance::class)->report($user, $historyEndsAt),
                 'window_start' => $historyStartsAt->toDateString(),
                 'window_end' => $historyEndsAt->toDateString(),
                 'sensor_zone_distribution' => app(SensorZoneDistribution::class)->history($user, $historyEndsAt),

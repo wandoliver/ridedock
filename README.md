@@ -1,6 +1,6 @@
 # RideDock
 
-![Release](https://img.shields.io/badge/release-v0.0.12-blue)
+![Release](https://img.shields.io/badge/release-v0.0.13-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 RideDock is an open-source, self-hosted cycling training platform. It imports raw activity data directly from supported bike computers, normalizes FIT recordings, and turns rides into a private activity archive with detailed measurements, route heatmaps, and training insights.
@@ -223,3 +223,9 @@ Activity details and the dashboard show recorded power and heart-rate time by th
 Assign a comparison group on each activity detail (for example, the same indoor setup or repeated endurance route). An empty value removes it. The six-week dashboard compares only your rides of the same type and group, taking the latest eligible predecessor in the preceding six weeks. Windows must match within 20% duration and 10% mean absolute power.
 
 The descriptive W/bpm proxy uses time-weighted mean power divided by mean heart rate during the longest qualifying continuous window: at least 20 minutes, after the first 10 minutes, entirely within 55–75% of the dated FTP, with power coefficient of variation no greater than 10%. Both sensors must overlap throughout; gaps break a window. These eligibility cutoffs are product choices, not validated physiological thresholds. Unlike [TrainingPeaks Efficiency Factor](https://help.trainingpeaks.com/hc/en-us/articles/204071724-Aerobic-Decoupling-Pw-Hr-and-Pa-HR-and-Efficiency-Factor-EF), this uses mean power rather than normalized power. Group labels stay out of AI contexts, which receive only numerical aggregates. Differences are descriptive and can reflect temperature, fatigue, device setup or other conditions; they are not a fitness or recovery score.
+
+## Recorded load, monotony and balance
+
+The dashboard uses the seven and 42 complete calendar days before today; activity AI analysis cuts history off before the activity’s local day and never uses subsequent rides. Session load is moving minutes × valid RPE (1–10), summed per recorded ride day. Within established recording history, days without rides contribute zero recorded cycling load. Before the first recorded ride they remain unknown. Missing duration/RPE makes a day and its period unknown, rather than artificially zero. Metrics require recording history reaching the period start and all recorded rides in the period having known load. Other sports, missing imports and subjective recovery are not captured.
+
+Seven-day monotony is daily mean divided by the population standard deviation of all seven days; strain is total seven-day load × monotony, following [Foster’s recorded-load method](https://pubmed.ncbi.nlm.nih.gov/9662690/). Zero load and zero variation have explicit unavailable states. The descriptive load balance is the arithmetic 42-day daily mean minus the seven-day daily mean, in RPE-minutes/day. This is a product-defined load comparison, not a CTL/ATL/TSB, fitness or freshness model. Neither metric has a risk colour, recommended threshold or injury/recovery prediction. Actual freshness remains unavailable because direct recovery information is not collected. UI and AI contexts expose coverage, reasons, formulas and this limitation.
