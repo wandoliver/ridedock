@@ -3,7 +3,7 @@ import js from '@eslint/js';
 export default [
     js.configs.recommended,
     {
-        files: ['resources/js/**/*.js', 'scripts/**/*.mjs', 'tests/JavaScript/**/*.js', 'vite.config.js'],
+        files: ['resources/js/**/*.js', 'scripts/**/*.mjs', 'tests/JavaScript/**/*.js', 'tests/Fixtures/**/*.js', 'vite.config.js'],
         languageOptions: {
             ecmaVersion: 'latest',
             sourceType: 'module',

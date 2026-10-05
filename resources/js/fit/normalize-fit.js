@@ -1,3 +1,5 @@
+import { normalizeShiftEvents } from './shift-events.js';
+
 const PARSER_NAME = 'fit-file-parser';
 const PARSER_VERSION = '5.0.2';
 
@@ -24,20 +26,24 @@ export function normalizeFitData(fitData) {
     const session = Array.isArray(fitData.sessions) ? fitData.sessions[0] ?? {} : {};
     const startedAt = firstTimestamp(records, session);
 
+    const shifts = normalizeShiftEvents(fitData, startedAt);
+
     return {
         parser: {
+            normalizer_version: '0.5.0',
+            shift_events_ignored: shifts.ignored,
             name: PARSER_NAME,
             version: PARSER_VERSION,
             protocol_version: fitData.protocolVersion ?? null,
             profile_version: fitData.profileVersion ?? null,
         },
-        summary: normalizeSummary(session, records),
+        summary: normalizeSummary(session, startedAt),
         streams: normalizeStreams(records, startedAt),
-        events: normalizeShiftEvents(fitData.events, startedAt),
+        events: shifts.events,
     };
 }
 
-function normalizeSummary(session, records) {
+function normalizeSummary(session, startedAt) {
     return compactObject({
         distance_m: finiteValue(session.total_distance),
         moving_time_s: finiteValue(session.total_moving_time ?? session.total_timer_time),
@@ -53,7 +59,7 @@ function normalizeSummary(session, records) {
         weighted_average_power: finiteValue(session.normalized_power),
         max_power: finiteValue(session.max_power),
         energy_kj: isFiniteNumber(session.total_work) ? session.total_work / 1000 : null,
-        started_at: toIsoString(session.start_time ?? records[0]?.timestamp),
+        started_at: startedAt,
     });
 }
 
@@ -94,36 +100,11 @@ function normalizeStreams(records, startedAt) {
     return streams;
 }
 
-function normalizeShiftEvents(events, startedAt) {
-    if (!Array.isArray(events)) {
-        return [];
-    }
-
-    return events.flatMap((event) => {
-        if (!['front_gear_change', 'rear_gear_change'].includes(event.event)) {
-            return [];
-        }
-
-        const recordedAt = toIsoString(event.timestamp);
-
-        return [{
-            type: 'shift',
-            elapsed_seconds: elapsedSeconds(recordedAt, startedAt),
-            recorded_at: recordedAt,
-            data: compactObject({
-                direction: event.event === 'front_gear_change' ? 'front' : 'rear',
-                event_type: event.event_type ?? null,
-                front_gear_number: finiteValue(event.front_gear_num),
-                front_gear_teeth: finiteValue(event.front_gear),
-                rear_gear_number: finiteValue(event.rear_gear_num),
-                rear_gear_teeth: finiteValue(event.rear_gear),
-            }),
-        }];
-    });
-}
-
 function firstTimestamp(records, session) {
-    return toIsoString(records[0]?.timestamp ?? session.start_time ?? session.timestamp);
+    const sessionStart = toIsoString(session.start_time);
+    if (sessionStart !== null) return sessionStart;
+    const timestamps = records.map((record) => toIsoString(record.timestamp)).filter((value) => value !== null).sort();
+    return timestamps[0] ?? toIsoString(session.timestamp);
 }
 
 function elapsedSeconds(timestamp, startedAt) {

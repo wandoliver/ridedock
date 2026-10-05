@@ -80,7 +80,8 @@ class ActivityDetailControllerTest extends TestCase
             ->assertSee(route('activities.feedback.update', $activity), false)
             ->assertSee('Notizen speichern')->assertSee('Bewertung speichern')
             ->assertSee('Hammerhead')
-            ->assertSee('1 Schaltvorgang')
+            ->assertSee('Schaltinformationen')
+            ->assertViewHas('gearShifts', fn (array $shifts): bool => $shifts['total'] === 1)
             ->assertSee('id="ride-route"', false)
             ->assertSee('data-stream-chart="power"', false);
     }

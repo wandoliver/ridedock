@@ -74,6 +74,8 @@ class ActivityDetailController extends Controller
             'matchedPlan' => $weeklyPlan,
             'activity' => $model,
             'activityStreams' => $activityStreams,
+            'gearShifts' => app(\App\Domain\Activities\Services\RecordedGearShifts::class)->report($model),
+            'canReprocessFit' => $model->sources->contains(fn ($source) => ! $source->purged_at && $source->source_file_path && $source->source_file_checksum && $source->connection->user_id === $user->id),
             'latestAiAnalysis' => $model->aiAnalyses()->latest()->first(),
             'aiConfigured' => $trainingAdvisor->isConfigured(),
             'nextPlannedSession' => $nextPlannedSessionResolver->resolve($user, $nextPlanDate),

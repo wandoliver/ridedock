@@ -46,6 +46,8 @@ Route::middleware('auth')->group(function (): void {
     Route::patch('/coach/plans/{plan}/days/{date}', PlanDayController::class)
         ->middleware('throttle:30,1')->name('coach.days.update');
     Route::get('/activities', ActivityIndexController::class)->name('activities.index');
+    Route::post('/activities/{activity}/fit-analysis', \App\Http\Controllers\ReprocessActivityFitController::class)
+        ->middleware('throttle:5,1')->name('activities.fit.reprocess');
     Route::patch('/activities/{activity}/comparison', ActivityComparisonController::class)
         ->middleware('throttle:30,1')->name('activities.comparison.update');
     Route::patch('/activities/{activity}/feedback', ActivityFeedbackController::class)

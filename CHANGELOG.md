@@ -4,6 +4,21 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-10-05
+
+### Added
+
+- Recorded gear-shifting details under ride Measurements: front/rear counts, timestamped gear positions, tooth counts and ratios when both tooth counts are recorded, with German and English labels.
+- Owner-only reprocessing of an existing archived FIT file from the ride page, preserving notes/RPE and respecting purged-original markers without downloading from providers.
+- CRC-valid, entirely synthetic native and developer-field FIT fixtures, plus regression checks through the real parser, database and rendered ride page.
+- A gear-shifting guide documenting supported encodings, fixture provenance, reprocessing and recording limits; unknown proprietary SRAM AXS formats remain unsupported without an explicit native mapping.
+
+### Fixed
+
+- Decode packed FIT gear-change data into rear/front positions and tooth counts; accept self-described developer fields only when their metadata identifies equivalent native event fields.
+- Skip incomplete, ambiguous or untimestamped shifts, preserve unknown 1x front values, sort chronologically and deduplicate equivalent timestamped events.
+- Use the same ride start for the normalized summary and elapsed event times when session start is absent.
+
 ## [0.4.0] - 2026-10-05
 
 ### Added

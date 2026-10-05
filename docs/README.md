@@ -7,6 +7,7 @@
 - [Provider connections](PROVIDERS.md): Hammerhead/Karoo, Wahoo, OAuth and disconnect behavior.
 - [AI coach](AI_COACH.md): credentials, planning, privacy and costs.
 - [Data retention and private zones](PRIVACY.md): local per-user settings, confirmed cleanup and masked route output.
+- [FIT gear shifting / SRAM AXS](SHIFTING.md): recorded gear changes, supported encodings, synthetic tests and reprocessing stored files.
 - [API access](API.md): authentication and request examples.
 - [Security review](SECURITY_REVIEW.md): threat model, dependency audit, controls and remaining work.
 - [Fixture policy](FIXTURES.md): synthetic data, provenance and repository checks.

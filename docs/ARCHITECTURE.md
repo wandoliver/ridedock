@@ -57,8 +57,10 @@ Provider imports run synchronously by default, without a separate queue worker. 
 - validates the checksum and parses the archived file;
 - makes FIT session totals authoritative for distance, duration and sensor summaries;
 - upserts time/distance series into `activity_streams` (`latlng`, `heart_rate`, `cadence`, `power`, `speed`, `altitude`);
-- upserts AXS shifts into `activity_events` with provider-specific details confined to the event's JSON data;
-- records parser name/version in source metadata and remains idempotent.
+- replaces normalized FIT `shift` events idempotently in `activity_events`, decoding native packed/components and explicitly equivalent developer fields;
+- records parser and normalizer versions plus omitted-shift counts in source/activity metadata.
+
+The ride Measurements section displays recorded gear positions and tooth counts and can explicitly reprocess a stored original. This never fetches another file from a provider. Unknown manufacturer encodings are not guessed; see [FIT gear shifting](SHIFTING.md).
 
 ## Heatmap
 

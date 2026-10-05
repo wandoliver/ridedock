@@ -120,7 +120,7 @@
         @endif
 
 
-<x-info-box>{{ $activity->events->count() === 1 ? __('ui.activity.shift_one', ['count'=>1]) : __('ui.activity.shift_many', ['count'=>$activity->events->count()]) }}</x-info-box>
+@include('activities._shifts')
 @include('activities._sensor-zones') @include('activities._efficiency')
 </section><section id="coach" data-page-panel="coach"><div class="rd-section-heading"><h2>{{ __('ux.coach') }}</h2>@if ($aiConfigured && (! $latestAiAnalysis || in_array($latestAiAnalysis->status->value, ['completed', 'failed'], true)))
                     <form method="POST" action="{{ route('activities.ai-analysis.store', ['activity' => $activity->id, 'return_to' => \App\Support\ActivityNavigation::returnTo(request())]) }}" data-activity-analysis-form>

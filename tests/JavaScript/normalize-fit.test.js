@@ -3,7 +3,7 @@ import test from 'node:test';
 import FitParser, { FitBaseType, FitEncoder } from 'fit-file-parser';
 import { normalizeFitData } from '../../resources/js/fit/normalize-fit.js';
 
-test('normalizes summaries, streams and AXS shift events', () => {
+test('normalizes summaries, streams and standard FIT shift events', () => {
     const result = normalizeFitData({
         protocolVersion: 32,
         profileVersion: 21188,
