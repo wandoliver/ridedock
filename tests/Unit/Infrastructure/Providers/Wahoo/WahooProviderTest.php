@@ -4,6 +4,7 @@ namespace Tests\Unit\Infrastructure\Providers\Wahoo;
 
 use App\Infrastructure\Providers\Wahoo\WahooProvider;
 use App\Models\ProviderConnection;
+use App\Infrastructure\Http\PublicActivityFileDownloader;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -106,6 +107,7 @@ class WahooProviderTest extends TestCase
 
     public function test_downloads_the_fit_file_from_the_workout_summary(): void
     {
+        $this->app->instance(PublicActivityFileDownloader::class, new PublicActivityFileDownloader(static fn (string $host): array => ['1.1.1.1']));
         Http::fake([
             'api.wahooligan.com/v1/workouts/1/workout_summary' => Http::response([
                 'file' => ['url' => 'https://cdn.wahooligan.com/workout.fit'],

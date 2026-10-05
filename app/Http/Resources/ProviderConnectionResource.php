@@ -20,7 +20,7 @@ class ProviderConnectionResource extends JsonResource
             'scopes' => $this->scopes,
             'capabilities' => $this->capabilities,
             'last_synced_at' => $this->last_synced_at?->toIso8601String(),
-            'last_error' => $this->last_error,
+            'last_error' => $this->last_error === null ? null : 'Provider synchronization failed. Retry the synchronization to resume.',
         ];
     }
 }

@@ -12,13 +12,13 @@
 - [x] Hammerhead FIT source-file archive
 - [x] idempotent FIT enrichment for summary metrics and streams
 - [x] RPE and notes API
-- [x] versioned JSON and CSV analysis export
+- [x] versioned JSON analysis export — API only; CSV disabled as of 0.3.0
 - [x] dashboard, activity archive and activity detail UI
 - [x] provider-neutral heatmap with privacy trimming
 - [x] measurement charts for recorded streams
 - [x] connection settings UI
 
-## AI analysis — in progress
+## AI analysis — done
 
 - [x] Define the first AI use case and its user-visible output
 - [x] Build a compact, schema-versioned training context from normalized data
@@ -45,8 +45,8 @@
 ## Release checklist
 
 - [ ] choose and clear the project name
-- [ ] threat model and dependency audit
+- [x] baseline threat model and dependency audit — see the dated 0.3.0 security review and its remaining deployment/product work
 - [x] CI for tests, formatting, static analysis, frontend builds and isolated installation checks
-- [ ] fixtures scrubbed of personal/location data
+- [x] current fixtures reviewed, coordinate literals made synthetic and repository asset/secret-pattern guard added
 - [ ] confirm API terms for every hosted provider integration
-- [ ] tagged `0.1.0` release and container deployment example
+- [ ] tagged release and container deployment example

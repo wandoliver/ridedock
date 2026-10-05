@@ -25,19 +25,19 @@ final class SyncProviderActivities
             return 0;
         }
 
-        $connection = $this->tokens->ensureFresh($connection);
-        $provider = $this->providers->get($connection->provider);
-        $cursor = $connection->sync_cursor;
-        $since = $cursor === null && $connection->last_synced_at
-            ? CarbonImmutable::instance($connection->last_synced_at)
-                ->subDays(config('activity-providers.sync.overlap_days'))
-            : null;
-        $imported = 0;
-        $pageCount = 0;
-
-        $connection->updateWhileConnected(['status' => ConnectionStatus::Syncing, 'last_error' => null]);
-
         try {
+            $connection = $this->tokens->ensureFresh($connection);
+            $provider = $this->providers->get($connection->provider);
+            $cursor = $connection->sync_cursor;
+            $since = $cursor === null && $connection->last_synced_at
+                ? CarbonImmutable::instance($connection->last_synced_at)
+                    ->subDays(config('activity-providers.sync.overlap_days'))
+                : null;
+            $imported = 0;
+            $pageCount = 0;
+
+            $connection->updateWhileConnected(['status' => ConnectionStatus::Syncing, 'last_error' => null]);
+
             do {
                 if (! $connection->stillConnected()) {
                     return $imported;
@@ -80,13 +80,14 @@ final class SyncProviderActivities
             ]);
 
             return $imported;
-        } catch (Throwable $exception) {
+        } catch (Throwable) {
+            $message = 'Provider synchronization failed. Retry the synchronization to resume.';
             $connection->updateWhileConnected([
                 'status' => ConnectionStatus::Error,
-                'last_error' => mb_substr($exception->getMessage(), 0, 2000),
+                'last_error' => $message,
             ]);
 
-            throw $exception;
+            throw new \RuntimeException($message);
         }
     }
 }

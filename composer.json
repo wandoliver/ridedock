@@ -74,12 +74,14 @@
         ],
         "check:quality": [
             "@composer validate --strict",
+            "@check:repository",
             "@lint",
             "@phpcs",
             "@cs-fixer:check",
             "@phpstan"
         ],
         "check:install": "@php scripts/check-install.php",
+        "check:repository": "node scripts/check-repository.mjs",
         "check": [
             "@test",
             "@check:quality",

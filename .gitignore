@@ -3,6 +3,17 @@
 .env
 .env.backup
 .env.production
+.env.*
+!.env.example
+*.fit
+*.gpx
+*.tcx
+*.kml
+*.kmz
+*.sqlite3
+*.sqlite
+*.db
+*.sql
 .phpactor.json
 .php-cs-fixer.cache
 .phpunit.result.cache

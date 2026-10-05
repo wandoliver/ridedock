@@ -27,7 +27,7 @@ class ActivityAiAnalysisControllerTest extends TestCase
         ]);
         ActivityStream::factory()->for($activity)->create([
             'type' => 'latlng',
-            'data' => [['elapsed_seconds' => 0, 'value' => [46.4983, 11.3548]]],
+            'data' => [['elapsed_seconds' => 0, 'value' => [0.01, 0.02]]],
         ]);
 
         $this->actingAs($user)
@@ -43,7 +43,7 @@ class ActivityAiAnalysisControllerTest extends TestCase
         $this->assertSame(30, $analysis->context['activity']['average_speed_kmh']);
         $encodedContext = json_encode($analysis->context, JSON_THROW_ON_ERROR);
         $this->assertStringNotContainsString('PRIVATE_RIDE_NOTE', $encodedContext);
-        $this->assertStringNotContainsString('46.4983', $encodedContext);
+        $this->assertStringNotContainsString('0.01', $encodedContext);
         $this->assertFalse($analysis->context['privacy']['gps_coordinates_included']);
     }
 

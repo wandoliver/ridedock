@@ -48,8 +48,8 @@ class ActivityDetailControllerTest extends TestCase
         ActivityStream::factory()->for($activity)->create([
             'type' => 'latlng',
             'data' => [
-                ['elapsed_seconds' => 0, 'value' => [46.4983, 11.3548]],
-                ['elapsed_seconds' => 10, 'value' => [46.4990, 11.3555]],
+                ['elapsed_seconds' => 0, 'value' => [0.01, 0.02]],
+                ['elapsed_seconds' => 10, 'value' => [0.011, 0.021]],
             ],
         ]);
         ActivityStream::factory()->for($activity)->create([

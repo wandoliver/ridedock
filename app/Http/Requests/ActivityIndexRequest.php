@@ -22,7 +22,7 @@ class ActivityIndexRequest extends FormRequest
             'type' => ['nullable', Rule::in(['ride', 'gravel', 'mountain_bike', 'e_bike', 'indoor_ride'])],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
             'include_route' => ['nullable', 'boolean'],
-            'format' => ['nullable', Rule::in(['json', 'csv'])],
+            'format' => ['nullable', Rule::in(['json'])],
         ];
     }
 }

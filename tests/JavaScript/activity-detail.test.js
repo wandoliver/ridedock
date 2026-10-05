@@ -34,13 +34,13 @@ test('builds value and elapsed-time ticks for the chart axes', () => {
 
 test('extracts valid route points from normalized and plain samples', () => {
     assert.deepEqual(routePointsFromStream([
-        { elapsed_seconds: 0, value: [46.4983, 11.3548] },
-        [46.499, 11.3555],
+        { elapsed_seconds: 0, value: [0.01, 0.02] },
+        [0.011, 0.021],
         { value: [91, 11] },
         { value: ['invalid', 11] },
     ]), [
-        [46.4983, 11.3548],
-        [46.499, 11.3555],
+        [0.01, 0.02],
+        [0.011, 0.021],
     ]);
 });
 

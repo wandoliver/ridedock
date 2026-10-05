@@ -32,21 +32,25 @@ class ImportProviderActivity implements ShouldQueue
             return;
         }
 
-        $connection = $tokens->ensureFresh($this->providerConnection);
-        $provider = $providers->get($connection->provider);
-        $payload = $provider->activity($connection, $this->externalId);
-        if (! $connection->stillConnected()) {
-            return;
-        }
-        $source = $importer->import($connection, $payload);
-
-        if (config('activity-providers.sync.store_source_files')
-            && $provider instanceof ActivityFileProvider) {
-            if (! $source->source_file_path) {
-                $files->archive($provider, $connection, $source);
+        try {
+            $connection = $tokens->ensureFresh($this->providerConnection);
+            $provider = $providers->get($connection->provider);
+            $payload = $provider->activity($connection, $this->externalId);
+            if (! $connection->stillConnected()) {
+                return;
             }
+            $source = $importer->import($connection, $payload);
 
-            $enricher->enrich($source->fresh());
+            if (config('activity-providers.sync.store_source_files')
+                && $provider instanceof ActivityFileProvider) {
+                if (! $source->source_file_path) {
+                    $files->archive($provider, $connection, $source);
+                }
+
+                $enricher->enrich($source->fresh());
+            }
+        } catch (\Throwable) {
+            throw new \RuntimeException("Provider activity import failed. Retry the import.");
         }
     }
 }

@@ -4,6 +4,27 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-10-05
+
+### Added
+
+- A dated security review and threat model, fixture provenance policy and documented remaining deployment/product work.
+- An offline repository asset/secret-pattern guard in local quality checks and the existing PHP 8.4 CI quality job.
+
+### Changed
+
+- Disable the CSV API export for now; `format=csv` returns HTTP 422 without a download. JSON export remains documented in the API guide.
+- Use clearly synthetic coordinates for location fixtures and ignore common private activity/database/environment files.
+- Require cURL, public HTTPS targets on port 443 and direct responses for external FIT downloads; redirects and proxies are disabled and the validated address is pinned.
+
+### Security
+
+- Bind OAuth callbacks to the initiating account and web session, consume state under a lock and reject replay before exchanging authorization codes.
+- Bound FIT download and archive size, and refuse public or serving archive disks.
+- Replace external response details in OAuth, sync, queued import, file-download and AI HTTP failures with safe application messages; mask legacy connection errors in the API.
+- Prevent the sample account from being seeded outside local/testing environments.
+- Update the transitive npm dependency `brace-expansion` from 5.0.9 to 5.0.12; Composer and npm audits report no known vulnerabilities at review time.
+
 ## [0.2.1] - 2026-10-05
 
 ### Changed

@@ -53,6 +53,7 @@ class ProviderOAuthControllerTest extends TestCase
         $this->assertSame([
             'user_id' => $user->id,
             'provider' => 'hammerhead',
+            'session_hash' => hash('sha256', session()->getId()),
         ], Cache::get('provider-oauth-state:'.$query['state']));
     }
 
@@ -73,7 +74,7 @@ class ProviderOAuthControllerTest extends TestCase
             ]),
         ]);
 
-        $response = $this->get('/api/v1/oauth/hammerhead/callback?code=valid-code&state=valid-state');
+        $response = $this->actingAs($user)->get('/api/v1/oauth/hammerhead/callback?code=valid-code&state=valid-state');
 
         $response->assertRedirect(route('settings.connections'))
             ->assertSessionHas('status', 'Hammerhead ist verbunden. Die erste Synchronisierung wurde angestoßen.');
@@ -83,6 +84,8 @@ class ProviderOAuthControllerTest extends TestCase
         $this->assertSame('access-token', $connection->access_token);
         Queue::assertPushed(SyncProviderConnection::class, fn (SyncProviderConnection $job): bool => $job->providerConnection->is($connection));
         $this->assertNull(Cache::get('provider-oauth-state:valid-state'));
+        $this->get('/api/v1/oauth/hammerhead/callback?code=valid-code&state=valid-state')->assertBadRequest();
+        Http::assertSentCount(1);
     }
 
     public function test_authenticated_user_connects_wahoo_and_stores_the_external_user(): void
@@ -97,6 +100,7 @@ class ProviderOAuthControllerTest extends TestCase
         parse_str((string) parse_url($location, PHP_URL_QUERY), $query);
         $this->assertSame('wahoo-client', $query['client_id']);
         $this->assertSame('user_read workouts_read offline_data', $query['scope']);
+        $this->withCookie(config('session.cookie'), session()->getId());
 
         Http::fake([
             'api.wahooligan.com/oauth/token' => Http::response([
@@ -122,11 +126,40 @@ class ProviderOAuthControllerTest extends TestCase
     {
         Http::fake();
 
-        $this->get('/api/v1/oauth/hammerhead/callback?code=valid-code&state=invalid-state')
+        $this->actingAs(User::factory()->create())->get('/api/v1/oauth/hammerhead/callback?code=valid-code&state=invalid-state')
             ->assertBadRequest();
 
         Http::assertNothingSent();
         $this->assertDatabaseEmpty('provider_connections');
+    }
+
+    public function test_oauth_callback_requires_an_authenticated_browser(): void
+    {
+        $this->getJson('/api/v1/oauth/hammerhead/callback?code=valid-code&state=anything')->assertUnauthorized();
+        Http::assertNothingSent();
+    }
+
+    public function test_another_user_cannot_consume_an_oauth_state(): void
+    {
+        $owner = User::factory()->create();
+        Cache::put('provider-oauth-state:owned-state', ['user_id' => $owner->id, 'provider' => 'hammerhead']);
+        $this->actingAs(User::factory()->create())
+            ->get('/api/v1/oauth/hammerhead/callback?code=valid-code&state=owned-state')->assertBadRequest();
+        $this->assertNotNull(Cache::get('provider-oauth-state:owned-state'));
+        $this->assertDatabaseEmpty('provider_connections');
+        Http::assertNothingSent();
+    }
+
+    public function test_web_oauth_state_cannot_be_used_from_a_different_session(): void
+    {
+        $user = User::factory()->create();
+        Cache::put('provider-oauth-state:other-session', [
+            'user_id' => $user->id, 'provider' => 'hammerhead', 'session_hash' => hash('sha256', 'another-browser-session'),
+        ]);
+        $this->actingAs($user)
+            ->get('/api/v1/oauth/hammerhead/callback?code=valid-code&state=other-session')->assertBadRequest();
+        $this->assertDatabaseEmpty('provider_connections');
+        Http::assertNothingSent();
     }
 
     public function test_owner_restarts_a_provider_sync_from_connection_settings(): void

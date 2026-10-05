@@ -33,7 +33,7 @@ class StreamRouteGeometryProviderTest extends TestCase
         $otherActivity = Activity::factory()->create();
         ActivityStream::factory()->for($otherActivity)->create([
             'type' => 'latlng',
-            'data' => [['value' => [50.0, 8.0]], ['value' => [50.1, 8.1]]],
+            'data' => [['value' => [0.05, 0.05]], ['value' => [0.051, 0.051]]],
         ]);
 
         $routes = iterator_to_array((new StreamRouteGeometryProvider)->routes($user));
@@ -55,7 +55,7 @@ class StreamRouteGeometryProviderTest extends TestCase
         ActivityStream::factory()->for($included)->create([
             'type' => 'latlng',
             'data' => collect(range(0, 6))->map(fn (int $index): array => [
-                'value' => [46.0 + ($index * 0.001), 11.0],
+                'value' => [0.0 + ($index * 0.001), 0.0],
             ])->all(),
         ]);
         $excluded = Activity::factory()->for($user)->create([
@@ -63,7 +63,7 @@ class StreamRouteGeometryProviderTest extends TestCase
         ]);
         ActivityStream::factory()->for($excluded)->create([
             'type' => 'latlng',
-            'data' => [['value' => [46.0, 11.0]], ['value' => [46.1, 11.1]]],
+            'data' => [['value' => [0.0, 0.0]], ['value' => [0.001, 0.001]]],
         ]);
 
         $routes = iterator_to_array((new StreamRouteGeometryProvider)->routes(

@@ -104,33 +104,39 @@ final class OpenAiTrainingAdvisor implements GoalTrainingPlanner, TrainingAdviso
 
         $this->extendExecutionTimeLimit();
 
-        $response = $this->http
-            ->baseUrl(rtrim($this->baseUrl, '/'))
-            ->withToken($this->apiKey)
-            ->acceptJson()
-            ->asJson()
-            ->timeout($this->timeoutSeconds)
-            ->post('/responses', [
-                'model' => $this->model,
-                'store' => false,
-                'instructions' => $instructions,
-                'input' => [[
-                    'role' => 'user',
-                    'content' => [[
-                        'type' => 'input_text',
-                        'text' => json_encode($context, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES),
+        try {
+            $response = $this->http
+                ->baseUrl(rtrim($this->baseUrl, '/'))
+                ->withToken($this->apiKey)
+                ->acceptJson()
+                ->asJson()
+                ->timeout($this->timeoutSeconds)
+                ->post('/responses', [
+                    'model' => $this->model,
+                    'store' => false,
+                    'instructions' => $instructions,
+                    'input' => [[
+                        'role' => 'user',
+                        'content' => [[
+                            'type' => 'input_text',
+                            'text' => json_encode($context, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES),
+                        ]],
                     ]],
-                ]],
-                'text' => [
-                    'format' => [
-                        'type' => 'json_schema',
-                        'name' => $schemaName,
-                        'strict' => true,
-                        'schema' => $schema,
+                    'text' => [
+                        'format' => [
+                            'type' => 'json_schema',
+                            'name' => $schemaName,
+                            'strict' => true,
+                            'schema' => $schema,
+                        ],
                     ],
-                ],
-            ])
-            ->throw();
+                ])
+                ->throw();
+        } catch (\Illuminate\Http\Client\RequestException $exception) {
+            throw new RuntimeException("AI provider request failed (HTTP ".$exception->response->status().").");
+        } catch (\Illuminate\Http\Client\ConnectionException) {
+            throw new RuntimeException("The AI provider could not be reached.");
+        }
 
         $outputText = $this->extractOutputText($response->json());
 

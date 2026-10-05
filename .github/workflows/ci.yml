@@ -69,6 +69,8 @@ jobs:
         run: npm ci --ignore-scripts
       - name: Validate Composer manifest and lockfile
         run: composer validate --strict
+      - name: Check repository assets and secret patterns
+        run: composer check:repository
       - name: Check whitespace and JavaScript
         run: composer lint
       - name: Check PHP coding standard

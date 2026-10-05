@@ -7,6 +7,8 @@
 - [Provider connections](PROVIDERS.md): Hammerhead/Karoo, Wahoo, OAuth and disconnect behavior.
 - [AI coach](AI_COACH.md): credentials, planning, privacy and costs.
 - [API access](API.md): authentication and request examples.
+- [Security review](SECURITY_REVIEW.md): threat model, dependency audit, controls and remaining work.
+- [Fixture policy](FIXTURES.md): synthetic data, provenance and repository checks.
 - [Production deployment](DEPLOYMENT.md): runtime, releases, workers and backups.
 - [Managed hosting](HOSTING.md): requirements and roadmap for a hosted service.
 

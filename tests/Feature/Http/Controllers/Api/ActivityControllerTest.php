@@ -54,6 +54,16 @@ class ActivityControllerTest extends TestCase
         $this->getJson('/api/v1/activities')->assertUnauthorized();
     }
 
+    public function test_csv_export_is_disabled_without_a_download_or_json_fallback(): void
+    {
+        $user = User::factory()->create();
+        $this->createActivityFor($user, ['name' => 'PRIVATE_DISABLED_EXPORT']);
+        Sanctum::actingAs($user, ['activities:read']);
+        $response = $this->getJson('/api/v1/analysis/export?format=csv')->assertUnprocessable()->assertJsonValidationErrors('format');
+        $this->assertFalse($response->headers->has('Content-Disposition'));
+        $this->assertStringNotContainsString('PRIVATE_DISABLED_EXPORT', $response->getContent());
+    }
+
     public function test_returns_403_when_token_lacks_read_ability(): void
     {
         Sanctum::actingAs(User::factory()->create(), ['activities:write']);

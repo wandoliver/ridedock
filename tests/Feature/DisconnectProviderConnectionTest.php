@@ -177,7 +177,7 @@ class DisconnectProviderConnectionTest extends TestCase
             'api.wahooligan.com/oauth/token' => Http::response(['access_token' => 'new-access', 'refresh_token' => 'new-refresh', 'expires_in' => 3600]),
             'api.wahooligan.com/v1/user' => Http::response(['id' => 123]),
         ]);
-        $this->get('/api/v1/oauth/wahoo/callback?code=new-code&state=reconnect')->assertRedirect(route('settings.connections'));
+        $this->actingAs($connection->user)->get('/api/v1/oauth/wahoo/callback?code=new-code&state=reconnect')->assertRedirect(route('settings.connections'));
         $this->assertDatabaseCount('provider_connections', 1);
         $this->assertSame('new-access', $connection->fresh()->access_token);
         $this->assertSame(ConnectionStatus::Active, $connection->fresh()->status);

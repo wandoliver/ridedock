@@ -7,7 +7,7 @@ The [CI workflow](../.github/workflows/ci.yml) runs on pushes to `main`, pull re
 | Job | Runtime | Checks |
 | --- | --- | --- |
 | Backend tests | PHP 8.4, Node 24 | `composer test`, with SQLite in memory and mocked Vite assets. |
-| Code quality | PHP 8.4, Node 24 | Composer manifest/lockfile validation, EditorConfig, ESLint, PHP_CodeSniffer, PHP-CS-Fixer in dry-run mode and PHPStan/Larastan. |
+| Code quality | PHP 8.4, Node 24 | Composer manifest/lockfile validation, repository asset/secret-pattern guard, EditorConfig, ESLint, PHP_CodeSniffer, PHP-CS-Fixer in dry-run mode and PHPStan/Larastan. |
 | Frontend tests and build | Node 24 | JavaScript tests and a Vite production build. |
 | Fresh installation | PHP 8.4, Node 24 | Production asset build; fresh SQLite migrations; configuration, route and Blade-view caches; HTTP 200 login page rendering with production asset references. |
 
@@ -36,6 +36,7 @@ Individual commands:
 ```bash
 composer test
 composer check:quality
+composer check:repository
 npm run test:js
 npm run build
 composer check:install
@@ -50,3 +51,5 @@ Use `composer cs-fixer` to apply PHP formatting, then repeat `composer cs-fixer:
 A failed step marks its job and the workflow as failed. Open the failing step's log to find the exact test or command. Successful runs establish the checks above; they do not validate real provider access, other database engines, visual layout or an actual deployment.
 
 Branch protection is a separate repository setting. After the workflow has run, its job names can be selected as required status checks for merges. The workflow itself does not change repository merge or push permissions.
+
+Dependency audits are separate online checks: run `composer audit --locked` and `npm audit` before releases and after dependency changes. The offline repository guard is not a complete secret or personal-data scanner; follow the [fixture policy](FIXTURES.md) and [security review](SECURITY_REVIEW.md).

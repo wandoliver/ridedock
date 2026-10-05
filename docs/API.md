@@ -29,6 +29,10 @@ curl -H "Authorization: Bearer TOKEN" \
 
 Routes are omitted from analysis exports by default. Pass `include_route=1` only when location data is actually needed.
 
+Only JSON analysis export is enabled (`format=json`, or omit `format`). CSV export is disabled as of 0.3.0: `format=csv` returns HTTP 422 and no download. There is currently no export control in the web interface.
+
 ## Connections
 
 See [provider configuration and disconnect behavior](PROVIDERS.md) for OAuth setup and connection endpoints.
+
+OAuth callbacks require an authenticated RideDock browser session for the user who started the connection. A flow started from the web interface must return to the same session within ten minutes. API clients may start authorization with `connections:write`, but the browser completing it must be signed in to the same RideDock account; callbacks cannot be completed using a bearer token alone.

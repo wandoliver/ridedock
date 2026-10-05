@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', DashboardController::class)->name('dashboard');
 Route::get('/activities/{activity}', ActivityDetailController::class)->name('activities.show');
 Route::get('/api/v1/oauth/{provider}/callback', [ProviderOAuthController::class, 'callback'])
-    ->middleware('throttle:30,1')
+    ->middleware(['auth', 'throttle:30,1'])
     ->name('provider.oauth.callback');
 
 Route::middleware('guest')->group(function (): void {

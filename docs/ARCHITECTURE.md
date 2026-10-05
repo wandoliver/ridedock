@@ -12,7 +12,7 @@ Wahoo           ─ OAuth + polling + FIT ──┴─ Provider adapter ─ Norm
                                                                     │
                                                 ┌──────────────────┴───────────────┐
                                                 ▼                                  ▼
-                                        JSON/CSV analysis API                Heatmap module
+                                        JSON analysis API                    Heatmap module
 ```
 
 The provider payload remains available in `activity_sources.raw_payload`, while application code reads the normalized `activities` record. Raw source files use the non-serving `activity_sources` disk and are never returned through the API.

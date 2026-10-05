@@ -16,12 +16,12 @@ test('decodes provider-neutral route polylines', () => {
 
 test('creates weighted heat points without changing coordinates', () => {
     assert.deepEqual(heatPointsFromRoutes([
-        [[46.4983, 11.3548], [46.499, 11.3555]],
-        [[46.5, 11.36]],
+        [[0.01, 0.02], [0.011, 0.021]],
+        [[0.012, 0.022]],
     ]), [
-        [46.4983, 11.3548, 0.55],
-        [46.499, 11.3555, 0.55],
-        [46.5, 11.36, 0.55],
+        [0.01, 0.02, 0.55],
+        [0.011, 0.021, 0.55],
+        [0.012, 0.022, 0.55],
     ]);
 });
 

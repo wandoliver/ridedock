@@ -63,7 +63,7 @@ class DashboardControllerTest extends TestCase
             'distance_m' => 42500, 'moving_time_s' => 5400, 'elevation_gain_m' => 620,
         ]);
         ActivityStream::factory()->for($activity)->create([
-            'type' => 'latlng', 'data' => [['value' => [46.4983, 11.3548]], ['value' => [46.4990, 11.3555]]],
+            'type' => 'latlng', 'data' => [['value' => [0.01, 0.02]], ['value' => [0.011, 0.021]]],
         ]);
         $private = Activity::factory()->create(['distance_m' => 900000]);
 
@@ -86,7 +86,7 @@ class DashboardControllerTest extends TestCase
         ]);
         ActivityStream::factory()->for($currentYear)->create([
             'type' => 'latlng',
-            'data' => [['value' => [46.0, 11.0]], ['value' => [46.1, 11.1]]],
+            'data' => [['value' => [0.0, 0.0]], ['value' => [0.001, 0.001]]],
         ]);
         $recent = Activity::factory()->for($user)->create([
             'name' => 'Recent ride',
@@ -97,7 +97,7 @@ class DashboardControllerTest extends TestCase
         ]);
         ActivityStream::factory()->for($recent)->create([
             'type' => 'latlng',
-            'data' => [['value' => [46.0, 11.0]], ['value' => [46.1, 11.1]]],
+            'data' => [['value' => [0.0, 0.0]], ['value' => [0.001, 0.001]]],
         ]);
         $lastYear = Activity::factory()->for($user)->create([
             'name' => 'Last year ride',
@@ -108,7 +108,7 @@ class DashboardControllerTest extends TestCase
         ]);
         ActivityStream::factory()->for($lastYear)->create([
             'type' => 'latlng',
-            'data' => [['value' => [46.0, 11.0]], ['value' => [46.1, 11.1]]],
+            'data' => [['value' => [0.0, 0.0]], ['value' => [0.001, 0.001]]],
         ]);
 
         $this->withoutVite()

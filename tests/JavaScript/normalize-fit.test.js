@@ -21,8 +21,8 @@ test('normalizes summaries, streams and AXS shift events', () => {
         records: [
             {
                 timestamp: new Date('2026-08-30T07:00:00Z'),
-                position_lat: 46.4983,
-                position_long: 11.3548,
+                position_lat: 0.01,
+                position_long: 0.02,
                 heart_rate: 130,
                 cadence: 82,
                 power: 210,
@@ -31,8 +31,8 @@ test('normalizes summaries, streams and AXS shift events', () => {
             },
             {
                 timestamp: new Date('2026-08-30T07:00:05Z'),
-                position_lat: 46.499,
-                position_long: 11.3555,
+                position_lat: 0.011,
+                position_long: 0.021,
                 heart_rate: 136,
                 power: 250,
             },
@@ -54,7 +54,7 @@ test('normalizes summaries, streams and AXS shift events', () => {
     assert.deepEqual(result.streams.latlng.data[1], {
         elapsed_seconds: 5,
         recorded_at: '2026-08-30T07:00:05.000Z',
-        value: [46.499, 11.3555],
+        value: [0.011, 0.021],
     });
     assert.equal(result.streams.cadence.data.length, 1);
     assert.deepEqual(result.events[0].data, {
@@ -81,8 +81,8 @@ test('omits unavailable values instead of inventing zeroes', () => {
 
 test('parses a strict CRC-valid FIT file before normalization', async () => {
     const startedAt = new Date('2026-08-30T07:00:00Z');
-    const latitude = 46.4983;
-    const longitude = 11.3548;
+    const latitude = 0.01;
+    const longitude = 0.02;
     const degreesToSemicircles = (degrees) => Math.round(degrees * (2 ** 31) / 180);
     const encoder = new FitEncoder();
 

@@ -31,6 +31,7 @@ class ProviderOAuthController extends Controller
         Cache::put("provider-oauth-state:{$state}", [
             'user_id' => $request->user()->id,
             'provider' => $providerName->value,
+            'session_hash' => $request->hasSession() ? hash('sha256', $request->session()->getId()) : null,
         ], now()->addMinutes(10));
 
         return redirect()->away($adapter->authorizationUrl($state));
@@ -44,13 +45,29 @@ class ProviderOAuthController extends Controller
 
         $providerName = ProviderName::tryFrom($provider) ?? throw new BadRequestHttpException('Unknown provider.');
 
-        if (! $request->filled(['code', 'state'])) {
+        $code = $request->input('code');
+        $stateValue = $request->input('state');
+        if (! is_string($code) || $code === '' || strlen($code) > 4096
+            || ! is_string($stateValue) || $stateValue === '' || strlen($stateValue) > 128) {
             throw new BadRequestHttpException('Invalid or expired OAuth state.');
         }
 
-        $state = Cache::pull('provider-oauth-state:'.$request->string('state'));
+        $stateKey = 'provider-oauth-state:'.$stateValue;
+        $state = Cache::lock('provider-oauth-state-lock:'.hash('sha256', $stateValue), 10)
+            ->get(function () use ($request, $stateKey, $provider): mixed {
+                $pending = Cache::get($stateKey);
+                if (! is_array($pending)
+                    || ($pending['provider'] ?? null) !== $provider
+                    || ($pending['user_id'] ?? null) !== $request->user()?->id
+                    || (isset($pending['session_hash'])
+                        && ! hash_equals($pending['session_hash'], hash('sha256', $request->session()->getId())))) {
+                    throw new BadRequestHttpException('Invalid or expired OAuth state.');
+                }
 
-        if (! $state || $state['provider'] !== $provider) {
+                return Cache::pull($stateKey);
+            });
+
+        if (! is_array($state)) {
             throw new BadRequestHttpException('Invalid or expired OAuth state.');
         }
 
@@ -60,7 +77,11 @@ class ProviderOAuthController extends Controller
             throw new BadRequestHttpException('This provider does not support OAuth.');
         }
 
-        $token = $adapter->exchangeAuthorizationCode($request->string('code')->toString());
+        try {
+            $token = $adapter->exchangeAuthorizationCode($code);
+        } catch (\Throwable) {
+            throw new \RuntimeException('Provider authorization could not be completed. Please try again.');
+        }
         $connection = ProviderConnection::query()->updateOrCreate(
             ['user_id' => $state['user_id'], 'provider' => $providerName],
             [

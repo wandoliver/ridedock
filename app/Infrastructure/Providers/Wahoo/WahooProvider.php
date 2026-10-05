@@ -10,6 +10,7 @@ use App\Domain\Activities\Data\ProviderPage;
 use App\Domain\Activities\Data\ProviderToken;
 use App\Domain\Activities\Enums\ProviderName;
 use App\Models\ProviderConnection;
+use App\Infrastructure\Http\PublicActivityFileDownloader;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
@@ -150,12 +151,7 @@ final class WahooProvider implements ActivityFileProvider, OAuthActivityProvider
             throw new RuntimeException('The Wahoo workout does not provide a valid FIT download URL.');
         }
 
-        return Http::connectTimeout(5)
-            ->timeout(60)
-            ->accept('application/vnd.ant.fit')
-            ->get($url)
-            ->throw()
-            ->body();
+        return app(PublicActivityFileDownloader::class)->download($url);
     }
 
     public function activityFileExtension(): string

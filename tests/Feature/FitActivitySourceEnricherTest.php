@@ -39,7 +39,7 @@ class FitActivitySourceEnricherTest extends TestCase
                     'data' => [[
                         'elapsed_seconds' => 0,
                         'recorded_at' => '2026-08-30T07:00:00.000Z',
-                        'value' => [46.4983, 11.3548],
+                        'value' => [0.01, 0.02],
                     ]],
                     'metadata' => ['unit' => 'degrees'],
                 ],
