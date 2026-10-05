@@ -3,7 +3,7 @@
 return [
     'title' => 'Trainingsauswertung',
     'six_weeks' => 'Letzte sechs Kalenderwochen',
-    'period_note' => 'Dieser Verlauf zeigt immer die letzten sechs Wochen, unabhängig vom Zeitraum oben.',
+    'period_note' => 'Dieser Verlauf zeigt immer die letzten sechs Wochen, unabhängig vom Zeitraum in Routen & Archiv.',
     'empty' => 'In den letzten sechs Wochen sind noch keine Fahrten erfasst.',
     'current_week' => 'Diese Woche',
     'partial' => 'Bis jetzt',

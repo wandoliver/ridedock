@@ -31,8 +31,8 @@ class ActivityAiAnalysisControllerTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->post(route('activities.ai-analysis.store', $activity))
-            ->assertRedirect()
+            ->post(route('activities.ai-analysis.store', ['activity' => $activity->id, 'return_to' => '/activities?period=30d']))
+            ->assertRedirect(route('activities.show', ['activity' => $activity->id, 'return_to' => '/activities?period=30d']).'#coach')
             ->assertSessionHas('status', 'Die Fahrtanalyse ist abgeschlossen.');
 
         $analysis = $activity->aiAnalyses()->firstOrFail();

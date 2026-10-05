@@ -161,6 +161,14 @@ function initializeRoute(leaflet, samples) {
         maxZoom: 19,
     }).addTo(map);
 
+    const refresh = () => {
+        if (routeElement.offsetWidth === 0) return;
+        map.invalidateSize({ pan: false });
+        if (points.length > 1) map.fitBounds(leaflet.latLngBounds(points), { padding: [32, 32] });
+    };
+    routeElement.closest('details')?.addEventListener('toggle', refresh);
+    window.addEventListener('rd:view-change', refresh);
+
     if (points.length < 2) {
         map.setView(points[0] ?? [46.4983, 11.3548], 13);
 
@@ -216,8 +224,6 @@ function initializeChart(chartElement, samples) {
     grid.setAttribute('shape-rendering', 'crispEdges');
     grid.setAttribute('aria-hidden', 'true');
 
-    const labels = chartLabels(series);
-
     const line = document.createElementNS(SVG_NAMESPACE, 'path');
     line.setAttribute('d', chartPath(series));
     line.setAttribute('fill', 'none');
@@ -227,8 +233,25 @@ function initializeChart(chartElement, samples) {
     line.setAttribute('stroke-width', '3');
     line.setAttribute('vector-effect', 'non-scaling-stroke');
 
-    svg.append(grid, labels, line);
-    canvas.append(svg);
+    const render = () => {
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        if (!width || !height) return;
+        const columns = width < 460 ? 3 : 6;
+        svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+        grid.setAttribute('d', chartGridPath(width, height, DEFAULT_CHART_INSETS, columns));
+        line.setAttribute('d', chartPath(series, width, height));
+        const area = document.createElementNS(SVG_NAMESPACE, 'path');
+        const bounds = chartBounds(width, height, DEFAULT_CHART_INSETS);
+        area.setAttribute('d', `${line.getAttribute('d')} L${bounds.right},${bounds.bottom} L${bounds.left},${bounds.bottom} Z`);
+        area.setAttribute('fill', chartElement.dataset.streamChart === 'altitude' ? '#1f9a6a' : 'none');
+        area.setAttribute('fill-opacity', '0.08');
+        area.setAttribute('aria-hidden', 'true');
+        svg.replaceChildren(grid, area, chartLabels(series, width, height, columns), line);
+        canvas.replaceChildren(svg);
+    };
+    new window.ResizeObserver(render).observe(canvas);
+    render();
 }
 
 function chartBounds(width, height, insets) {
@@ -246,14 +269,14 @@ function chartBounds(width, height, insets) {
     };
 }
 
-function chartLabels(series) {
+function chartLabels(series, width = 640, height = 160, columns = 6) {
     const group = document.createElementNS(SVG_NAMESPACE, 'g');
-    const bounds = chartBounds(640, 160, DEFAULT_CHART_INSETS);
-    const ticks = chartAxisTicks(series);
+    const bounds = chartBounds(width, height, DEFAULT_CHART_INSETS);
+    const ticks = chartAxisTicks(series, columns);
 
-    group.setAttribute('fill', '#94a3b8');
-    group.setAttribute('font-size', '10');
-    group.setAttribute('font-family', 'ui-sans-serif, system-ui, sans-serif');
+    group.setAttribute('fill', '#647080');
+    group.setAttribute('font-size', '12');
+    group.setAttribute('font-family', 'Hanken Grotesk, system-ui, sans-serif');
     group.setAttribute('aria-hidden', 'true');
 
     ticks.values.forEach((value, index) => {
@@ -264,7 +287,7 @@ function chartLabels(series) {
     ticks.elapsedSeconds.forEach((seconds, index) => {
         const x = bounds.left + (index / (ticks.elapsedSeconds.length - 1)) * bounds.width;
         const anchor = index === 0 ? 'start' : index === ticks.elapsedSeconds.length - 1 ? 'end' : 'middle';
-        group.append(svgText(formatElapsedTime(seconds), x, 155, anchor));
+        group.append(svgText(formatElapsedTime(seconds), x, height - 4, anchor));
     });
 
     return group;
@@ -288,44 +311,47 @@ function initializeCombinedChart(streams) {
     })).filter(({ points }) => points.length > 0);
     if (!series.length) { canvas.hidden = true; return; }
     const maxTime = series.reduce((max, { points }) => points.reduce((time, point) => Math.max(time, point.elapsedSeconds), max), 1);
-    const svg = document.createElementNS(SVG_NAMESPACE, 'svg');
-    svg.setAttribute('viewBox', '0 0 640 160');
-    svg.setAttribute('class', 'size-full');
-    svg.setAttribute('preserveAspectRatio', 'none');
-    svg.setAttribute('role', 'img');
-    svg.setAttribute('aria-label', canvas.getAttribute('aria-label'));
-    const grid = document.createElementNS(SVG_NAMESPACE, 'path');
-    grid.setAttribute('d', chartGridPath());
-    grid.setAttribute('fill', 'none');
-    grid.setAttribute('stroke', 'rgba(23,26,31,.08)');
-    svg.append(grid);
-    series.forEach(({ type, points }) => {
-        const values = points.map((point) => point.value);
-        const min = Math.min(...values);
-        const range = Math.max(...values) - min || 1;
-        const coordinates = points.map((point) => [42 + point.elapsedSeconds / maxTime * 592, 138 - (point.value - min) / range * 125]);
-        const path = document.createElementNS(SVG_NAMESPACE, 'path');
-        let d = coordinates.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(2)},${y.toFixed(2)}`).join(' ');
-        if (type === 'altitude') d += ` L${coordinates.at(-1)[0]},138 L${coordinates[0][0]},138 Z`;
-        path.setAttribute('d', d);
-        path.setAttribute('fill', type === 'altitude' ? 'rgba(23,26,31,.05)' : 'none');
-        path.setAttribute('stroke', type === 'speed' ? '#1f9a6a' : type === 'altitude' ? 'none' : '#171a1f');
-        path.setAttribute('stroke-width', '1.5');
-        path.setAttribute('vector-effect', 'non-scaling-stroke');
-        svg.append(path);
-    });
-    for (let i = 0; i <= 6; i++) {
-        const text = document.createElementNS(SVG_NAMESPACE, 'text');
-        text.setAttribute('x', String(42 + i / 6 * 592));
-        text.setAttribute('y', '156');
-        text.setAttribute('text-anchor', i === 6 ? 'end' : 'start');
-        text.setAttribute('font-size', '10');
-        text.setAttribute('fill', 'rgba(23,26,31,.45)');
-        const seconds = Math.round(maxTime * i / 6);
-        text.textContent = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
-        svg.append(text);
-    }
-    canvas.replaceChildren(svg);
+    const render = () => {
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        if (!width || !height) return;
+        const columns = width < 460 ? 3 : 6;
+        const bounds = chartBounds(width, height, DEFAULT_CHART_INSETS);
+        const svg = document.createElementNS(SVG_NAMESPACE, 'svg');
+        svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+        svg.setAttribute('class', 'size-full');
+        svg.setAttribute('role', 'img');
+        svg.setAttribute('aria-label', canvas.getAttribute('aria-label'));
+        const grid = document.createElementNS(SVG_NAMESPACE, 'path');
+        grid.setAttribute('d', chartGridPath(width, height, DEFAULT_CHART_INSETS, columns));
+        grid.setAttribute('fill', 'none');
+        grid.setAttribute('stroke', 'rgba(23,26,31,.08)');
+        svg.append(grid);
+        series.forEach(({ type, points }) => {
+            const values = points.map((point) => point.value);
+            const min = Math.min(...values);
+            const range = Math.max(...values) - min || 1;
+            const coordinates = points.map((point) => [bounds.left + point.elapsedSeconds / maxTime * bounds.width, bounds.bottom - (point.value - min) / range * bounds.height]);
+            const path = document.createElementNS(SVG_NAMESPACE, 'path');
+            let d = coordinates.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(2)},${y.toFixed(2)}`).join(' ');
+            if (type === 'altitude') d += ` L${coordinates.at(-1)[0]},${bounds.bottom} L${coordinates[0][0]},${bounds.bottom} Z`;
+            path.setAttribute('d', d);
+            path.setAttribute('fill', type === 'altitude' ? 'rgba(23,26,31,.05)' : 'none');
+            path.setAttribute('stroke', type === 'speed' ? '#1f9a6a' : type === 'altitude' ? 'none' : '#171a1f');
+            path.setAttribute('stroke-width', '1.5');
+            path.setAttribute('vector-effect', 'non-scaling-stroke');
+            svg.append(path);
+        });
+        for (let i = 0; i <= columns; i++) {
+            const text = svgText(formatElapsedTime(maxTime * i / columns), bounds.left + i / columns * bounds.width, height - 4, i === columns ? 'end' : i === 0 ? 'start' : 'middle');
+            text.setAttribute('font-size', '12');
+            text.setAttribute('fill', '#647080');
+            svg.append(text);
+        }
+        canvas.replaceChildren(svg);
+    };
+    new window.ResizeObserver(render).observe(canvas);
+    render();
 }
 
 function initializeRpe() {
@@ -340,7 +366,6 @@ function initializeRpe() {
     };
     ratings.forEach((input) => input.addEventListener('change', () => {
         paint();
-        input.form?.requestSubmit();
     }));
     paint();
 }

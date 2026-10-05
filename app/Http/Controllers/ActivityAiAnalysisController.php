@@ -9,6 +9,7 @@ use App\Domain\Training\Services\ReserveAiAnalysis;
 use App\Jobs\GenerateActivityAnalysis;
 use App\Models\Activity;
 use App\Models\User;
+use App\Support\ActivityNavigation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Throwable;
@@ -28,9 +29,10 @@ class ActivityAiAnalysisController extends Controller
         }
 
         $model = Activity::query()->whereBelongsTo($user)->findOrFail($activity);
+        $redirect = redirect()->route('activities.show', ActivityNavigation::detailParameters($request, $model->id))->withFragment('coach');
 
         if (! $trainingAdvisor->isConfigured()) {
-            return back()->with('analysis_error', __('ui.messages.ai_not_configured'));
+            return $redirect->with('analysis_error', __('ui.messages.ai_not_configured'));
         }
 
         $isAlreadyRunning = $model->aiAnalyses()
@@ -38,7 +40,7 @@ class ActivityAiAnalysisController extends Controller
             ->exists();
 
         if ($isAlreadyRunning) {
-            return back()->with('status', __('ui.messages.analysis_running'));
+            return $redirect->with('status', __('ui.messages.analysis_running'));
         }
 
         $context = $contextBuilder->build($model);
@@ -66,10 +68,10 @@ class ActivityAiAnalysisController extends Controller
                 'completed_at' => now(),
             ]);
 
-            return back()->with('analysis_error', __('ui.messages.ride_analysis_failed'));
+            return $redirect->with('analysis_error', __('ui.messages.ride_analysis_failed'));
         }
 
-        return back()->with('status', __($analysis->refresh()->status === AiAnalysisStatus::Completed
+        return $redirect->with('status', __($analysis->refresh()->status === AiAnalysisStatus::Completed
             ? 'ui.messages.ride_analysis_complete' : 'ui.messages.ai_queued'));
     }
 }

@@ -79,7 +79,7 @@ class ComparableEfficiencyTest extends TestCase
         $rows = $service->history($user, CarbonImmutable::parse('2026-10-02'));
         $this->assertCount(6, $rows);
         $this->actingAs($user)->withoutVite()->get(route('activities.show', $current))->assertOk()->assertSee(__('efficiency.title'));
-        $this->get(route('dashboard'))->assertOk()->assertSee(__('efficiency.trends'));
+        $this->get(route('analytics'))->assertOk()->assertSee(__('efficiency.trends'));
         $this->patch(route('activities.comparison.update', $current), ['comparison_group' => 'New group', 'user_id' => 99999])->assertRedirect();
         $this->assertSame('New group', $current->fresh()->comparison_group);
         $this->patch(route('activities.comparison.update', $current), ['comparison_group' => str_repeat('x', 81)])->assertSessionHasErrors('comparison_group');

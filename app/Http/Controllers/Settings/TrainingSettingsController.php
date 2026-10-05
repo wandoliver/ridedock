@@ -56,6 +56,11 @@ class TrainingSettingsController extends Controller
 
         app()->setLocale($user->locale);
 
-        return to_route('settings.training')->with('status', __('ui.settings.profile_saved'));
+        $redirect = to_route('settings.training')->with('status', __('ui.settings.profile_saved'));
+        $section = $request->input('section');
+        if (is_string($section) && in_array($section, ['profile', 'availability', 'thresholds'], true)) {
+            $redirect->withFragment($section);
+        }
+        return $redirect;
     }
 }

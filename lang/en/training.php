@@ -3,7 +3,7 @@
 return [
     'title' => 'Training overview',
     'six_weeks' => 'Last six calendar weeks',
-    'period_note' => 'This history always covers the last six weeks, independently of the period selected above.',
+    'period_note' => 'This history always covers the last six weeks, independently of the period selected in Routes & archive.',
     'empty' => 'No rides have been recorded in the last six weeks yet.',
     'current_week' => 'This week',
     'partial' => 'So far',

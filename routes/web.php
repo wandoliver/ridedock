@@ -39,6 +39,7 @@ Route::middleware('guest')->group(function (): void {
 });
 
 Route::middleware('auth')->group(function (): void {
+    Route::get('/insights', DashboardController::class)->name('analytics');
     Route::get('/ai-analyses/{analysis}/status', AiAnalysisStatusController::class)
         ->middleware('throttle:120,1')->name('ai-analyses.status');
     Route::get('/coach', CoachController::class)->name('coach.index');

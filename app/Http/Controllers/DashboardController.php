@@ -29,9 +29,10 @@ class DashboardController extends Controller
             return view('dashboard');
         }
 
+        $isAnalytics = $request->routeIs('analytics');
         $activityQuery = $user->activities()
-            ->when($range['from'], fn ($query, $from) => $query->where('started_at', '>=', $from))
-            ->when($range['to'], fn ($query, $to) => $query->where('started_at', '<=', $to));
+            ->when($isAnalytics && $range['from'], fn ($query) => $query->where('started_at', '>=', $range['from']))
+            ->when($isAnalytics && $range['to'], fn ($query) => $query->where('started_at', '<=', $range['to']));
 
         $totals = (clone $activityQuery)
             ->selectRaw('COUNT(*) as activity_count')
@@ -44,13 +45,13 @@ class DashboardController extends Controller
         $activities = (clone $activityQuery)
             ->with('latestAiAnalysis')
             ->latest('started_at')
-            ->limit(5)
+            ->limit($isAnalytics ? 5 : 3)
             ->get([
                 'id', 'user_id', 'name', 'started_at', 'distance_m', 'moving_time_s',
                 'elevation_gain_m', 'average_power', 'rpe',
             ]);
 
-        $heatmapRoutes = iterator_to_array($routeGeometry->routes($user, $range['from'], $range['to']));
+        $heatmapRoutes = $isAnalytics ? iterator_to_array($routeGeometry->routes($user, $range['from'], $range['to'])) : [];
 
         $weeklyPlan = $user->aiAnalyses()->where('type', 'weekly_plan')
             ->where('status', 'completed')->latest()->first();
@@ -58,9 +59,12 @@ class DashboardController extends Controller
         $today = $now->toDateString();
         $todayPlan = $planDays->firstWhere('date', $today)
             ?? $planDays->first(fn ($day) => $day['date'] >= $today && $day['type'] === 'ride');
-        $volumeActivities = (clone $activityQuery)->get(['started_at', 'moving_time_s']);
-        $weeklyVolume = $volumeActivities->groupBy(fn ($activity) => $activity->started_at->startOfWeek()->toDateString())
-            ->map(fn ($rides) => $rides->sum('moving_time_s') / 3600)->sortKeys();
+        $weeklyVolume = collect();
+        if ($isAnalytics) {
+            $weeklyVolume = (clone $activityQuery)->get(['started_at', 'moving_time_s'])
+                ->groupBy(fn ($activity) => $activity->started_at->startOfWeek()->toDateString())
+                ->map(fn ($rides) => $rides->sum('moving_time_s') / 3600)->sortKeys();
+        }
         $planActivities = $user->activities()->whereBetween('started_at', [
             CarbonImmutable::parse($planDays->min('date') ?? $today)->subDay(),
             CarbonImmutable::parse($planDays->max('date') ?? $today)->addDays(2),
@@ -81,10 +85,10 @@ class DashboardController extends Controller
         }
         $recentCount = $user->activities()->where('started_at', '>=', $now->subDays(7))->count();
 
-        return view('dashboard', [
-            'efficiencyTrends' => app(ComparableEfficiency::class)->history($user, $now),
-            'sensorZones' => app(SensorZoneDistribution::class)->history($user, $now),
-            'loadBalance' => app(RecordedLoadBalance::class)->report($user, $now),
+        return view($isAnalytics ? 'analytics' : 'dashboard', [
+            'efficiencyTrends' => $isAnalytics ? app(ComparableEfficiency::class)->history($user, $now) : [],
+            'sensorZones' => $isAnalytics ? app(SensorZoneDistribution::class)->history($user, $now) : [],
+            'loadBalance' => $isAnalytics ? app(RecordedLoadBalance::class)->report($user, $now) : [],
             'trainingStatistics' => app(TrainingStatistics::class)->report($user, $now),
             'todayRides' => $todayRides,
             'planRiddenMinutes' => $planRiddenMinutes,

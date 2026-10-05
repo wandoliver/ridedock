@@ -78,7 +78,7 @@ class ActivityDetailControllerTest extends TestCase
             ->assertSee('RPE 6')
             ->assertSee('Kontrolliert gefahren.')
             ->assertSee(route('activities.feedback.update', $activity), false)
-            ->assertSee('Gefühl speichern')
+            ->assertSee('Notizen speichern')->assertSee('Bewertung speichern')
             ->assertSee('Hammerhead')
             ->assertSee('1 Schaltvorgang')
             ->assertSee('id="ride-route"', false)

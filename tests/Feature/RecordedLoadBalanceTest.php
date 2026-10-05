@@ -44,7 +44,7 @@ class RecordedLoadBalanceTest extends TestCase
         $this->assertSame(round(300 * $mean / $deviation, 1), $report['monotony']['strain']);
         $this->assertSame(-35.7, $report['load_balance']['value']);
         $this->assertFalse($report['freshness']['available']);
-        $this->actingAs($user)->withoutVite()->get(route('dashboard'))->assertOk()->assertSee(__('balance.title'));
+        $this->actingAs($user)->withoutVite()->get(route('analytics'))->assertOk()->assertSee(__('balance.title'));
     }
 
     public function test_missing_ratings_or_duration_make_their_period_unknown(): void

@@ -3,10 +3,8 @@
 namespace Tests\Feature;
 
 use App\Domain\Activities\Enums\ConnectionStatus;
-use App\Domain\Training\Enums\AiAnalysisStatus;
 use App\Models\Activity;
 use App\Models\ActivityStream;
-use App\Models\AiAnalysis;
 use App\Models\ProviderConnection;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -16,6 +14,12 @@ use Tests\TestCase;
 class DashboardControllerTest extends TestCase
 {
     use LazilyRefreshDatabase;
+
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+        parent::tearDown();
+    }
 
     public function test_guest_sees_landing_page_with_login_and_no_private_dashboard(): void
     {
@@ -34,45 +38,39 @@ class DashboardControllerTest extends TestCase
             ->assertDontSee('Private morning ride');
     }
 
-    public function test_authenticated_user_sees_only_their_totals_and_recent_activities(): void
+    public function test_overview_is_limited_to_three_recent_rides_and_the_current_week(): void
+    {
+        Carbon::setTestNow('2026-10-05 12:00:00');
+        $user = User::factory()->create();
+        foreach (range(1, 4) as $day) {
+            Activity::factory()->for($user)->create(['name' => 'Ride '.$day, 'started_at' => '2026-10-0'.$day.'T10:00:00Z']);
+        }
+        Activity::factory()->for($user)->create(['name' => 'Today ride', 'started_at' => now(), 'distance_m' => 42500]);
+        Activity::factory()->create(['name' => 'Private ride']);
+
+        $this->withoutVite()->actingAs($user)->get(route('dashboard'))->assertOk()
+            ->assertSee('Today ride')->assertSee('Ride 4')->assertSee('Ride 3')
+            ->assertDontSee('Ride 2')->assertDontSee('Private ride')
+            ->assertSee('42,5 km')->assertSee('Deine Woche')
+            ->assertSee(route('analytics'), false)->assertSee(route('activities.index'), false)
+            ->assertDontSee('id="ride-heatmap"', false)->assertDontSee('data-stream-chart', false);
+    }
+
+    public function test_insights_show_only_the_owners_metrics_and_routes(): void
     {
         $user = User::factory()->create();
         $activity = Activity::factory()->for($user)->create([
-            'name' => 'Passo Ride',
-            'distance_m' => 42500,
-            'moving_time_s' => 5400,
-            'elevation_gain_m' => 620,
-        ]);
-        AiAnalysis::factory()->for($user)->for($activity)->create([
-            'status' => AiAnalysisStatus::Completed,
+            'distance_m' => 42500, 'moving_time_s' => 5400, 'elevation_gain_m' => 620,
         ]);
         ActivityStream::factory()->for($activity)->create([
-            'type' => 'latlng',
-            'data' => [
-                ['value' => [46.4983, 11.3548]],
-                ['value' => [46.4990, 11.3555]],
-            ],
+            'type' => 'latlng', 'data' => [['value' => [46.4983, 11.3548]], ['value' => [46.4990, 11.3555]]],
         ]);
-        Activity::factory()->create(['name' => 'Someone else ride', 'distance_m' => 900000]);
+        $private = Activity::factory()->create(['distance_m' => 900000]);
 
-        $this->withoutVite()
-            ->actingAs($user)
-            ->get(route('dashboard'))
-            ->assertOk()
-            ->assertSee('Passo Ride')
-            ->assertSee('Analysiert')
-            ->assertSee('43 km')
-            ->assertSee('620 m')
-            ->assertSee('1 Route')
-            ->assertSee($activity->id)
-            ->assertSee('data-heatmap-expand', false)
-            ->assertSee(route('settings.connections'), false)
-            ->assertDontSee('Fahrten verstehen, Daten behalten.')
-            ->assertDontSee(route('login.store'), false)
-            ->assertDontSee('Deine Wege wachsen mit.')
-            ->assertDontSee('Datenquellen')
-            ->assertDontSee('Someone else ride')
-            ->assertDontSee('900 km');
+        $this->withoutVite()->actingAs($user)->get(route('analytics'))->assertOk()
+            ->assertSee('43 km')->assertSee('620 m')->assertSee('1 Route')
+            ->assertSee($activity->id)->assertSee('data-heatmap-expand', false)
+            ->assertDontSee($private->id)->assertDontSee('900 km');
     }
 
     public function test_current_year_is_default_and_period_filter_updates_totals_and_routes(): void
@@ -115,35 +113,35 @@ class DashboardControllerTest extends TestCase
 
         $this->withoutVite()
             ->actingAs($user)
-            ->get(route('dashboard'))
+            ->get(route('analytics'))
             ->assertOk()
             ->assertSee('Jahr 2026')
             ->assertSee('50 km')
-            ->assertSee('Current year ride')
-            ->assertSee('Recent ride')
+            ->assertSee($currentYear->id)
+            ->assertSee($recent->id)
             ->assertSee('2 Routen')
-            ->assertDontSee('Last year ride')
+            ->assertDontSee($lastYear->id)
             ->assertDontSee('110 km');
 
         $this->withoutVite()
             ->actingAs($user)
-            ->get(route('dashboard', ['period' => '30d']))
+            ->get(route('analytics', ['period' => '30d']))
             ->assertOk()
             ->assertSee('Letzte 30 Tage')
             ->assertSee('10 km')
-            ->assertSee('Recent ride')
+            ->assertSee($recent->id)
             ->assertSee('1 Route')
-            ->assertDontSee('Current year ride')
-            ->assertDontSee('Last year ride');
+            ->assertDontSee($currentYear->id)
+            ->assertDontSee($lastYear->id);
 
         $this->withoutVite()
             ->actingAs($user)
-            ->get(route('dashboard', ['period' => 'all']))
+            ->get(route('analytics', ['period' => 'all']))
             ->assertOk()
             ->assertSee('Gesamter Zeitraum')
             ->assertSee('110 km')
             ->assertSee('3 Routen')
-            ->assertSee('Last year ride');
+            ->assertSee($lastYear->id);
     }
 
     public function test_invalid_period_falls_back_to_current_year(): void
@@ -153,7 +151,7 @@ class DashboardControllerTest extends TestCase
 
         $this->withoutVite()
             ->actingAs($user)
-            ->get(route('dashboard', ['period' => 'invalid']))
+            ->get(route('analytics', ['period' => 'invalid']))
             ->assertOk()
             ->assertSee('Jahr 2026');
     }
@@ -189,7 +187,7 @@ class DashboardControllerTest extends TestCase
             'started_at' => '2026-09-29T10:00:00Z', 'moving_time_s' => 99999, 'rpe' => 10,
         ]);
         foreach (['30d', 'year', 'all'] as $period) {
-            $this->withoutVite()->actingAs($user)->get(route('dashboard', ['period' => $period]))
+            $this->withoutVite()->actingAs($user)->get(route('analytics', ['period' => $period]))
                 ->assertOk()->assertSee('Trainingsauswertung')->assertSee('Anstrengungsverteilung')
                 ->assertSee('1 von 2 Fahrten mit RPE und Fahrzeit')
                 ->assertSee('33% der bekannten Fahrzeit bewertet')
@@ -202,7 +200,7 @@ class DashboardControllerTest extends TestCase
     public function test_training_overview_has_an_english_empty_state(): void
     {
         $user = User::factory()->create(['locale' => 'en']);
-        $this->withoutVite()->actingAs($user)->get(route('dashboard'))->assertOk()
+        $this->withoutVite()->actingAs($user)->get(route('analytics'))->assertOk()
             ->assertSee('Training overview')->assertSee('No rides have been recorded in the last six weeks yet.')
             ->assertDontSee('training.title')->assertDontSee('Trainingsauswertung');
     }

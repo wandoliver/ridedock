@@ -70,6 +70,6 @@ class SensorZoneDistributionTest extends TestCase
         $this->assertSame(60.0, $result['power']['seconds']['P4']);
         $this->assertSame(60.0, $result['power']['seconds']['P1']);
         $this->actingAs($user)->withoutVite()->get(route('activities.show', $ride))->assertOk()->assertSee(__('zones.sensor_title'));
-        $this->get(route('dashboard'))->assertOk()->assertSee(__('zones.sensor_title'));
+        $this->get(route('analytics'))->assertOk()->assertSee(__('zones.sensor_title'));
     }
 }

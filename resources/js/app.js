@@ -7,6 +7,12 @@ import { initializeCoachTabs } from './coach-tabs.js';
 import { decodePolyline, heatPointsFromRoutes, setHeatmapPanelExpanded } from './heatmap.js';
 import { initializeProviderSync } from './provider-sync.js';
 import { initializeWeeklyPlan } from './weekly-plan.js';
+import { initializePageTabs } from './page-tabs.js';
+import { initializeNavigation } from './navigation.js';
+
+initializeNavigation();
+initializePageTabs();
+initializeCoachTabs();
 
 const heatmapElement = document.getElementById('ride-heatmap');
 const heatmapDataElement = document.getElementById('ride-heatmap-data');
@@ -21,6 +27,7 @@ if (heatmapElement && heatmapDataElement) {
         attributionControl: true,
         scrollWheelZoom: true,
         zoomControl: false,
+        trackResize: false,
     });
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -29,9 +36,8 @@ if (heatmapElement && heatmapDataElement) {
         maxZoom: 19,
     }).addTo(map);
 
-    if (decodedRoutes.length === 0) {
-        map.setView([46.4983, 11.3548], 9);
-    } else {
+    let heatLayer = null;
+    if (decodedRoutes.length > 0) {
         const routeLayer = L.layerGroup();
 
         for (const points of decodedRoutes) {
@@ -43,7 +49,7 @@ if (heatmapElement && heatmapDataElement) {
         }
 
         routeLayer.addTo(map);
-        L.heatLayer(heatPointsFromRoutes(decodedRoutes), {
+        heatLayer = L.heatLayer(heatPointsFromRoutes(decodedRoutes), {
             blur: 11,
             gradient: {
                 0.15: '#177a54',
@@ -53,12 +59,23 @@ if (heatmapElement && heatmapDataElement) {
             },
             minOpacity: 0.2,
             radius: 8,
-        }).addTo(map);
-
-        map.fitBounds(L.latLngBounds(decodedRoutes.flat()), {
-            padding: [24, 24],
         });
     }
+
+    let mapReady = false;
+    const refreshHeatmap = () => {
+        if (!heatmapElement.offsetWidth || !heatmapElement.offsetHeight) return;
+        map.invalidateSize({ pan: false });
+        if (!mapReady) {
+            if (decodedRoutes.length) map.fitBounds(L.latLngBounds(decodedRoutes.flat()), { padding: [24, 24] });
+            else map.setView([46.4983, 11.3548], 9);
+            heatLayer?.addTo(map);
+            mapReady = true;
+        }
+    };
+    window.addEventListener('rd:view-change', refreshHeatmap);
+    new window.ResizeObserver(refreshHeatmap).observe(heatmapElement);
+    refreshHeatmap();
 
     const frame = document.querySelector('[data-heatmap-frame]');
     const expandButton = document.querySelector('[data-heatmap-expand]');
@@ -81,7 +98,6 @@ if (heatmapElement && heatmapDataElement) {
 initializeActivityDetail(L);
 initializeActivityAnalysis();
 initializeAiStatus();
-initializeCoachTabs();
 initializeWeeklyPlan();
 initializeProviderSync();
 

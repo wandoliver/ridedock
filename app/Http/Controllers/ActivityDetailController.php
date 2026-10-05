@@ -54,6 +54,7 @@ class ActivityDetailController extends Controller
         $matchedDay = $days->first(fn ($day) => $day['type'] === 'ride' && $matches->get($day['date'], collect())->isNotEmpty());
 
         return view('activities.show', [
+            'returnUrl' => \App\Support\ActivityNavigation::returnTo($request) ?? route('activities.index'),
             'efficiency' => app(ComparableEfficiency::class)->report($model),
             'sensorZones' => app(SensorZoneDistribution::class)->activity($model),
             'matchedDay' => $matchedDay,

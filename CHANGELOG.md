@@ -4,6 +4,26 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0] - 2026-10-05
+
+### Added
+
+- A shared responsive sidebar, contextual page headers, accessible section navigation, and a consistent typography, spacing and button system.
+- A dedicated Insights page for volume/load, sensor zones, efficiency and route heatmaps.
+
+### Changed
+
+- Reduce the overview to the next session, current-week totals and three recent activities.
+- Restructure ride details around a compact elevation profile and rating, with separate Measurements, Coach and Notes sections; save ratings and notes independently.
+- Open Coach on the weekly plan and replace cramped day columns with a responsive agenda and selected-day details.
+- Group training settings into Profile & goal, Availability, Measurements & zones and AI & privacy; align Connections and authentication with the shared interface.
+
+### Fixed
+
+- Preserve archive filters, pagination and Coach context when returning from ride details, including scroll position when session storage is available.
+- Restore section/day selections with browser Back/Forward, retain the active section after saving or requesting an analysis, and expose hidden form sections when validation fails.
+- Restrict contextual return links to approved local destinations.
+
 ## [0.0.13] - 2026-10-02
 
 ### Added

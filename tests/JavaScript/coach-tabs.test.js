@@ -83,3 +83,10 @@ function fakeClassList() {
         },
     };
 }
+
+test('coach opens the current week by default', () => {
+    const tabs = ['goal-plan', 'training-block', 'weekly-plan'].map(fakeTab);
+    const panels = ['goal-plan', 'training-block', 'weekly-plan'].map(fakeSection);
+    assert.equal(activateCoachSection('', tabs, panels), 'weekly-plan');
+    assert.deepEqual(panels.map((panel) => panel.hidden), [true, true, false]);
+});

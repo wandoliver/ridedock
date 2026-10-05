@@ -26,6 +26,10 @@ class TrainingZoneProfileController extends Controller
             isset($data['ftp_watts']) ? (int) $data['ftp_watts'] : null,
             isset($data['max_heart_rate']) ? (int) $data['max_heart_rate'] : null
         );
-        return to_route('settings.training')->with('status', __('zones.saved'));
+        $redirect = to_route('settings.training')->with('status', __('zones.saved'));
+        if ($request->input('section') === 'thresholds') {
+            $redirect->withFragment('thresholds');
+        }
+        return $redirect;
     }
 }
