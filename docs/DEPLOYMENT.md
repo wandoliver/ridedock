@@ -4,6 +4,16 @@ This document describes the current baseline for running one RideDock installati
 
 For a service operated on behalf of non-technical users, also follow [HOSTING.md](HOSTING.md).
 
+## Deployment options
+
+- **Local development:** SQLite with the AI worker started by `composer run dev` is sufficient for evaluating RideDock. Follow [local development](DEVELOPMENT.md).
+- **Production self-hosting:** use HTTPS, PostgreSQL, persistent private storage, backups and a supervised queue worker. Use the operational baseline below.
+- **Managed RideDock:** a public multiuser service requires additional identity, privacy, lifecycle, billing and operational controls. Follow [HOSTING.md](HOSTING.md).
+
+## Updating
+
+Run `php artisan migrate --force` after updating, including the migration that allows cleared provider access tokens. For worker and configuration changes when upgrading older installations, see [local development](DEVELOPMENT.md#upgrading-installations-from-before-v008) and the [Changelog](../CHANGELOG.md).
+
 ## Recommended topology
 
 A production installation should have:
@@ -126,7 +136,7 @@ Use HTTPS before enabling either provider. Keep development, staging and product
 
 ## AI operations
 
-Follow the AI setup in [README.md](README.md#ai-coach-configuration). For production:
+Follow the AI setup in [AI coach configuration](AI_COACH.md). For production:
 
 - use a dedicated OpenAI project and server-side project key;
 - never expose the key to the browser;

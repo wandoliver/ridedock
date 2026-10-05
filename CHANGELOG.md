@@ -4,6 +4,14 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-10-05
+
+### Changed
+
+- Reduce the README to a project overview, quick start and documentation links.
+- Move setup, AI configuration, API examples and training methodology into focused guides under `docs/`; consolidate provider and architecture documentation.
+- Move deployment and managed-hosting guides into `docs/` and update their references.
+
 ## [0.1.0] - 2026-10-05
 
 ### Added

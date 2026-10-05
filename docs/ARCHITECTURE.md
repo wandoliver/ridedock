@@ -1,5 +1,22 @@
 # Architecture
 
+## Data flow
+
+```text
+Hammerhead/Karoo ─ OAuth + webhook + FIT ─┐
+Wahoo           ─ OAuth + polling + FIT ──┴─ Provider adapter ─ Normalize
+                                                                    │
+                                                                    ▼
+                                                        activities + sources
+                                                        streams + events
+                                                                    │
+                                                ┌──────────────────┴───────────────┐
+                                                ▼                                  ▼
+                                        JSON/CSV analysis API                Heatmap module
+```
+
+The provider payload remains available in `activity_sources.raw_payload`, while application code reads the normalized `activities` record. Raw source files use the non-serving `activity_sources` disk and are never returned through the API.
+
 ## Principles
 
 1. The normalized activity is the product; providers are replaceable input adapters.
