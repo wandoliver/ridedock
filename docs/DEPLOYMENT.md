@@ -30,7 +30,7 @@ Redis and object storage are sensible scaling additions, but the current applica
 
 ## Runtime requirements
 
-- PHP 8.3 or later with the extensions required by Laravel and the selected database;
+- PHP 8.4 or later with the extensions required by Laravel and the selected database;
 - Composer;
 - Node.js for building frontend assets and parsing FIT files;
 - PostgreSQL for a hosted or multiuser installation;

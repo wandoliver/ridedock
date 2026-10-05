@@ -2,7 +2,7 @@
 
 ## Setup
 
-Requirements: PHP 8.3+, Composer, Node.js 22 (22.13+) or 24+ (24 recommended), and SQLite (default) or PostgreSQL/MySQL.
+Requirements: PHP 8.4+, Composer, Node.js 22 (22.13+) or 24+ (24 recommended), and SQLite (default) or PostgreSQL/MySQL.
 
 ```bash
 composer setup

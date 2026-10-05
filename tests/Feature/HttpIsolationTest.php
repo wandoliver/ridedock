@@ -8,6 +8,16 @@ use Tests\TestCase;
 
 class HttpIsolationTest extends TestCase
 {
+    public function test_providers_are_disabled_without_inherited_oauth_credentials(): void
+    {
+        foreach (['hammerhead', 'wahoo'] as $provider) {
+            $this->assertFalse(config("activity-providers.$provider.enabled"));
+            foreach (['client_id', 'client_secret', 'redirect_uri'] as $field) {
+                $this->assertEmpty(config("activity-providers.$provider.$field"));
+            }
+        }
+    }
+
     public function test_unmocked_http_requests_are_blocked_by_default(): void
     {
         $this->expectException(StrayRequestException::class);

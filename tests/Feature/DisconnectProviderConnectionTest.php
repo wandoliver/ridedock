@@ -161,7 +161,15 @@ class DisconnectProviderConnectionTest extends TestCase
     public function test_wahoo_oauth_reconnects_the_same_record(): void
     {
         Queue::fake();
-        config()->set('activity-providers.wahoo.enabled', true);
+        config()->set('activity-providers.wahoo', [
+            ...config('activity-providers.wahoo'),
+            'enabled' => true,
+            'client_id' => 'wahoo-client',
+            'client_secret' => 'wahoo-secret',
+            'redirect_uri' => 'http://localhost/api/v1/oauth/wahoo/callback',
+            'api_url' => 'https://api.wahooligan.com/v1',
+            'auth_url' => 'https://api.wahooligan.com',
+        ]);
         $connection = ProviderConnection::factory()->create(['provider' => 'wahoo']);
         app(DisconnectProviderConnection::class)->handle($connection);
         Cache::put('provider-oauth-state:reconnect', ['user_id' => $connection->user_id, 'provider' => 'wahoo']);

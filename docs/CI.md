@@ -6,18 +6,18 @@ The [CI workflow](../.github/workflows/ci.yml) runs on pushes to `main`, pull re
 
 | Job | Runtime | Checks |
 | --- | --- | --- |
-| Backend tests | PHP 8.3 and 8.4, Node 24 | `composer test`, with SQLite in memory and mocked Vite assets. |
+| Backend tests | PHP 8.4, Node 24 | `composer test`, with SQLite in memory and mocked Vite assets. |
 | Code quality | PHP 8.4, Node 24 | Composer manifest/lockfile validation, EditorConfig, ESLint, PHP_CodeSniffer, PHP-CS-Fixer in dry-run mode and PHPStan/Larastan. |
 | Frontend tests and build | Node 24 | JavaScript tests and a Vite production build. |
 | Fresh installation | PHP 8.4, Node 24 | Production asset build; fresh SQLite migrations; configuration, route and Blade-view caches; HTTP 200 login page rendering with production asset references. |
 
-The backend matrix runs both PHP versions independently, so one failure does not cancel the other. Jobs have bounded timeouts. A newer run of the same branch or pull request cancels its obsolete predecessor.
+All PHP jobs use PHP 8.4. Jobs have bounded timeouts. A newer run of the same branch or pull request cancels its obsolete predecessor.
 
 Each run installs Composer and npm dependencies from their committed lockfiles. Only dependency downloads are cached; databases, Laravel caches and application build output are recreated. Actions are pinned to full commit IDs. The workflow has `contents: read` permission and checkout does not persist Git credentials. No provider or AI secrets are required.
 
-Composer resolves dependencies against PHP 8.3.0 (`config.platform.php`), so updating the lockfile on a newer development runtime preserves the documented minimum. Symfony components use the compatible 7.4 series. The backend matrix still executes the tests on both real PHP runtimes.
+Composer resolves dependencies against PHP 8.4.0 (`config.platform.php`), the documented minimum. CI executes the tests on PHP 8.4.
 
-The default Laravel test case blocks unmocked Laravel HTTP-client requests. Use explicit HTTP fakes or mocked training/provider contracts in tests. Backend tests replace Vite rendering; the frontend and installation jobs validate the actual build separately. Use synthetic activity data, never personal FIT files, tokens or routes.
+The default Laravel test case blocks unmocked Laravel HTTP-client requests. PHPUnit disables providers and clears their OAuth credentials independently of local environment values; provider tests must explicitly set their synthetic configuration. Use explicit HTTP fakes or mocked training/provider contracts in tests. Backend tests replace Vite rendering; the frontend and installation jobs validate the actual build separately. Use synthetic activity data, never personal FIT files, tokens or routes.
 
 ## Local checks
 
@@ -29,7 +29,7 @@ npm ci --ignore-scripts
 composer check
 ```
 
-`composer check` runs backend tests, code quality, JavaScript tests, the production build and installation verification, using your current local PHP and Node versions. GitHub additionally tests PHP 8.3 and 8.4, with Node 24. Supported Node versions are 22.13+ within Node 22, or Node 24+; Node 24 is recommended.
+`composer check` runs backend tests, code quality, JavaScript tests, the production build and installation verification, using your current local PHP and Node versions. GitHub uses PHP 8.4 and Node 24. Supported Node versions are 22.13+ within Node 22, or Node 24+; Node 24 is recommended.
 
 Individual commands:
 

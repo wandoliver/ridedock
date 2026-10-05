@@ -33,7 +33,22 @@
         <env name="SESSION_DRIVER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
-        <env name="WAHOO_ENABLED" value="false"/>
+        <env name="HAMMERHEAD_ENABLED" value="false" force="true"/>
+        <env name="HAMMERHEAD_CLIENT_ID" value="" force="true"/>
+        <env name="HAMMERHEAD_CLIENT_SECRET" value="" force="true"/>
+        <env name="HAMMERHEAD_REDIRECT_URI" value="" force="true"/>
+        <env name="WAHOO_ENABLED" value="false" force="true"/>
+        <env name="WAHOO_CLIENT_ID" value="" force="true"/>
+        <env name="WAHOO_CLIENT_SECRET" value="" force="true"/>
+        <env name="WAHOO_REDIRECT_URI" value="" force="true"/>
+        <server name="HAMMERHEAD_ENABLED" value="false"/>
+        <server name="HAMMERHEAD_CLIENT_ID" value=""/>
+        <server name="HAMMERHEAD_CLIENT_SECRET" value=""/>
+        <server name="HAMMERHEAD_REDIRECT_URI" value=""/>
+        <server name="WAHOO_ENABLED" value="false"/>
+        <server name="WAHOO_CLIENT_ID" value=""/>
+        <server name="WAHOO_CLIENT_SECRET" value=""/>
+        <server name="WAHOO_REDIRECT_URI" value=""/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
     </php>
 </phpunit>

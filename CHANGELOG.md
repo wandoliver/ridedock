@@ -4,6 +4,17 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-10-05
+
+### Changed
+
+- Standardize the PHP baseline and all CI jobs on PHP 8.4; remove the backend version matrix and align Composer and setup documentation.
+
+### Fixed
+
+- Give the Wahoo reconnect test explicit synthetic OAuth configuration so it passes on a fresh CI checkout without local provider credentials.
+- Disable providers and clear OAuth credentials in PHPUnit regardless of inherited environment values, preventing local configuration from hiding incomplete test fixtures.
+
 ## [0.2.0] - 2026-10-05
 
 ### Added
