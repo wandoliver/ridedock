@@ -6,7 +6,7 @@ use App\Models\Activity;
 
 final class RecordedGearShifts
 {
-    /** @return array{total: int, front: int, rear: int, unknown: int, ignored: int, rows: list<array<string, mixed>>, truncated: bool} */
+    /** @return array{total: int, front: int, rear: int, unknown: int, ignored: int, rows: list<array<string, mixed>>, truncated: bool, status: string} */
     public function report(Activity $activity): array
     {
         $events = $activity->events->where('type', 'shift')->sortBy(fn ($event) => $event->elapsed_seconds
@@ -34,11 +34,18 @@ final class RecordedGearShifts
             ];
         }
         $ignored = $activity->metadata['fit_parser']['shift_events_ignored'] ?? 0;
+        $status = $activity->metadata['fit_parser']['shift_diagnostics']['status'] ?? null;
+        if ($events->isNotEmpty()) {
+            $status = 'available';
+        } elseif (! is_string($status) || ! in_array($status, ['absent', 'described_only', 'unsupported', 'incomplete'], true)) {
+            $status = 'not_evaluated';
+        }
 
         return [
             'total' => $events->count(), 'front' => $front, 'rear' => $rear, 'unknown' => $events->count() - $front - $rear,
             'ignored' => is_int($ignored) && $ignored > 0 ? $ignored : 0,
             'rows' => $rows, 'truncated' => $events->count() > 200,
+            'status' => $status,
         ];
     }
 }

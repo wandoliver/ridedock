@@ -4,6 +4,18 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-10-05
+
+### Fixed
+
+- Replace the generic empty gear-shifting message with distinct states for absent values, field descriptions without recorded values, unsupported gear-value formats and incomplete shift messages.
+- Treat previous analyses without current diagnostics as unverified and offer reprocessing instead of claiming that their original FIT contained no gearing data.
+- Persist gear diagnostics with parser metadata and explain that pairing the electronic drivetrain with the recording bike computer is required to capture gearing.
+
+### Added
+
+- Synthetic, CRC-valid description-only FIT coverage and regression checks for diagnostic persistence and localized empty states, without copying rider recordings into fixtures.
+
 ## [0.5.0] - 2026-10-05
 
 ### Added

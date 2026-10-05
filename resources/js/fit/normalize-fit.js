@@ -1,4 +1,5 @@
 import { normalizeShiftEvents } from './shift-events.js';
+import { shiftDiagnostics } from './shift-diagnostics.js';
 
 const PARSER_NAME = 'fit-file-parser';
 const PARSER_VERSION = '5.0.2';
@@ -30,8 +31,9 @@ export function normalizeFitData(fitData) {
 
     return {
         parser: {
-            normalizer_version: '0.5.0',
+            normalizer_version: '0.5.1',
             shift_events_ignored: shifts.ignored,
+            shift_diagnostics: shiftDiagnostics(fitData, shifts),
             name: PARSER_NAME,
             version: PARSER_VERSION,
             protocol_version: fitData.protocolVersion ?? null,

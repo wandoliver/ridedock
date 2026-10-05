@@ -25,6 +25,18 @@ Manufacturer names, application IDs or arbitrary field names such as `axs_rear_g
 - Counts describe the recorded events, which may be incomplete. RideDock does not infer missing shifts from power/cadence or estimate time spent in a gear from sparse events.
 - No SRAM network service, credentials or additional integration is used. Gearing does not enter AI contexts through this change; JSON exports keep their existing normalized-event structure and CSV remains disabled.
 
+### Empty states since 0.5.1
+
+The view no longer uses a single empty message for all files. Parser metadata records `shift_diagnostics` with a status, standard shift-message count, recognizable gear-value-message count and whether gear fields were described:
+
+- **Not evaluated with current diagnostics:** older saved analyses do not establish what their original contained; reprocess the archived original if available.
+- **Absent:** no recognizable recorded gear values or standard shift messages were found.
+- **Descriptions only:** fields such as `front_gear` / `rear_gear` were declared, but no recognizable gearing values or shift messages were recorded. A head unit can include optional field descriptions even when that sensor supplied no data.
+- **Unsupported:** recognizable gear values exist outside usable standard shift messages. Those values are not converted into invented shift events.
+- **Incomplete:** standard shift messages exist, but missing/ambiguous gear values or timestamps prevented normalization.
+
+These statuses describe what the parser recognizes, not the absence of every possible proprietary encoding. A drivetrain mounted on the bike does not establish sensor connectivity during a recording. For future rides, verify sensor pairing and live gear display on the bike computer; Hammerhead documents this under [SRAM AXS groupset integration](https://support.hammerhead.io/hc/en-us/articles/25671266567195-Karoo-OS-SRAM-AXS-Groupset-Integration). RideDock does not infer a particular device setting or hardware fault from an empty file.
+
 ## Existing rides
 
 New FIT imports use the updated normalizer automatically. Previously enriched rides are not silently rewritten. Open the ride's Measurements section and choose **Reprocess FIT file** to update metrics, streams and shift events from its existing archived original. Notes and RPE remain unchanged.
@@ -33,8 +45,8 @@ The authenticated, CSRF-protected action only uses a source belonging to the rid
 
 ## Synthetic test data
 
-`tests/Fixtures/shifting-fit.js` generates a CRC-valid two-minute FIT entirely in memory: invented timestamps, two power samples and four shifts (three rear, one front). A simulated device uses the published SRAM manufacturer code 268. The developer variant uses an invented 16-byte application ID, the name `synthetic_shift_state`, an explicit native event/data mapping and a generated protocol-v2 developer definition. This fixture establishes protocol support; it is not a captured SRAM recording or a claim that SRAM uses that invented schema.
+`tests/Fixtures/shifting-fit.js` generates a CRC-valid two-minute FIT entirely in memory: invented timestamps, two power samples and four shifts (three rear, one front). A simulated device uses the published SRAM manufacturer code 268. The developer variant uses an invented 16-byte application ID, the name `synthetic_shift_state`, an explicit native event/data mapping and a generated protocol-v2 developer definition. A third variant declares `front_gear` and `rear_gear` as uint8z developer fields with index 1 but writes no gearing values or shifts, testing that a field description is not a recording. These fixtures establish protocol support; they are not captured SRAM recordings or a claim that SRAM uses the invented application schema.
 
 JavaScript tests parse both binary variants with the real `fit-file-parser` package and cover unpacking, precedence, developer identity/type/scale ambiguity, unsigned values, 1x missing data, timestamp handling, sorting and deduplication. PHP feature tests exercise the same generated files through the real Node parser, persistence, reprocessing and the rendered page, including ownership, purged sources, corrupt-file preservation and localized output. HTTP requests remain blocked in the tests.
 
-Run `composer check` for the full checks, or `npm run test:js` and `php artisan test --filter=GearShiftingTest` for the targeted tests. Real hardware recordings have not been validated; proprietary encodings require a documented schema and a synthetic reproduction before support can be claimed.
+Run `composer check` for the full checks, or `npm run test:js` and `php artisan test --filter=GearShiftingTest` for the targeted tests. Tests use generated files; rider originals remain private and are not committed. Arbitrary proprietary encodings require a documented schema and a synthetic reproduction before support can be claimed.

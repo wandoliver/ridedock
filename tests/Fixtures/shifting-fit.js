@@ -3,7 +3,7 @@ import { FitBaseType, FitEncoder } from 'fit-file-parser';
 
 // Invented timestamps, gears, device identity and developer application ID.
 // This is a protocol fixture, never a rider recording or a claimed SRAM app schema.
-export function shiftingFit({ developerFields = false } = {}) {
+export function shiftingFit({ developerFields = false, gearDescriptionsOnly = false } = {}) {
     const start = new Date('2026-08-30T07:00:00Z');
     const encoder = new FitEncoder({ protocolVersion: 32 });
     encoder.writeMessage(18, [
@@ -15,6 +15,20 @@ export function shiftingFit({ developerFields = false } = {}) {
     encoder.writeMessage(23, [field(0, 1, FitBaseType.Uint8, 0), field(2, 2, FitBaseType.Uint16, 268)]);
     encoder.writeMessage(20, [field(253, 4, FitBaseType.Uint32, FitEncoder.toFitTimestamp(start)), field(7, 2, FitBaseType.Uint16, 180)]);
     encoder.writeMessage(20, [field(253, 4, FitBaseType.Uint32, FitEncoder.toFitTimestamp(start) + 120), field(7, 2, FitBaseType.Uint16, 220)]);
+    if (gearDescriptionsOnly) {
+        encoder.writeMessage(207, [
+            field(1, 16, FitBaseType.Byte, Uint8Array.from({ length: 16 }, (_, index) => index + 1)),
+            field(3, 1, FitBaseType.Uint8, 1),
+        ]);
+        for (const [number, label] of [[9, 'front_gear'], [10, 'rear_gear']]) {
+            const name = FitEncoder.string(label);
+            encoder.writeMessage(206, [
+                field(0, 1, FitBaseType.Uint8, 1), field(1, 1, FitBaseType.Uint8, number),
+                field(2, 1, FitBaseType.Uint8, FitBaseType.Uint8z), field(3, name.length, FitBaseType.String, name),
+            ]);
+        }
+        return Buffer.from(encoder.close());
+    }
     const shifts = [
         { seconds: 10, event: 43, rear: 7, rearTeeth: 21, front: 2, frontTeeth: 48 },
         { seconds: 30, event: 43, rear: 8, rearTeeth: 19, front: 2, frontTeeth: 48 },
@@ -75,5 +89,8 @@ function field(number, size, baseType, value) {
 }
 
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
-    process.stdout.write(shiftingFit({ developerFields: process.argv.includes('--developer-fields') }));
+    process.stdout.write(shiftingFit({
+        developerFields: process.argv.includes('--developer-fields'),
+        gearDescriptionsOnly: process.argv.includes('--gear-descriptions-only'),
+    }));
 }

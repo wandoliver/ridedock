@@ -4,9 +4,9 @@
 <head>
     <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ str_ends_with($title, ' · RideDock') ? $title : $title.' · RideDock' }}</title>
-    <link rel="icon" href="{{ asset('favicon.ico') }}?v=0.5.0" sizes="any">
-    <link rel="icon" href="{{ asset('favicon.svg') }}?v=0.5.0" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}?v=0.5.0">
+    <link rel="icon" href="{{ asset('favicon.ico') }}?v=0.5.1" sizes="any">
+    <link rel="icon" href="{{ asset('favicon.svg') }}?v=0.5.1" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}?v=0.5.1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">

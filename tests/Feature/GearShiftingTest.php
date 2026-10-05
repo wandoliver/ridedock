@@ -45,7 +45,7 @@ class GearShiftingTest extends TestCase
         $this->assertSame(120, $activity->moving_time_s);
         $this->assertSame('Synthetic notes', $activity->notes);
         $this->assertSame(6, $activity->rpe);
-        $this->assertSame('0.5.0', $source->fresh()->metadata['fit_parser']['normalizer_version']);
+        $this->assertSame('0.5.1', $source->fresh()->metadata['fit_parser']['normalizer_version']);
         $this->assertSame(0, $activity->metadata['fit_parser']['shift_events_ignored']);
         $this->assertSame(4, $activity->events()->where('type', 'shift')->count());
         $this->assertSame([180, 220], array_column($activity->streams()->where('type', 'power')->firstOrFail()->data, 'value'));
@@ -141,17 +141,58 @@ class GearShiftingTest extends TestCase
         $user = User::factory()->create(['locale' => 'en']);
         $activity = Activity::factory()->for($user)->create();
         $this->actingAs($user)->get(route('activities.show', $activity))->assertOk()
-            ->assertSee('Gear shifting')->assertSee('No usable gear shifting data recorded.')
+            ->assertSee('Gear shifting')->assertSee('predates the current gearing diagnostics')
             ->assertDontSee('Reprocess FIT file');
     }
 
-    private function syntheticSource(bool $developerFields = false): ActivitySource
+    public function test_description_only_original_is_reported_without_claiming_recorded_gears(): void
+    {
+        $source = $this->syntheticSource(gearDescriptionsOnly: true);
+        $user = $source->activity->user;
+        $this->actingAs($user)->get(route('activities.show', $source->activity))->assertOk()
+            ->assertViewHas('gearShifts', fn (array $report): bool => $report['status'] === 'not_evaluated')
+            ->assertSee('stammt noch nicht aus der aktuellen Prüfung');
+        $this->post(route('activities.fit.reprocess', $source->activity))->assertSessionHasNoErrors();
+        $this->assertSame('described_only', $source->activity->fresh()->metadata['fit_parser']['shift_diagnostics']['status']);
+        $this->assertSame(0, $source->activity->events()->count());
+        $this->get(route('activities.show', $source->activity))->assertOk()
+            ->assertViewHas('gearShifts', fn (array $report): bool => $report['status'] === 'described_only')
+            ->assertSee('Feldbeschreibungen allein sind noch keine Schaltaufzeichnung')
+            ->assertSee('elektronische Schaltung als Sensor verbunden');
+        Http::assertNothingSent();
+    }
+
+    /** @return array<string, array{string, string}> */
+    public static function diagnosticStates(): array
+    {
+        return [
+            'absent' => ['absent', 'No recognizable gear values or shift messages'],
+            'unsupported' => ['unsupported', 'This recording format is not yet evaluated'],
+            'incomplete' => ['incomplete', 'missing or ambiguous gear values or timestamps'],
+            'malformed legacy status' => ['unknown', 'predates the current gearing diagnostics'],
+        ];
+    }
+
+    #[DataProvider('diagnosticStates')]
+    public function test_empty_states_distinguish_missing_unsupported_and_incomplete_recordings(string $status, string $message): void
+    {
+        $user = User::factory()->create(['locale' => 'en']);
+        $activity = Activity::factory()->for($user)->create([
+            'metadata' => ['fit_parser' => ['shift_diagnostics' => ['status' => $status]]],
+        ]);
+        $this->actingAs($user)->get(route('activities.show', $activity))->assertOk()->assertSee($message);
+    }
+
+    private function syntheticSource(bool $developerFields = false, bool $gearDescriptionsOnly = false): ActivitySource
     {
         Storage::fake('activity_sources');
         config()->set('activity-providers.sync.source_file_disk', 'activity_sources');
         $command = ['node', base_path('tests/Fixtures/shifting-fit.js')];
         if ($developerFields) {
             $command[] = '--developer-fields';
+        }
+        if ($gearDescriptionsOnly) {
+            $command[] = '--gear-descriptions-only';
         }
         $process = new Process($command);
         $process->mustRun();

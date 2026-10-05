@@ -18,7 +18,12 @@
         @if($gearShifts['truncated'])<p class="mt-3 text-sm text-ink-60">{{ __('shifts.truncated') }}</p>@endif
     </details>
     <p class="mt-3 text-sm text-ink-60">{{ __('shifts.limits') }}</p>
-    @else<p class="mt-4 text-sm text-ink-60">{{ __('shifts.empty') }}</p>@endif
+    @else
+    <p class="mt-4 text-sm text-ink-60">{{ __('shifts.status_'.$gearShifts['status']) }}</p>
+    @if(in_array($gearShifts['status'], ['absent', 'described_only'], true))
+    <p class="mt-3 text-sm text-ink-60">{{ __('shifts.recording_hint') }}</p>
+    @endif
+    @endif
     @if($gearShifts['ignored'])<x-info-box class="mt-3">{{ __('shifts.ignored', ['count' => $gearShifts['ignored']]) }}</x-info-box>@endif
     @if($canReprocessFit)
     <form method="POST" action="{{ route('activities.fit.reprocess', ['activity' => $activity->id, 'return_to' => \App\Support\ActivityNavigation::returnTo(request())]) }}" class="mt-4">
