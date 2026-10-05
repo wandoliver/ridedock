@@ -36,17 +36,16 @@
 
 - [x] Add Wahoo as a second activity provider
 - [x] Add provider disconnect endpoints and Wahoo deauthorization
-- [ ] Add user-controlled retention choices
+- [x] Add separate user-controlled ride/original retention limits with preview and explicitly confirmed cleanup
 - [ ] Add rate-limit-aware scheduling, distributed locks and per-user sync status
 - [ ] Decode SRAM AXS developer fields into `shift` events using real fixtures
-- [ ] Add explicit private-zone masking and opt-in route export
+- [x] Add explicit private-zone masking for detail maps, heatmaps and opt-in JSON routes
 - [ ] Add GDPR export/deletion flows and a deployer privacy-policy template
 
-## Release checklist
+## Project maintenance
 
 - [ ] choose and clear the project name
 - [x] baseline threat model and dependency audit — see the dated 0.3.0 security review and its remaining deployment/product work
 - [x] CI for tests, formatting, static analysis, frontend builds and isolated installation checks
 - [x] current fixtures reviewed, coordinate literals made synthetic and repository asset/secret-pattern guard added
-- [ ] confirm API terms for every hosted provider integration
-- [ ] tagged release and container deployment example
+- [ ] confirm API terms for every hosted provider integration — deferred while development remains exclusively local

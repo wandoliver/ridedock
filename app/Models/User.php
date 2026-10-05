@@ -18,6 +18,8 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $name
  * @property string $email
  * @property string $locale
+ * @property int|null $activity_retention_days
+ * @property int|null $source_retention_days
  * @property-read AthleteProfile|null $athleteProfile
  */
 #[Fillable(['name', 'email', 'locale', 'password'])]
@@ -31,6 +33,12 @@ class User extends Authenticatable
     public function activities(): HasMany
     {
         return $this->hasMany(Activity::class);
+    }
+
+    /** @return HasMany<PrivacyZone, $this> */
+    public function privacyZones(): HasMany
+    {
+        return $this->hasMany(PrivacyZone::class);
     }
 
     /** @return HasMany<ProviderConnection, $this> */
@@ -65,6 +73,8 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'activity_retention_days' => 'integer',
+            'source_retention_days' => 'integer',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];

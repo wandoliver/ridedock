@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property CarbonImmutable|null $external_updated_at
  * @property CarbonImmutable $imported_at
  * @property CarbonImmutable|null $deleted_at_provider
+ * @property CarbonImmutable|null $purged_at
  * @property array<string, mixed>|null $metadata
  * @property-read Activity $activity
  * @property-read ProviderConnection $connection
@@ -37,6 +38,7 @@ class ActivitySource extends Model
     protected function casts(): array
     {
         return [
+            'purged_at' => 'immutable_datetime',
             'raw_payload' => 'array',
             'metadata' => 'array',
             'external_updated_at' => 'immutable_datetime',

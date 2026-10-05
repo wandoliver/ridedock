@@ -32,7 +32,10 @@ class GenerateActivityAnalysis implements ShouldBeUnique, ShouldQueue
 
     public function handle(TrainingAdvisor $trainingAdvisor): void
     {
-        $analysis = AiAnalysis::query()->findOrFail($this->analysisId);
+        $analysis = AiAnalysis::query()->find($this->analysisId);
+        if ($analysis === null) {
+            return;
+        }
         app()->setLocale($analysis->user()->value('locale') ?? config('app.locale'));
 
         if ($analysis->status === AiAnalysisStatus::Completed) {

@@ -27,7 +27,7 @@ curl -H "Authorization: Bearer TOKEN" \
     "http://localhost:8000/api/v1/analysis/export?from=2026-08-01&format=json"
 ```
 
-Routes are omitted from analysis exports by default. Pass `include_route=1` only when location data is actually needed.
+Routes are omitted from analysis exports by default. Pass `include_route=1` only when location data is actually needed. Since 0.4.0, explicitly included routes respect your private zones: `route_segments` contains separate visible encoded polylines. Draw each segment independently. `summary_polyline` is null for a split or fully hidden route, and contains the sole visible segment otherwise. Neither route field is included by default. See [data retention and private zones](PRIVACY.md).
 
 Only JSON analysis export is enabled (`format=json`, or omit `format`). CSV export is disabled as of 0.3.0: `format=csv` returns HTTP 422 and no download. There is currently no export control in the web interface.
 

@@ -102,6 +102,7 @@ class DashboardController extends Controller
             'elevationMetres' => (float) $totals->getAttribute('elevation_gain_m'),
             'movingHours' => (float) $totals->getAttribute('moving_time_s') / 3600,
             'heatmapRoutes' => $heatmapRoutes,
+            'heatmapRouteCount' => count(array_unique(array_column($heatmapRoutes, 'activity_id'))),
             'privacyTrimMetres' => (float) config('heatmap.privacy_trim_m'),
             'activities' => $activities,
             'connectionErrorCount' => $user->providerConnections()

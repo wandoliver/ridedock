@@ -58,6 +58,7 @@ class DashboardControllerTest extends TestCase
 
     public function test_insights_show_only_the_owners_metrics_and_routes(): void
     {
+        config()->set('heatmap.privacy_trim_m', 0);
         $user = User::factory()->create();
         $activity = Activity::factory()->for($user)->create([
             'distance_m' => 42500, 'moving_time_s' => 5400, 'elevation_gain_m' => 620,
@@ -75,6 +76,7 @@ class DashboardControllerTest extends TestCase
 
     public function test_current_year_is_default_and_period_filter_updates_totals_and_routes(): void
     {
+        config()->set('heatmap.privacy_trim_m', 0);
         Carbon::setTestNow('2026-08-30 12:00:00');
         $user = User::factory()->create();
         $currentYear = Activity::factory()->for($user)->create([

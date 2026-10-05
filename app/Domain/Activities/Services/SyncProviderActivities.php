@@ -49,6 +49,9 @@ final class SyncProviderActivities
                         return $imported;
                     }
                     $source = $this->importer->import($connection, $payload);
+                    if ($source === null) {
+                        continue;
+                    }
                     $imported++;
 
                     if (config('activity-providers.sync.store_source_files')
@@ -57,7 +60,7 @@ final class SyncProviderActivities
                             $this->files->archive($provider, $connection, $source);
                         }
 
-                        if (! Arr::has($source->metadata ?? [], 'fit_parser')) {
+                        if ($source->source_file_path && ! Arr::has($source->metadata ?? [], 'fit_parser')) {
                             EnrichActivitySource::dispatch($source->refresh());
                         }
                     }

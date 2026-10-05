@@ -47,6 +47,8 @@ npm audit
 
 ## Remaining deployment and product work
 
+This is the dated 0.3.0 review. Version 0.4.0 adds [local retention controls and private-zone masking](PRIVACY.md); hosted-service readiness and operational retention remain separate.
+
 - Public managed hosting still needs the identity/account lifecycle, quotas, retention, export/deletion and operational controls listed in [hosting readiness](HOSTING.md). This release does not close those backlog items.
 - Use a shared lock-capable cache for OAuth state across application nodes. A login/logout/session renewal during a web OAuth flow requires restarting that flow.
 - FIT download hosts must resolve to public addresses and return an uncompressed file directly over HTTPS. Automatic HTTP decompression is disabled to prevent inflated responses bypassing transfer limits. Redirecting CDN responses and private-network/proxy downloads now fail closed. cURL is required; the guard must not be bypassed for compatibility.

@@ -25,6 +25,22 @@ export function routePointsFromStream(samples) {
     });
 }
 
+export function routeSegmentsFromStream(samples) {
+    const segments = [];
+    let segment = [];
+    for (const sample of samples) {
+        const points = routePointsFromStream([sample]);
+        if (!points.length) {
+            if (segment.length >= 2) segments.push(segment);
+            segment = [];
+        } else {
+            segment.push(points[0]);
+        }
+    }
+    if (segment.length >= 2) segments.push(segment);
+    return segments;
+}
+
 export function numericSeriesFromStream(samples, multiplier = 1) {
     return samples.flatMap((sample, index) => {
         const rawValue = sample && typeof sample === 'object' && 'value' in sample ? sample.value : sample;
@@ -148,7 +164,8 @@ function initializeRoute(leaflet, samples) {
         return;
     }
 
-    const points = routePointsFromStream(samples);
+    const segments = routeSegmentsFromStream(samples);
+    const points = segments.flat();
     const map = leaflet.map(routeElement, {
         attributionControl: true,
         scrollWheelZoom: false,
@@ -175,12 +192,13 @@ function initializeRoute(leaflet, samples) {
         return;
     }
 
-    const route = leaflet.polyline(points, {
+    const route = leaflet.polyline(segments, {
         color: '#1f9a6a',
         lineCap: 'round',
         lineJoin: 'round',
         opacity: 0.95,
         weight: 3,
+        smoothFactor: 0,
     }).addTo(map);
 
     map.fitBounds(route.getBounds(), { padding: [32, 32] });

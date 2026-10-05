@@ -6,14 +6,20 @@ use App\Domain\Activities\Data\ProviderActivity;
 use App\Models\Activity;
 use App\Models\ActivitySource;
 use App\Models\ProviderConnection;
+use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 final class ActivityImporter
 {
-    public function import(ProviderConnection $connection, ProviderActivity $payload): ActivitySource
+    public function import(ProviderConnection $connection, ProviderActivity $payload): ?ActivitySource
     {
-        return DB::transaction(function () use ($connection, $payload): ActivitySource {
+        return DB::transaction(function () use ($connection, $payload): ?ActivitySource {
+            $user = User::query()->whereKey($connection->user_id)->lockForUpdate()->firstOrFail();
+            $retention = app(DataRetention::class);
+            if ($retention->activityExpired($user, $payload->startedAt)) {
+                return null;
+            }
             $source = ActivitySource::query()
                 ->with('activity')
                 ->where('provider_connection_id', $connection->id)
@@ -74,7 +80,7 @@ final class ActivityImporter
                 ],
                 [
                     'activity_id' => $activity->id,
-                    'raw_payload' => $payload->raw,
+                    'raw_payload' => $source?->purged_at || $retention->sourceExpired($user, $payload->startedAt) ? null : $payload->raw,
                     'external_updated_at' => $payload->externalUpdatedAt,
                     'imported_at' => now(),
                     'deleted_at_provider' => null,

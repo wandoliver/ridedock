@@ -4,6 +4,23 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-10-05
+
+### Added
+
+- German and English Data & privacy settings with independent ride and original-data retention limits, unlimited by default.
+- Existing-data cleanup with affected-record preview, explicit confirmation, stale-preview rejection and private-file deletion; whole-ride cleanup also removes user AI analyses/plans that may retain ride summaries.
+- Named private zones selected on a map or by coordinates, applied on the server to ride details, heatmaps and explicitly included JSON routes.
+- Segmented route output that removes crossing edges and preserves gaps, including dateline and straight projected map segments.
+- Documentation and synthetic regression checks for ownership, retention cutoffs, cleanup retries, reimports and route masking.
+
+### Changed
+
+- Import and file-processing paths honor retention limits and removed-original markers; deleted enrichment/AI work is skipped.
+- JSON routes expose masked `route_segments`; `summary_polyline` is null when split or fully hidden. Routes remain opt-in and CSV remains disabled.
+- Short heatmap routes that cannot survive endpoint trimming are omitted.
+- Remove tagged releases and container deployment from the current backlog while development remains exclusively local.
+
 ## [0.3.0] - 2026-10-05
 
 ### Added

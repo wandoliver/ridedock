@@ -12,6 +12,12 @@ class ActivityResource extends JsonResource
     /** @return array<string, mixed> */
     public function toArray(Request $request): array
     {
+        $segments = $request->boolean('include_route')
+            ? array_map(
+                app(\App\Modules\Heatmap\Services\RoutePrivacy::class)->encode(...),
+                app(\App\Modules\Heatmap\Services\RoutePrivacy::class)->activitySegments($this->resource)
+            )
+            : [];
         return [
             'id' => $this->id,
             'started_at' => $this->started_at->toIso8601String(),
@@ -41,7 +47,8 @@ class ActivityResource extends JsonResource
             'rpe' => $this->rpe,
             'notes' => $this->notes,
             'has_route' => filled($this->summary_polyline),
-            'summary_polyline' => $this->when($request->boolean('include_route'), $this->summary_polyline),
+            'summary_polyline' => $this->when($request->boolean('include_route'), count($segments) === 1 ? $segments[0] : null),
+            'route_segments' => $this->when($request->boolean('include_route'), $segments),
             'sources' => $this->whenLoaded('sources', fn () => $this->sources->map(fn ($source) => [
                 'provider' => $source->connection->provider->value,
                 'external_id' => $source->external_id,

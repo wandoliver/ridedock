@@ -40,6 +40,9 @@ class ImportProviderActivity implements ShouldQueue
                 return;
             }
             $source = $importer->import($connection, $payload);
+            if ($source === null) {
+                return;
+            }
 
             if (config('activity-providers.sync.store_source_files')
                 && $provider instanceof ActivityFileProvider) {
@@ -47,7 +50,9 @@ class ImportProviderActivity implements ShouldQueue
                     $files->archive($provider, $connection, $source);
                 }
 
-                $enricher->enrich($source->fresh());
+                if ($source->source_file_path) {
+                    $enricher->enrich($source->refresh());
+                }
             }
         } catch (\Throwable) {
             throw new \RuntimeException("Provider activity import failed. Retry the import.");

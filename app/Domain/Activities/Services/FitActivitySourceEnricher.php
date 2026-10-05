@@ -43,6 +43,22 @@ final class FitActivitySourceEnricher implements ActivitySourceEnricher
 
     public function enrich(ActivitySource $source): void
     {
+        DB::transaction(function () use ($source): void {
+            $source = $source->fresh();
+            if (! $source || $source->purged_at) {
+                return;
+            }
+            \App\Models\User::query()->whereKey($source->activity->user_id)->lockForUpdate()->firstOrFail();
+            $source->refresh();
+            if ($source->purged_at) {
+                return;
+            }
+            $this->enrichLocked($source);
+        });
+    }
+
+    private function enrichLocked(ActivitySource $source): void
+    {
         if (! $source->source_file_path || ! $source->source_file_checksum) {
             throw new RuntimeException('The activity source has no archived FIT file.');
         }
@@ -58,6 +74,11 @@ final class FitActivitySourceEnricher implements ActivitySourceEnricher
         $result = $this->parser->parse($path);
 
         DB::transaction(function () use ($source, $result): void {
+            \App\Models\User::query()->whereKey($source->activity->user_id)->lockForUpdate()->firstOrFail();
+            $current = ActivitySource::query()->find($source->id);
+            if (! $current || $current->purged_at || ! $current->source_file_path) {
+                return;
+            }
             $activity = $source->activity()->lockForUpdate()->firstOrFail();
             $summary = Arr::only($result['summary'], self::SUMMARY_FIELDS);
 

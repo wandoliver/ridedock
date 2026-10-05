@@ -13,6 +13,7 @@ class EnrichActivitySource implements ShouldBeUnique, ShouldQueue
     use Queueable;
 
     public int $tries = 2;
+    public bool $deleteWhenMissingModels = true;
 
     public int $uniqueFor = 3600;
 
@@ -25,7 +26,10 @@ class EnrichActivitySource implements ShouldBeUnique, ShouldQueue
 
     public function handle(ActivitySourceEnricher $enricher): void
     {
-        $enricher->enrich($this->activitySource->refresh());
+        $source = $this->activitySource->fresh();
+        if ($source && ! $source->purged_at && $source->source_file_path) {
+            $enricher->enrich($source);
+        }
     }
 
     public function uniqueId(): string

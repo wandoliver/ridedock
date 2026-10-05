@@ -16,6 +16,7 @@ class AnalysisExportController extends Controller
             ->where('user_id', $request->user()->id)
             ->whereHas('sources', fn ($query) => $query->whereNull('deleted_at_provider'))
             ->with('sources.connection')
+            ->when($request->boolean('include_route'), fn ($query) => $query->with(['streams' => fn ($query) => $query->where('type', 'latlng'), 'user.privacyZones']))
             ->when($request->date('from'), fn ($query, $from) => $query->where('started_at', '>=', $from->startOfDay()))
             ->when($request->date('to'), fn ($query, $to) => $query->where('started_at', '<=', $to->endOfDay()))
             ->when($request->string('type')->toString(), fn ($query, $type) => $query->where('type', $type))

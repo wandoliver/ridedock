@@ -42,6 +42,19 @@ class ActivityDetailController extends Controller
         foreach ($model->streams as $stream) {
             $activityStreams[$stream->type] = array_values($stream->data);
         }
+        $segments = app(\App\Modules\Heatmap\Services\RoutePrivacy::class)->activitySegments($model);
+        unset($activityStreams['latlng']);
+        if ($segments !== []) {
+            $activityStreams['latlng'] = [];
+            foreach ($segments as $segment) {
+                if ($activityStreams['latlng'] !== []) {
+                    $activityStreams['latlng'][] = null;
+                }
+                foreach ($segment as $point) {
+                    $activityStreams['latlng'][] = ['value' => $point];
+                }
+            }
+        }
 
         $today = CarbonImmutable::today(config('app.timezone'));
         $activityDate = $model->localStartedAt();

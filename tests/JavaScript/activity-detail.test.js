@@ -66,3 +66,12 @@ test('builds a stable chart path for changing and constant series', () => {
     ], 100, 50, 5), 'M5.00,45.00 L95.00,45.00');
     assert.equal(chartPath([]), '');
 });
+
+
+test('private route gaps stay separate when rendering map lines', async () => {
+    const { routeSegmentsFromStream } = await import('../../resources/js/activity-detail.js');
+    const first = [[0.01, 0.01], [0.02, 0.02]];
+    const second = [[0.03, 0.03], [0.04, 0.04]];
+    assert.deepEqual(routeSegmentsFromStream([...first, null, ...second]), [first, second]);
+    assert.deepEqual(routeSegmentsFromStream([[0.01, 0.01], null, [0.02, 0.02]]), []);
+});

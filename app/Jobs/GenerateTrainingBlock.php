@@ -37,7 +37,10 @@ class GenerateTrainingBlock implements ShouldBeUnique, ShouldQueue
 
     public function handle(TrainingBlockPlanner $trainingPlanner): void
     {
-        $analysis = AiAnalysis::query()->findOrFail($this->analysisId);
+        $analysis = AiAnalysis::query()->find($this->analysisId);
+        if ($analysis === null) {
+            return;
+        }
         app()->setLocale($analysis->user()->value('locale') ?? config('app.locale'));
 
         if ($analysis->status === AiAnalysisStatus::Completed) {

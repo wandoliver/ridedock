@@ -52,6 +52,11 @@ Route::middleware('auth')->group(function (): void {
         ->middleware('throttle:30,1')
         ->name('activities.feedback.update');
     Route::get('/settings/connections', ConnectionSettingsController::class)->name('settings.connections');
+    Route::get('/settings/privacy', [\App\Http\Controllers\Settings\PrivacySettingsController::class, 'show'])->name('settings.privacy');
+    Route::patch('/settings/privacy', [\App\Http\Controllers\Settings\PrivacySettingsController::class, 'update'])->name('settings.privacy.update');
+    Route::post('/settings/privacy/zones', [\App\Http\Controllers\Settings\PrivacySettingsController::class, 'storeZone'])->middleware('throttle:20,1')->name('settings.privacy.zones.store');
+    Route::delete('/settings/privacy/zones/{zone}', [\App\Http\Controllers\Settings\PrivacySettingsController::class, 'destroyZone'])->name('settings.privacy.zones.destroy');
+    Route::post('/settings/privacy/cleanup', [\App\Http\Controllers\Settings\PrivacySettingsController::class, 'purge'])->middleware('throttle:5,1')->name('settings.privacy.cleanup');
     Route::get('/settings/training', [TrainingSettingsController::class, 'show'])->name('settings.training');
     Route::post('/settings/training/zones', TrainingZoneProfileController::class)
         ->middleware('throttle:20,1')->name('settings.training.zones.store');

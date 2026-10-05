@@ -1,4 +1,5 @@
 import L from 'leaflet';
+import { initializePrivacySettings } from './privacy-settings.js';
 import { initializeAiStatus } from './ai-status.js';
 import { initializeSelectionPanels } from './selection-panels.js';
 import { initializeActivityAnalysis } from './activity-analysis.js';
@@ -11,6 +12,7 @@ import { initializePageTabs } from './page-tabs.js';
 import { initializeNavigation } from './navigation.js';
 
 initializeNavigation();
+initializePrivacySettings(L);
 initializePageTabs();
 initializeCoachTabs();
 
@@ -42,6 +44,7 @@ if (heatmapElement && heatmapDataElement) {
 
         for (const points of decodedRoutes) {
             L.polyline(points, {
+                smoothFactor: 0,
                 color: '#1f9a6a',
                 opacity: 0.34,
                 weight: 1.25,
