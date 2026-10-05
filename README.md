@@ -1,6 +1,7 @@
 # RideDock
 
-![Release](https://img.shields.io/badge/release-v0.1.1-blue)
+![Release](https://img.shields.io/badge/release-v0.2.0-blue)
+[![CI](https://github.com/wandoliver/ridedock/actions/workflows/ci.yml/badge.svg)](https://github.com/wandoliver/ridedock/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 RideDock is an open-source, self-hosted cycling training platform. Import rides from Hammerhead/Karoo or Wahoo, explore measurements and route heatmaps, and plan training with an optional AI coach.
@@ -9,7 +10,7 @@ Activities and source files stay private. GPS coordinates, FIT files, provider p
 
 ## Quick start
 
-Requires PHP 8.3+, Composer, Node.js 20 (20.19+) or 22.12+, and SQLite (default) or PostgreSQL/MySQL.
+Requires PHP 8.3+, Composer, Node.js 22 (22.13+) or 24+ (24 recommended), and SQLite (default) or PostgreSQL/MySQL.
 
 ```bash
 composer setup

@@ -235,6 +235,7 @@ class ActivityDetailControllerTest extends TestCase
 
     public function test_weekly_plan_takes_precedence_over_an_activity_next_session(): void
     {
+        CarbonImmutable::setTestNow('2026-09-02T12:00:00Z');
         $this->app->instance(TrainingAdvisor::class, new class implements TrainingAdvisor
         {
             public function isConfigured(): bool
@@ -248,7 +249,7 @@ class ActivityDetailControllerTest extends TestCase
             }
         });
         $user = User::factory()->create();
-        $activity = Activity::factory()->for($user)->create();
+        $activity = Activity::factory()->for($user)->create(['started_at' => '2026-09-01T06:00:00Z', 'timezone' => 'Europe/Rome']);
         AiAnalysis::factory()->for($user)->for($activity)->create([
             'status' => AiAnalysisStatus::Completed,
             'output' => [

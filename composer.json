@@ -67,17 +67,25 @@
         "lint:javascript": "npm run lint",
         "phpcs": "./vendor/bin/phpcs --standard=PSR2 --extensions=php --exclude=Generic.Files.LineLength,Squiz.Functions.MultiLineFunctionDeclaration,Squiz.WhiteSpace.ScopeClosingBrace app",
         "cs-fixer": "./vendor/bin/php-cs-fixer fix --sequential",
+        "cs-fixer:check": "./vendor/bin/php-cs-fixer fix --dry-run --diff --sequential --using-cache=no",
         "phpstan": [
             "Composer\\Config::disableProcessTimeout",
             "@php -d memory_limit=2G ./vendor/bin/phpstan analyse --memory-limit=2G --debug"
         ],
-        "check": [
-            "@test",
+        "check:quality": [
+            "@composer validate --strict",
             "@lint",
             "@phpcs",
-            "@phpstan",
+            "@cs-fixer:check",
+            "@phpstan"
+        ],
+        "check:install": "@php scripts/check-install.php",
+        "check": [
+            "@test",
+            "@check:quality",
             "npm run test:js",
-            "npm run build"
+            "npm run build",
+            "@check:install"
         ],
         "precommit": [
             "@cs-fixer",
@@ -114,6 +122,9 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+        "platform": {
+            "php": "8.3.0"
         }
     },
     "minimum-stability": "stable",

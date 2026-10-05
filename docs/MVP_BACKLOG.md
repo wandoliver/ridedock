@@ -46,7 +46,7 @@
 
 - [ ] choose and clear the project name
 - [ ] threat model and dependency audit
-- [ ] CI for tests, formatting and static analysis
+- [x] CI for tests, formatting, static analysis, frontend builds and isolated installation checks
 - [ ] fixtures scrubbed of personal/location data
 - [ ] confirm API terms for every hosted provider integration
 - [ ] tagged `0.1.0` release and container deployment example

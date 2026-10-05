@@ -1,0 +1,127 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  APP_ENV: testing
+  APP_KEY: base64:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+  APP_DEBUG: 'false'
+  DB_CONNECTION: sqlite
+  DB_DATABASE: ':memory:'
+  CACHE_STORE: array
+  SESSION_DRIVER: array
+  QUEUE_CONNECTION: sync
+  AI_QUEUE_CONNECTION: sync
+
+jobs:
+  backend:
+    name: Backend tests (PHP ${{ matrix.php }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.3', '8.4']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Setup PHP dependencies
+        uses: ./.github/actions/setup-php
+        with:
+          php-version: ${{ matrix.php }}
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install Node dependencies
+        run: npm ci --ignore-scripts
+      - name: Run backend tests
+        run: composer test
+
+  quality:
+    name: Code quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Setup PHP dependencies
+        uses: ./.github/actions/setup-php
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install Node dependencies
+        run: npm ci --ignore-scripts
+      - name: Validate Composer manifest and lockfile
+        run: composer validate --strict
+      - name: Check whitespace and JavaScript
+        run: composer lint
+      - name: Check PHP coding standard
+        run: composer phpcs
+      - name: Check PHP formatting
+        run: composer cs-fixer:check
+      - name: Run static analysis
+        run: composer phpstan
+
+  frontend:
+    name: Frontend tests and build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install Node dependencies
+        run: npm ci --ignore-scripts
+      - name: Run JavaScript tests
+        run: npm run test:js
+      - name: Build production assets
+        run: npm run build
+
+  installation:
+    name: Fresh installation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Setup PHP dependencies
+        uses: ./.github/actions/setup-php
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install Node dependencies
+        run: npm ci --ignore-scripts
+      - name: Build production assets
+        run: npm run build
+      - name: Check fresh migrations, Laravel caches and HTTP boot
+        run: composer check:install

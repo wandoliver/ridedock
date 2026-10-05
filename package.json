@@ -26,5 +26,8 @@
         "fit-file-parser": "5.0.2",
         "leaflet": "1.9.4",
         "leaflet.heat": "0.2.0"
+    },
+    "engines": {
+        "node": "^22.13.0 || >=24.0.0"
     }
 }

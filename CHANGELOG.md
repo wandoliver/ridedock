@@ -4,6 +4,29 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-10-05
+
+### Added
+
+- GitHub Actions CI for pushes and pull requests to main, plus manual runs: backend tests on PHP 8.3/8.4, code quality, Node 24 frontend tests/build and a fresh-installation check.
+- Isolated installation verification for SQLite migrations, Laravel configuration/route/view caches and login rendering with production assets; temporary database, environment and cache files are cleaned up.
+- A CI status badge and a guide to local checks and GitHub job logs.
+
+### Changed
+
+- Align `composer check` with CI, including manifest/lockfile validation and a read-only PHP-CS-Fixer check covering application, tests and PHP scripts.
+- Mock Vite in backend tests and reject unmocked Laravel HTTP-client requests by default.
+- Standardize supported Node versions at 22.13+ within Node 22, or Node 24+; recommend Node 24 and align contribution instructions with PHP-CS-Fixer.
+
+### Fixed
+
+- Resolve Composer dependencies against PHP 8.3.0 and use compatible Symfony 7.4 components; the previous lockfile required PHP 8.4.1 despite the documented PHP 8.3 minimum.
+- Make the weekly-plan precedence test deterministic by setting its clock and an explicitly historical ride date.
+
+### Security
+
+- Update Laravel to 13.34.0 and league/commonmark to 2.10.3 to address the dependency advisories found during the lockfile review.
+
 ## [0.1.1] - 2026-10-05
 
 ### Changed

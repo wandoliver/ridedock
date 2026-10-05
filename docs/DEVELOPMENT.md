@@ -2,7 +2,7 @@
 
 ## Setup
 
-Requirements: PHP 8.3+, Composer, Node.js 20 (20.19+) or 22.12+, and SQLite (default) or PostgreSQL/MySQL.
+Requirements: PHP 8.3+, Composer, Node.js 22 (22.13+) or 24+ (24 recommended), and SQLite (default) or PostgreSQL/MySQL.
 
 ```bash
 composer setup
@@ -45,4 +45,4 @@ composer test
 composer check
 ```
 
-`composer check` also runs formatting checks, static analysis, JavaScript tests and the production build.
+`composer check` also validates the Composer manifest/lockfile, checks PHP formatting, runs static analysis and JavaScript tests, builds production assets and verifies a fresh cached installation in a temporary directory. See [CI and quality checks](CI.md).

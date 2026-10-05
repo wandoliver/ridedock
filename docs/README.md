@@ -2,6 +2,7 @@
 
 ## Setup and operation
 
+- [CI and quality checks](CI.md): GitHub pipelines, local checks and isolated installation verification.
 - [Local development](DEVELOPMENT.md): setup, queues, HTTPS and quality checks.
 - [Provider connections](PROVIDERS.md): Hammerhead/Karoo, Wahoo, OAuth and disconnect behavior.
 - [AI coach](AI_COACH.md): credentials, planning, privacy and costs.
