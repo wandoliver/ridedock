@@ -2,6 +2,8 @@
 
 Available since **0.5.0** under **Ride → Measurements → Gear shifting** (**Fahrt → Messdaten → Schaltinformationen** in German). The section shows recorded front/rear shift counts and a collapsible timeline with ride time, changed component, gear positions, tooth counts and gear ratio. The timeline displays the first 200 changes; counters include all normalized changes.
 
+Recorded SRAM AXS shifts are included when the FIT contains a supported encoding. Stored originals can be reprocessed from Measurements. Since **0.5.1**, the view distinguishes absent values, field descriptions alone, unsupported formats and incomplete messages; older analyses without current diagnostics remain unverified. The sections below explain these states and reprocessing.
+
 SRAM AXS can supply gearing information to a recording head unit, but the head unit determines which information reaches the activity file. A paired drivetrain alone does not guarantee that a FIT contains shift events. See [SRAM's head-unit information guide](https://support.sram.com/hc/en-us/articles/6225479178395-What-eTap-AXS-system-information-is-made-available-to-be-displayed-on-ANT-or-BLE-compatible-GPS-head-units).
 
 ## Supported FIT encodings
@@ -14,7 +16,7 @@ RideDock handles standard FIT event messages (global message 21), identified as 
 
 The field order comes from the [official Garmin FIT Profile](https://github.com/garmin/fit-javascript-sdk/blob/main/src/profile.js). Developer mapping follows the [FIT developer-data format](https://developer.garmin.com/fit/cookbook/developer-data) and [FIT protocol definitions](https://developer.garmin.com/fit/articles/fit-protocol/fit_protocol.html).
 
-Manufacturer names, application IDs or arbitrary field names such as `axs_rear_gear` are insufficient to establish a mapping. There is no hardcoded proprietary SRAM application schema. Unknown proprietary encodings and record-only gear samples do not become shift events. The upstream parser flattens developer names into message properties; files with developer names that collide with native shift/timestamp fields are conservatively omitted because those values cannot be safely distinguished.
+Manufacturer names, application IDs or arbitrary field names such as `axs_rear_gear` are insufficient to establish a mapping. Missing or unknown manufacturer data is not inferred. There is no hardcoded proprietary SRAM application schema. Unknown proprietary encodings and record-only gear samples do not become shift events. The upstream parser flattens developer names into message properties; files with developer names that collide with native shift/timestamp fields are conservatively omitted because those values cannot be safely distinguished.
 
 ## Interpretation and missing data
 

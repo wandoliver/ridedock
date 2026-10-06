@@ -1,6 +1,6 @@
 # Data retention and private zones
 
-Available since 0.4.0 at **Settings → Data & privacy** (`/settings/privacy`), in German and English. These are per-user controls for local development and use. There is no scheduled cleanup or automatic synchronization.
+Per-user data retention and private zones are available since 0.4.0 at **Settings → Data & privacy** (`/settings/privacy`), in German and English. Retention limits default to unlimited; existing data is removed only through explicitly confirmed cleanup. These controls are intended for local development and use. There is no scheduled cleanup or automatic synchronization.
 
 ## Retention
 

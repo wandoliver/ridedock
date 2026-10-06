@@ -4,6 +4,12 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.2] - 2026-10-06
+
+### Changed
+
+- Consolidate data-retention/private-zone and FIT gear-shifting details in their existing guides under `docs/`, keeping the README focused on the project overview, quick start and documentation links.
+
 ## [0.5.1] - 2026-10-05
 
 ### Fixed
