@@ -8,7 +8,9 @@ use App\Http\Controllers\ActivityFeedbackController;
 use App\Http\Controllers\ActivityIndexController;
 use App\Http\Controllers\Api\ProviderConnectionController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\InvitationController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Middleware\ProtectAccountLinks;
 use App\Http\Controllers\CoachController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GoalTrainingPlanController;
@@ -32,10 +34,18 @@ Route::middleware('guest')->group(function (): void {
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])
         ->middleware('throttle:10,1')
         ->name('login.store');
-    Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
-    Route::post('/register', [RegisteredUserController::class, 'store'])
-        ->middleware('throttle:5,1')
-        ->name('register.store');
+});
+
+Route::middleware([ProtectAccountLinks::class, 'guest', 'throttle:20,1'])->group(function (): void {
+    Route::get('/invitations/{token}', [InvitationController::class, 'show'])->name('invitations.show');
+    Route::post('/invitations/{token}', [InvitationController::class, 'accept'])->name('invitations.accept');
+});
+
+Route::prefix('admin')->name('admin.')->middleware([ProtectAccountLinks::class, 'auth', 'can:manage-users', 'throttle:30,1'])->group(function (): void {
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
+    Route::post('/users/{user}/invitation', [UserController::class, 'reissue'])->name('users.invitation.reissue');
+    Route::delete('/users/{user}/invitation', [UserController::class, 'revoke'])->name('users.invitation.revoke');
 });
 
 Route::middleware('auth')->group(function (): void {

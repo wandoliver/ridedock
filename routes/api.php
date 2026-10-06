@@ -13,7 +13,7 @@ Route::prefix('v1')->group(function (): void {
         Route::post('/webhooks/hammerhead', HammerheadWebhookController::class);
     });
 
-    Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function (): void {
+    Route::middleware(['auth:sanctum', \App\Http\Middleware\EnsureActiveAccount::class, 'throttle:60,1'])->group(function (): void {
         Route::middleware(CheckAbilities::class.':activities:read')->group(function (): void {
             Route::get('/activities', [ActivityController::class, 'index']);
             Route::get('/activities/{activity}', [ActivityController::class, 'show']);

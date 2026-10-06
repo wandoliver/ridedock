@@ -4,6 +4,21 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-10-06
+
+### Added
+
+- Administrator and member roles, explicit CLI administrator creation/promotion, and German/English user management with pending-account status.
+- Administrator-created activation links and optional synchronous email invitations, bound to a specific account, hashed at rest, expiring after seven days and consumed once under transaction locks.
+- Invitation renewal/revocation, account administration audit events, sensitive-page cache/referrer protection and regressions for authentication, authorization, activation and token handling.
+- Account administration and mail-setup documentation; fresh-install verification covers the removal of registration even with cached routes.
+
+### Changed
+
+- Remove public registration routes, controller, request and form; direct GET/POST registration attempts return 404.
+- Existing accounts retain their credentials and become active members; administrator access is granted explicitly by CLI.
+- API-token creation requires an existing active account and no longer provisions users; pending accounts cannot authenticate or access browser/API endpoints.
+
 ## [0.5.2] - 2026-10-06
 
 ### Changed

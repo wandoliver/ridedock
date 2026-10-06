@@ -15,6 +15,9 @@
         @foreach($items as [$route, $label, $icon, $active])
             <a href="{{ route($route) }}" @if($active) aria-current="page" @endif><x-icon :name="$icon" /><span>{{ __($label) }}</span></a>
         @endforeach
+        @can('manage-users')
+            <a href="{{ route('admin.users.index') }}" @if(request()->routeIs('admin.*')) aria-current="page" @endif><x-icon name="settings" /><span>{{ __('accounts.title') }}</span></a>
+        @endcan
     </nav>
     <div class="rd-sidebar-footer"><p>{{ auth()->user()->name }}</p><form method="POST" action="{{ route('logout') }}">@csrf<x-button secondary type="submit"><x-icon name="logout" />{{ __('ui.dashboard.sign_out') }}</x-button></form></div>
     </div>

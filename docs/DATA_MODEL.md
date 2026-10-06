@@ -1,5 +1,13 @@
 # Data model
 
+## `users`, `user_invitations`, `account_audit_events`
+
+Users have `role` (`member` or `admin`) and `status` (`pending` or `active`). Existing users retain active access; role/status are assigned through controlled code rather than mass assignment. A pending user's initial password is an unknown random hash and cannot be used for login or API access.
+
+Invitations bind a user and their email to a unique SHA-256 token hash, inviter, seven-day expiry and optional email/acceptance/revocation timestamps. Raw tokens exist only in the direct activation-link response or outgoing email, never invitation records, application sessions, queues or audit events. All activation, renewal and revocation transactions lock the user before accessing invitations.
+
+Audit records contain an event name, nullable actor/subject user references and timestamp; they contain no passwords or activation links. CLI admin creation/promotion has no actor. Existing rider ownership boundaries remain independent of the administrator role.
+
 ## `provider_connections`
 
 One row per user/provider. Tokens use Laravel encrypted casts. It owns sync state, OAuth scopes, provider capabilities and external user identity.

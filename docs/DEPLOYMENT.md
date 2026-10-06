@@ -66,6 +66,12 @@ Generate `APP_KEY` once with `php artisan key:generate` and back it up securely.
 
 Add provider and AI secrets only through the host's secret manager or protected environment configuration. Never bake `.env` into a container image or publish it with a deployment bundle.
 
+## Account administration from v0.6.0
+
+Public registration is removed. After migrations, initialize a new installation or promote your existing active account using `php artisan app:create-admin your-email@example.com --name="Your Name"`. New accounts require interactive password entry; existing credentials are preserved. No account is automatically promoted. Configure SMTP before using email invitations, or use the manual activation-link option. Follow [account administration](ACCOUNTS.md).
+
+On upgrades, rebuild the route cache with the new code and restart long-running application processes/workers. Confirm `php artisan route:list --path=register` has no matches and direct GET/POST `/register` return 404. Protect `/invitations/*` paths from access-log capture, analytics and tracing; they contain bearer secrets.
+
 ## Build and release
 
 A typical release runs:

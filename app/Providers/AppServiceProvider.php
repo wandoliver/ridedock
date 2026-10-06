@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Domain\Accounts\Enums\UserRole;
+use App\Domain\Accounts\Enums\UserStatus;
+use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 use App\Domain\Activities\Contracts\ActivitySourceEnricher;
 use App\Domain\Activities\Contracts\ActivitySourceFileParser;
 use App\Domain\Activities\Services\FitActivitySourceEnricher;
@@ -54,6 +58,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::define('manage-users', fn (User $user): bool => $user->role === UserRole::Admin && $user->status === UserStatus::Active);
         Model::preventLazyLoading(! app()->isProduction());
 
         if (app()->environment('local')

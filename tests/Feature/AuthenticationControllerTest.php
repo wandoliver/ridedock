@@ -4,36 +4,34 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class AuthenticationControllerTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    public function test_guest_registers_and_is_signed_in(): void
+    public function test_public_registration_is_absent_for_guests_and_members(): void
     {
-        $response = $this->post(route('register.store'), [
-            'name' => 'Ada Rider',
-            'email' => 'ada@example.com',
-            'password' => 'SecureRide123',
-            'password_confirmation' => 'SecureRide123',
-        ]);
-
-        $response->assertRedirect(route('dashboard'));
-        $this->assertAuthenticated();
-        $this->assertDatabaseHas('users', ['email' => 'ada@example.com', 'locale' => 'en']);
-        $this->assertTrue(Hash::check('SecureRide123', User::firstOrFail()->password));
+        $this->assertFalse(\Illuminate\Support\Facades\Route::has('register'));
+        $this->assertFalse(\Illuminate\Support\Facades\Route::has('register.store'));
+        $this->get('/register')->assertNotFound();
+        $this->post('/register', ['email' => 'ada@example.com', 'password' => 'SecureRide123'])->assertNotFound();
+        $this->getJson('/api/register')->assertNotFound();
+        $this->postJson('/api/v1/register', ['email' => 'ada@example.com'])->assertNotFound();
+        $this->assertDatabaseEmpty('users');
+        $user = User::factory()->create();
+        $this->actingAs($user)->get('/register')->assertNotFound();
+        $this->post('/register')->assertNotFound();
     }
 
     public function test_guest_pages_use_english_by_default(): void
     {
         $this->withoutVite()
-            ->get(route('register'))
+            ->get(route('login'))
             ->assertOk()
             ->assertSee('<html lang="en">', false)
-            ->assertSee('Create account')
-            ->assertSee('Already registered?');
+            ->assertSee('Access is by invitation.')
+            ->assertDontSee('/register');
     }
 
     public function test_user_signs_in_and_out_with_a_regenerated_session(): void
@@ -73,6 +71,5 @@ class AuthenticationControllerTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)->get(route('login'))->assertRedirect(route('dashboard'));
-        $this->actingAs($user)->get(route('register'))->assertRedirect(route('dashboard'));
     }
 }

@@ -2,13 +2,13 @@
 
 ## Authentication
 
-Application endpoints under `/api/v1` require a bearer token. Create one for your account using its registered email address:
+Application endpoints under `/api/v1` require a bearer token. Create one for your account using its existing email address:
 
 ```bash
 php artisan app:create-owner-token you@example.com
 ```
 
-Copy the printed token; it is shown once. The command creates an owner account with a random password if the email does not already exist. Register through the web interface first if you also need browser access.
+Copy the printed token; it is shown once. The command requires an existing active account and never creates users or grants administrator privileges. Create the first administrator via CLI or activate an administrator-issued invitation first; see [account administration](ACCOUNTS.md). Pending accounts cannot use API tokens.
 
 The token grants `activities:read`, `activities:write` and `connections:write`. Treat it as a secret.
 

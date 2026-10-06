@@ -31,6 +31,18 @@ try {
         }
         $kernel->terminate($request, $response);
         echo "Fresh cached installation: HTTP 200 with production assets.\n";
+        if (\Illuminate\Support\Facades\Route::has('register') || \Illuminate\Support\Facades\Route::has('register.store')) {
+            throw new \RuntimeException('Cached installation still contains registration routes.');
+        }
+        foreach ([['GET', '/register', 404], ['POST', '/register', 404], ['GET', '/admin/users', 302], ['GET', '/invitations/'.str_repeat('a', 64), 404]] as [$method, $path, $expected]) {
+            $request = \Illuminate\Http\Request::create('http://localhost'.$path, $method);
+            $response = $kernel->handle($request);
+            if ($response->getStatusCode() !== $expected) {
+                throw new \RuntimeException('Fresh cached installation failed '.$method.' '.$path.' (HTTP '.$response->getStatusCode().').');
+            }
+            $kernel->terminate($request, $response);
+        }
+        echo "Fresh cached installation: registration absent; administration and invitations protected.\n";
         exit(0);
     }
     exit($app->handleCommand(new \Symfony\Component\Console\Input\ArgvInput(array_merge(['artisan'], array_slice($argv, 3)))));

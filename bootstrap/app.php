@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\SetUserLocale;
+use App\Http\Middleware\EnsureActiveAccount;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,7 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->web(append: [SetUserLocale::class]);
+        $middleware->web(append: [EnsureActiveAccount::class, SetUserLocale::class]);
 
         $middleware->trustProxies(
             at: ['127.0.0.1', '::1'],
@@ -25,6 +26,14 @@ return Application::configure(basePath: dirname(__DIR__))
         );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->respond(function (\Symfony\Component\HttpFoundation\Response $response): \Symfony\Component\HttpFoundation\Response {
+            if (request()->is('invitations/*', 'admin/*')) {
+                $response->headers->set('Cache-Control', 'no-store, private');
+                $response->headers->set('Referrer-Policy', 'no-referrer');
+                $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
+            }
+            return $response;
+        });
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );

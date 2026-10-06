@@ -8,6 +8,7 @@ The target experience is simple: a user creates an account, connects a supported
 
 RideDock already provides several useful multiuser boundaries:
 
+- administrator-managed access and expiring, revocable invitations;
 - account-scoped activities, sources, streams, events and analyses;
 - ownership checks on web pages, APIs, exports and route geometry;
 - encrypted OAuth access and refresh tokens;
@@ -16,7 +17,7 @@ RideDock already provides several useful multiuser boundaries:
 - normalized, data-minimized AI contexts;
 - optional PostgreSQL and asynchronous queue operation.
 
-These are foundations, not a complete hosted product. Public registration should remain restricted until the following readiness work is complete.
+These are foundations, not a complete hosted product. Public registration is removed as of v0.6.0; accounts are provisioned by administrators. See [account administration](ACCOUNTS.md). The following readiness work remains before broader managed hosting.
 
 ## Hosting model
 
@@ -30,9 +31,8 @@ Bring-your-own OpenAI keys may remain an option for self-hosted installations. I
 
 ### Identity and onboarding
 
-- verified email addresses;
+- general email verification (email-delivered invitations verify their bound address; manual links and legacy accounts do not);
 - password-reset and account-recovery flows;
-- optional invite-only registration for early releases;
 - acceptance and versioning of terms and privacy information;
 - administrative account suspension and support tooling;
 - login throttling, bot protection and session management review.

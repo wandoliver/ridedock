@@ -11,6 +11,7 @@
 - [API access](API.md): authentication and request examples.
 - [Security review](SECURITY_REVIEW.md): threat model, dependency audit, controls and remaining work.
 - [Fixture policy](FIXTURES.md): synthetic data, provenance and repository checks.
+- [Account administration](ACCOUNTS.md): administrator setup, invite-only access and mail delivery.
 - [Production deployment](DEPLOYMENT.md): runtime, releases, workers and backups.
 - [Managed hosting](HOSTING.md): requirements and roadmap for a hosted service.
 

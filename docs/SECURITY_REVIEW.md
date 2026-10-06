@@ -2,6 +2,14 @@
 
 Reviewed on 2026-10-05. Scope: the current application and repository tree, authorization boundaries, OAuth linking, external file intake, error handling, dependency lockfiles and test fixtures. This is a documented engineering review, not an independent penetration test or approval for public managed hosting.
 
+## v0.6.0 account access update — 2026-10-06
+
+Public registration routes and their implementation are removed. Access is provisioned by explicit administrators; pending accounts cannot log in, use remembered browser sessions or use Sanctum API tokens. Admin authorization is checked on every management route and lifecycle service, without granting access to other riders' activity data. CLI token creation requires an existing active account.
+
+Activation links are 256-bit random bearer secrets stored only as SHA-256 hashes, bound to the pending account/email and valid for seven days. Renewal invalidates previous invitations. Acceptance, renewal and revocation lock the user first within a transaction; GET does not consume tokens. Invitations are CSRF-protected, rate-limited and served with no-store/no-referrer/noindex headers, including error responses. Manual links are rendered once without session persistence. Email sending is synchronous, rejects log transports and suppresses raw transport exceptions; queues and audit events do not contain links.
+
+Coverage includes registration absence, admin/member boundaries, token lifecycle, password validation, pending-session/API refusal, CLI initialization, localization, transport failure and fresh cached installation. SMTP delivery and infrastructure log redaction require deployment verification; account suspension, general password recovery and administrator MFA remain future product work. See [account administration](ACCOUNTS.md).
+
 ## Assets and trust boundaries
 
 - Rider identity, password hashes, sessions and API tokens.

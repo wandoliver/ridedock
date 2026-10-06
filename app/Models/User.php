@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Domain\Accounts\Enums\UserRole;
+use App\Domain\Accounts\Enums\UserStatus;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Carbon;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -17,6 +19,11 @@ use Laravel\Sanctum\HasApiTokens;
  * @property int $id
  * @property string $name
  * @property string $email
+ * @property UserRole $role
+ * @property UserStatus $status
+ * @property string $password
+ * @property Carbon|null $email_verified_at
+ * @property-read UserInvitation|null $latestInvitation
  * @property string $locale
  * @property int|null $activity_retention_days
  * @property int|null $source_retention_days
@@ -26,8 +33,17 @@ use Laravel\Sanctum\HasApiTokens;
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
+    /** @var array<string, mixed> */
+    protected $attributes = ['role' => 'member', 'status' => 'active'];
+
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
+
+    /** @return HasOne<UserInvitation, $this> */
+    public function latestInvitation(): HasOne
+    {
+        return $this->hasOne(UserInvitation::class)->latestOfMany();
+    }
 
     /** @return HasMany<Activity, $this> */
     public function activities(): HasMany
@@ -77,6 +93,8 @@ class User extends Authenticatable
             'source_retention_days' => 'integer',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role' => UserRole::class,
+            'status' => UserStatus::class,
         ];
     }
 }

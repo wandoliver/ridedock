@@ -6,10 +6,11 @@ Requirements: PHP 8.4+, Composer, Node.js 22 (22.13+) or 24+ (24 recommended), a
 
 ```bash
 composer setup
+php artisan app:create-admin you@example.com --name="Your Name"
 composer run dev
 ```
 
-Open the local URL printed by the server and register an account. For API authentication, see [API access](API.md).
+The admin command securely prompts for a password. Open the local URL printed by the server and sign in. Public registration is removed; use [user management](ACCOUNTS.md) to create and invite other users. For API authentication, see [API access](API.md).
 
 For an existing checkout where frontend assets are not needed:
 
@@ -21,6 +22,10 @@ php artisan migrate
 ```
 
 Provider imports run synchronously by default (`QUEUE_CONNECTION=sync`). AI activity analyses and all training plans use a separate persistent database queue by default (`AI_QUEUE_CONNECTION=ai`). `composer run dev` starts its worker automatically. When starting the web server separately, also run `php artisan queue:work ai --queue=ai --sleep=1 --timeout=120`. Provider imports may independently use an asynchronous connection such as `database`, with their own worker. See [DEPLOYMENT.md](DEPLOYMENT.md) for supervision and retry settings.
+
+### Upgrading to v0.6.0
+
+Run `php artisan migrate` and `php artisan optimize:clear`, then promote your existing account with `php artisan app:create-admin your-existing-email@example.com`. Promotion keeps its password and data. All existing accounts otherwise remain active members. Restart development servers/workers after updating. See [account administration](ACCOUNTS.md) for mail delivery and invitation handling.
 
 ### Upgrading installations from before v0.0.8
 

@@ -1,6 +1,6 @@
 # RideDock
 
-![Release](https://img.shields.io/badge/release-v0.5.2-blue)
+![Release](https://img.shields.io/badge/release-v0.6.0-blue)
 [![CI](https://github.com/wandoliver/ridedock/actions/workflows/ci.yml/badge.svg)](https://github.com/wandoliver/ridedock/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -14,10 +14,11 @@ Requires PHP 8.4+, Composer, Node.js 22 (22.13+) or 24+ (24 recommended), and SQ
 
 ```bash
 composer setup
+php artisan app:create-admin you@example.com --name="Your Name"
 composer run dev
 ```
 
-Open the local URL printed by the server and register an account. Configure provider connections and the optional AI coach using the [setup guides](docs/README.md).
+The admin command asks for a password securely. Open the local URL printed by the server and sign in; access for other users is granted through [user management and invitations](docs/ACCOUNTS.md). Configure provider connections and the optional AI coach using the [setup guides](docs/README.md).
 
 ## Documentation
 
