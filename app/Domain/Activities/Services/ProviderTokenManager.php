@@ -14,6 +14,21 @@ final class ProviderTokenManager
 
     public function ensureFresh(ProviderConnection $connection): ProviderConnection
     {
+        $lock = app(\App\Domain\Operations\Services\ProviderOperations::class)->lock('provider-token:'.$connection->id, 120);
+        if (! $lock->get()) {
+            throw new \App\Domain\Operations\Exceptions\WorkDeferred(5);
+        }
+        try {
+            // A concurrent refresh may have rotated both tokens. Re-read under the shared lock.
+            $current = ProviderConnection::query()->findOrFail($connection->id);
+            return $this->refreshIfExpired($current);
+        } finally {
+            $lock->release();
+        }
+    }
+
+    private function refreshIfExpired(ProviderConnection $connection): ProviderConnection
+    {
         if (! $connection->stillConnected()) {
             throw new RuntimeException('The provider connection is disconnected.');
         }

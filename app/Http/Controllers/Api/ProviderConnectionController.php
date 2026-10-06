@@ -45,7 +45,24 @@ class ProviderConnectionController extends Controller
 
         abort_unless($connection->isConnected(), 409, 'Reconnect the provider before synchronizing.');
 
-        SyncProviderConnection::dispatch($connection);
+        if (in_array($connection->status, [\App\Domain\Activities\Enums\ConnectionStatus::Active, \App\Domain\Activities\Enums\ConnectionStatus::Error], true)) {
+            $connection->updateWhileConnected(['status' => \App\Domain\Activities\Enums\ConnectionStatus::Queued, 'sync_started_at' => now(), 'sync_retry_at' => null]);
+        }
+        try {
+            SyncProviderConnection::dispatch($connection);
+        } catch (\App\Domain\Operations\Exceptions\WorkDeferred $deferred) {
+            if ($request->expectsJson()) {
+                return response()->json(['status' => 'waiting', 'retry_after' => $deferred->retryAfter], 429)->header('Retry-After', (string) $deferred->retryAfter);
+            }
+            return redirect()->route('settings.connections')->with('status', __('operations.sync_waiting', ['seconds' => $deferred->retryAfter]));
+        } catch (\Throwable) {
+            $connection->updateWhileConnected(['status' => \App\Domain\Activities\Enums\ConnectionStatus::Error, 'last_error' => 'Provider synchronization failed. Retry the synchronization to resume.']);
+            app(\App\Domain\Operations\Services\OperationalEvents::class)->record('provider', 'sync_dispatch_failed', $connection->user_id, $connection->provider->value);
+            if ($request->expectsJson()) {
+                return response()->json(['status' => 'failed'], 503);
+            }
+            return redirect()->route('settings.connections')->with('analysis_error', __('ui.settings.sync_failed'));
+        }
 
         if (! $request->expectsJson()) {
             return redirect()

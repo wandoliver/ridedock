@@ -4,6 +4,22 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-10-06
+
+### Added
+
+- Hosted provider approval/terms confirmation gates and shared-cache requirements, with configurable application-wide API budgets and shared cooldowns for provider limits/outages.
+- Cross-server sync/token-refresh locks, resumable detail/overlap checkpoints, queued/waiting connection states and delayed processing of requested sync/webhook work. Automatic periodic synchronization remains deferred.
+- Monthly per-user ride/plan quotas with audited administrator overrides, shared pending/concurrent/request-start limits and capacity deferrals that do not spend provider-failure retries.
+- Per-attempt token/cache usage and snapshotted estimated USD costs, including invalid responses; unknown costs remain explicit. Anonymous monthly spend totals survive personal data deletion.
+- German/English personal AI usage and administrator operations views, configurable budget warnings and a CLI/opt-in scheduled monitor with bounded safe events and log output.
+- Synthetic regression coverage for quotas, admission, real queue releases, resumable sync, token rotation, hosted gates, ownership and budget accounting; operational setup and remaining external deployment prerequisites.
+
+### Changed
+
+- Database provider queue reservations last at least 360 seconds for 300-second jobs; provider jobs use bounded deadlines and three actual exceptions instead of spending retries on capacity waits.
+- Personal export/deletion and preview-first retention include operational usage/events. New migration backfills quota requests and available historical token usage without inventing past retry costs.
+
 ## [0.7.0] - 2026-10-06
 
 ### Added

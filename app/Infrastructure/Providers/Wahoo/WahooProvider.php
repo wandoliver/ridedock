@@ -15,6 +15,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
+use App\Domain\Operations\Services\ProviderOperations;
 
 final class WahooProvider implements ActivityFileProvider, OAuthActivityProvider, RevocableActivityProvider
 {
@@ -33,8 +34,8 @@ final class WahooProvider implements ActivityFileProvider, OAuthActivityProvider
 
     public function revokeAccess(ProviderConnection $connection): void
     {
-        Http::baseUrl(config('activity-providers.wahoo.api_url'))
-            ->connectTimeout(5)->timeout(10)->acceptJson()
+        app(ProviderOperations::class)->client('wahoo', Http::baseUrl(config('activity-providers.wahoo.api_url'))
+            ->connectTimeout(5)->timeout(10)->acceptJson())
             ->withToken((string) $connection->access_token)
             ->delete('/permissions')->throw();
     }
@@ -42,6 +43,7 @@ final class WahooProvider implements ActivityFileProvider, OAuthActivityProvider
     public function authorizationUrl(string $state): string
     {
         $this->assertConfigured();
+        app(ProviderOperations::class)->assertAllowed('wahoo');
 
         return rtrim(config('activity-providers.wahoo.auth_url'), '/').'/oauth/authorize?'.http_build_query([
             'client_id' => config('activity-providers.wahoo.client_id'),
@@ -55,8 +57,9 @@ final class WahooProvider implements ActivityFileProvider, OAuthActivityProvider
     public function exchangeAuthorizationCode(string $code): ProviderToken
     {
         $this->assertConfigured();
+        app(ProviderOperations::class)->assertAllowed('wahoo');
 
-        $payload = Http::asForm()->post($this->tokenUrl(), [
+        $payload = app(ProviderOperations::class)->client('wahoo', Http::asForm()->connectTimeout(5)->timeout(30), false)->post($this->tokenUrl(), [
             'client_id' => config('activity-providers.wahoo.client_id'),
             'client_secret' => config('activity-providers.wahoo.client_secret'),
             'grant_type' => 'authorization_code',
@@ -71,8 +74,9 @@ final class WahooProvider implements ActivityFileProvider, OAuthActivityProvider
     public function refreshAccessToken(ProviderConnection $connection): ProviderToken
     {
         $this->assertConfigured();
+        app(ProviderOperations::class)->assertAllowed('wahoo');
 
-        return $this->tokenFromResponse(Http::asForm()->post($this->tokenUrl(), [
+        return $this->tokenFromResponse(app(ProviderOperations::class)->client('wahoo', Http::asForm()->connectTimeout(5)->timeout(30), false)->post($this->tokenUrl(), [
             'client_id' => config('activity-providers.wahoo.client_id'),
             'client_secret' => config('activity-providers.wahoo.client_secret'),
             'grant_type' => 'refresh_token',
@@ -203,12 +207,14 @@ final class WahooProvider implements ActivityFileProvider, OAuthActivityProvider
 
     private function clientWithToken(string $accessToken): PendingRequest
     {
-        return Http::baseUrl(config('activity-providers.wahoo.api_url'))
-            ->connectTimeout(5)
-            ->timeout(30)
-            ->acceptJson()
-            ->withToken($accessToken)
-            ->retry(2, 250, throw: false);
+        return app(ProviderOperations::class)->client(
+            'wahoo',
+            Http::baseUrl(config('activity-providers.wahoo.api_url'))
+                ->connectTimeout(5)
+                ->timeout(30)
+                ->acceptJson()
+                ->withToken($accessToken)
+        );
     }
 
     /** @param array<string, mixed> $payload */

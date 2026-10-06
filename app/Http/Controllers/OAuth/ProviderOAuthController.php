@@ -89,6 +89,7 @@ class ProviderOAuthController extends Controller
         try {
             $token = $adapter->exchangeAuthorizationCode($code);
         } catch (\Throwable) {
+            app(\App\Domain\Operations\Services\OperationalEvents::class)->record('provider', 'oauth_failed', $request->user()->id, $providerName->value);
             throw new \RuntimeException('Provider authorization could not be completed. Please try again.');
         }
         $connection = \Illuminate\Support\Facades\DB::transaction(function () use ($state, $providerName, $token, $adapter): ProviderConnection {
@@ -105,10 +106,20 @@ class ProviderOAuthController extends Controller
                     'capabilities' => $adapter->capabilities(),
                     'status' => ConnectionStatus::Active,
                     'last_error' => null,
+                    'sync_cursor' => null,
+                    'sync_since' => null,
+                    'sync_started_at' => null,
+                    'sync_retry_at' => null,
                 ],
             );
         });
-        SyncProviderConnection::dispatch($connection);
+        try {
+            SyncProviderConnection::dispatch($connection);
+        } catch (\App\Domain\Operations\Exceptions\WorkDeferred) {
+            // Connection succeeded. The settings page shows when its initial sync can resume.
+        } catch (\Throwable) {
+            // Sync records a safe error; successful OAuth must still return to the settings page.
+        }
 
         $locale = User::query()->whereKey($state['user_id'])->value('locale');
 

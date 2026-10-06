@@ -17,6 +17,9 @@ return [
     ],
 
     'hammerhead' => [
+        'hosted_approved' => (bool) env('HAMMERHEAD_HOSTED_APPROVED', false),
+        'terms_reviewed_at' => env('HAMMERHEAD_TERMS_REVIEWED_AT'),
+        'rate_limits' => [60 => (int) env('HAMMERHEAD_REQUESTS_PER_MINUTE', 60)],
         'priority' => 100,
         'enabled' => (bool) env('HAMMERHEAD_ENABLED', false),
         'client_id' => env('HAMMERHEAD_CLIENT_ID'),
@@ -34,6 +37,13 @@ return [
     ],
 
     'wahoo' => [
+        'hosted_approved' => (bool) env('WAHOO_HOSTED_APPROVED', false),
+        'terms_reviewed_at' => env('WAHOO_TERMS_REVIEWED_AT'),
+        'rate_limits' => [
+            300 => (int) env('WAHOO_REQUESTS_PER_5_MINUTES', 25),
+            3600 => (int) env('WAHOO_REQUESTS_PER_HOUR', 100),
+            86400 => (int) env('WAHOO_REQUESTS_PER_DAY', 250),
+        ],
         'priority' => 90,
         'enabled' => (bool) env('WAHOO_ENABLED', false),
         'client_id' => env('WAHOO_CLIENT_ID'),

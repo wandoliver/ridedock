@@ -53,6 +53,13 @@
                         <p class="mt-2 text-sm text-ink-60">{{ $invitation->revoked_at ? __('accounts.invitation_revoked') : ($invitation->expires_at->isPast() ? __('accounts.invitation_expired') : __('accounts.invitation_pending', ['date' => $invitation->expires_at->format('d.m.Y H:i')])) }}</p>
                     @endif
                 </div>
+                <form method="POST" action="{{ route('admin.users.quotas', $user) }}" class="flex flex-wrap items-end gap-3">
+                    @csrf @method('PATCH')
+                    <div><label for="activity-quota-{{ $user->id }}" class="block text-sm">{{ __('operations.activity') }}</label><input id="activity-quota-{{ $user->id }}" name="ai_activity_quota" type="number" min="0" max="100000" value="{{ $user->ai_activity_quota }}" placeholder="{{ config('operations.ai.monthly_activity_quota') }}" class="mt-1 w-24 rounded border border-line p-2"></div>
+                    <div><label for="plan-quota-{{ $user->id }}" class="block text-sm">{{ __('operations.plans') }}</label><input id="plan-quota-{{ $user->id }}" name="ai_plan_quota" type="number" min="0" max="100000" value="{{ $user->ai_plan_quota }}" placeholder="{{ config('operations.ai.monthly_plan_quota') }}" class="mt-1 w-24 rounded border border-line p-2"></div>
+                    <x-button secondary>{{ __('operations.save_quotas') }}</x-button>
+                    <p class="basis-full text-sm text-ink-60">{{ __('operations.quota_defaults') }}</p>
+                </form>
                 @if($user->status === \App\Domain\Accounts\Enums\UserStatus::Pending)
                 <div class="flex flex-wrap gap-2" role="group" aria-label="{{ __('accounts.actions') }}: {{ $user->email }}">
                     <form method="POST" action="{{ route('admin.users.invitation.reissue', $user) }}">@csrf<input type="hidden" name="delivery" value="manual"><x-button secondary>{{ __('accounts.renew_manual') }}</x-button></form>

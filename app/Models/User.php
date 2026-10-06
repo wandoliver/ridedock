@@ -28,12 +28,20 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $locale
  * @property int|null $activity_retention_days
  * @property int|null $source_retention_days
+ * @property int|null $ai_activity_quota
+ * @property int|null $ai_plan_quota
  * @property-read AthleteProfile|null $athleteProfile
  */
 #[Fillable(['name', 'email', 'locale', 'password'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
+    public function aiQuota(bool $activity): int
+    {
+        return max(0, $activity
+            ? ($this->ai_activity_quota ?? (int) config('operations.ai.monthly_activity_quota'))
+            : ($this->ai_plan_quota ?? (int) config('operations.ai.monthly_plan_quota')));
+    }
     /** @var array<string, mixed> */
     protected $attributes = ['role' => 'member', 'status' => 'active'];
 
@@ -92,6 +100,8 @@ class User extends Authenticatable
         return [
             'activity_retention_days' => 'integer',
             'source_retention_days' => 'integer',
+            'ai_activity_quota' => 'integer',
+            'ai_plan_quota' => 'integer',
             'email_verified_at' => 'datetime',
             'last_active_at' => 'datetime',
             'password' => 'hashed',

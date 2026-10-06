@@ -25,8 +25,10 @@
                             <p class="mt-1 text-sm {{ $connection?->status->value === 'error' ? 'text-ink-60' : 'text-ink-50' }}">
                                 @if (! $connected)
                                     {{ __('ui.settings.not_connected') }}
-                                @elseif ($connection->status->value === 'syncing')
+                                @elseif (in_array($connection->status->value, ['syncing', 'queued'], true))
                                     {{ __('ui.settings.sync_running') }}
+                                @elseif ($connection->status->value === 'waiting')
+                                    {{ __('operations.sync_retry', ['time' => $connection->sync_retry_at?->locale(app()->getLocale())->diffForHumans() ?? '–']) }}
                                 @elseif ($connection->status->value === 'error')
                                     {{ __('ui.settings.sync_failed') }}
                                 @elseif ($connection->last_synced_at)
@@ -42,7 +44,7 @@
                                 @csrf
                                 <button type="submit" class="rd-button rd-button-secondary" data-provider-sync-button data-pending-label="{{ __('ui.settings.sync_running') }}">{{ __('ui.settings.try_again') }}</button>
                             </form>
-                        @elseif ($connection?->status->value === 'syncing')
+                        @elseif (in_array($connection?->status->value, ['syncing', 'queued'], true))
                             <span class="w-fit rounded-full bg-canvas px-3 py-1.5 text-sm font-medium text-ink-60">{{ __('ui.settings.running') }}</span>
                         @elseif ($connected)
                             <div class="flex flex-wrap items-center gap-2">

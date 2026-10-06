@@ -9,3 +9,6 @@ Artisan::command('inspire', function () {
 
 Illuminate\Support\Facades\Schedule::command('app:prune-data --execute')
     ->dailyAt('03:00')->withoutOverlapping()->when(fn () => config('data-lifecycle.scheduled'));
+
+Illuminate\Support\Facades\Schedule::command('app:monitor-operations --record')
+    ->everyFiveMinutes()->onOneServer()->withoutOverlapping()->when(fn () => config('operations.scheduled_monitor'));

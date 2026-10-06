@@ -18,10 +18,24 @@ class ImportProviderActivity implements ShouldQueue
 
     public bool $deleteWhenMissingModels = true;
 
+    public int $tries = 0;
+    public int $maxExceptions = 3;
+    public int $timeout = 300;
+    public int $deadline = 0;
+    /** @var list<int> */
+    public array $backoff = [60, 300, 900];
+
     public function __construct(
         public readonly ProviderConnection $providerConnection,
         public readonly string $externalId,
-    ) {}
+    ) {
+        $this->deadline = now()->addDays(2)->getTimestamp();
+    }
+
+    public function retryUntil(): \DateTimeInterface
+    {
+        return $this->deadline > 0 ? \Carbon\CarbonImmutable::createFromTimestamp($this->deadline) : \Carbon\CarbonImmutable::now()->addDays(2);
+    }
 
     public function handle(
         ProviderRegistry $providers,
@@ -34,7 +48,11 @@ class ImportProviderActivity implements ShouldQueue
             return;
         }
 
+        $lock = app(\App\Domain\Operations\Services\ProviderOperations::class)->lock('provider-sync:'.$this->providerConnection->id, (int) config('operations.lock_seconds'));
         try {
+            if (! $lock->get()) {
+                throw new \App\Domain\Operations\Exceptions\WorkDeferred(5);
+            }
             $connection = $tokens->ensureFresh($this->providerConnection);
             $provider = $providers->get($connection->provider);
             $payload = $provider->activity($connection, $this->externalId);
@@ -56,8 +74,21 @@ class ImportProviderActivity implements ShouldQueue
                     $enricher->enrich($source->refresh());
                 }
             }
+        } catch (\App\Domain\Operations\Exceptions\WorkDeferred $deferred) {
+            if ($this->job === null || $this->job instanceof \Illuminate\Queue\Jobs\SyncJob) {
+                throw $deferred;
+            }
+            $this->release($deferred->retryAfter);
         } catch (\Throwable) {
+            app(\App\Domain\Operations\Services\OperationalEvents::class)->record('provider', 'import_failed', $this->providerConnection->user_id, $this->providerConnection->provider->value);
             throw new \RuntimeException("Provider activity import failed. Retry the import.");
+        } finally {
+            $lock->release();
         }
+    }
+
+    public function failed(?\Throwable $exception): void
+    {
+        app(\App\Domain\Operations\Services\OperationalEvents::class)->record('provider', 'import_job_failed', $this->providerConnection->user_id, $this->providerConnection->provider->value);
     }
 }

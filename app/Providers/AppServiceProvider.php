@@ -32,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->singleton(\App\Domain\Operations\Services\AiUsage::class);
         $this->app->bind(ActivitySourceFileParser::class, NodeFitFileParser::class);
         $this->app->bind(ActivitySourceEnricher::class, FitActivitySourceEnricher::class);
         $this->app->bind(RouteGeometryProvider::class, StreamRouteGeometryProvider::class);

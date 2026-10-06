@@ -101,10 +101,12 @@ Deploy application code and migrations as one coordinated release. Back up the d
 With `QUEUE_CONNECTION=database`, provider synchronization, webhook imports and FIT enrichment can run outside the web request. Supervise at least one long-running worker:
 
 ```bash
-php artisan queue:work --sleep=1 --tries=3 --timeout=120
+php artisan queue:work --sleep=1 --timeout=300
 ```
 
 Restart workers after every deployment so they load the new code and configuration. Monitor `failed_jobs`, worker restarts, queue age and repeated provider failures. Increase concurrency only after confirming provider rate limits and ensuring unique jobs still behave as expected.
+
+From v0.8.0, provider jobs use a two-day deadline, three actual exceptions and delayed release for capacity waits. The database queue reserves jobs for at least 360 seconds. Configure equivalent reservation timing on other backends. All nodes must share a lock-capable cache; follow [operations setup](OPERATIONS.md) for hosted provider confirmation, quotas, pricing, budget warnings and the opt-in monitor schedule. Auto-Sync remains deferred.
 
 AI activity analyses, goal roadmaps, four-week blocks and weekly plans use the dedicated `ai` database connection and `ai` queue by default, independently of `QUEUE_CONNECTION`. Supervise its worker even when provider imports use `sync`:
 

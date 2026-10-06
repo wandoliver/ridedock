@@ -47,6 +47,20 @@ final class PruneDataLifecycle extends Command
             }
         }
         $audit = DB::table('account_audit_events')->where('created_at', '<', now()->subDays(config('data-lifecycle.audit_days')));
+        // Keep the current calendar month so deletion of old analyses cannot reset quotas.
+        $cutoff = now()->subDays(max(32, (int) config('operations.usage_days')))->startOfMonth();
+        foreach (['ai_usage_requests', 'ai_usage_attempts'] as $table) {
+            $usage = DB::table($table)->where('created_at', '<', $cutoff);
+            $this->line('Expired '.$table.': '.$usage->count());
+            if ($execute) {
+                $usage->delete();
+            }
+        }
+        $events = DB::table('operation_events')->where('created_at', '<', now()->subDays(config('operations.event_days')));
+        $this->line('Expired operation events: '.$events->count());
+        if ($execute) {
+            $events->delete();
+        }
         $this->line('Expired audit events: '.$audit->count());
         if ($execute) {
             $audit->delete();

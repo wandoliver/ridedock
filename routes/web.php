@@ -42,13 +42,16 @@ Route::middleware([ProtectAccountLinks::class, 'guest', 'throttle:20,1'])->group
 });
 
 Route::prefix('admin')->name('admin.')->middleware([ProtectAccountLinks::class, 'auth', 'can:manage-users', 'throttle:30,1'])->group(function (): void {
+    Route::get('/operations', \App\Http\Controllers\Admin\OperationsController::class)->name('operations');
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
+    Route::patch('/users/{user}/ai-quotas', [UserController::class, 'quotas'])->name('users.quotas');
     Route::post('/users/{user}/invitation', [UserController::class, 'reissue'])->name('users.invitation.reissue');
     Route::delete('/users/{user}/invitation', [UserController::class, 'revoke'])->name('users.invitation.revoke');
 });
 
 Route::middleware('auth')->group(function (): void {
+    Route::get('/settings/ai-usage', \App\Http\Controllers\Settings\AiUsageController::class)->middleware(ProtectAccountLinks::class)->name('settings.ai-usage');
     Route::get('/insights', DashboardController::class)->name('analytics');
     Route::get('/ai-analyses/{analysis}/status', AiAnalysisStatusController::class)
         ->middleware('throttle:120,1')->name('ai-analyses.status');

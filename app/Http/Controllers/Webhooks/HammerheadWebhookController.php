@@ -28,7 +28,11 @@ class HammerheadWebhookController extends Controller
             ->first();
 
         if ($connection) {
-            ImportProviderActivity::dispatch($connection, $payload['activityId']);
+            try {
+                ImportProviderActivity::dispatch($connection, $payload['activityId']);
+            } catch (\App\Domain\Operations\Exceptions\WorkDeferred $deferred) {
+                return response('', 503)->header('Retry-After', (string) $deferred->retryAfter);
+            }
         }
 
         return response()->noContent(200);

@@ -14,6 +14,7 @@
 - [Account administration](ACCOUNTS.md): administrator setup, invite-only access and mail delivery.
 - [Production deployment](DEPLOYMENT.md): runtime, releases, workers and backups.
 - [Managed hosting](HOSTING.md): requirements and roadmap for a hosted service.
+- [Provider and AI operations](OPERATIONS.md): hosted approval gates, shared limits/locks, user quotas, cost estimates, budget warnings and monitoring.
 
 ## Reference
 

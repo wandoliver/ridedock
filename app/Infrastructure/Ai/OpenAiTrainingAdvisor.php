@@ -114,6 +114,7 @@ final class OpenAiTrainingAdvisor implements GoalTrainingPlanner, TrainingAdviso
                 ->post('/responses', [
                     'model' => $this->model,
                     'store' => false,
+                    'max_output_tokens' => max(16, (int) config('operations.ai.max_output_tokens')),
                     'instructions' => $instructions,
                     'input' => [[
                         'role' => 'user',
@@ -130,8 +131,10 @@ final class OpenAiTrainingAdvisor implements GoalTrainingPlanner, TrainingAdviso
                             'schema' => $schema,
                         ],
                     ],
-                ])
-                ->throw();
+                ]);
+            // Capture billable usage before checking HTTP, JSON or plan validity.
+            app(\App\Domain\Operations\Services\AiUsage::class)->response($response, $this->model);
+            $response->throw();
         } catch (\Illuminate\Http\Client\RequestException $exception) {
             throw new RuntimeException("AI provider request failed (HTTP ".$exception->response->status().").");
         } catch (\Illuminate\Http\Client\ConnectionException) {

@@ -61,6 +61,22 @@ final class UserController extends Controller
         return to_route('admin.users.index')->with('status', __('accounts.revoked'));
     }
 
+    public function quotas(Request $request, User $user): RedirectResponse
+    {
+        Gate::authorize('manage-users');
+        $values = $request->validate([
+            'ai_activity_quota' => ['present', 'nullable', 'integer', 'min:0', 'max:100000'],
+            'ai_plan_quota' => ['present', 'nullable', 'integer', 'min:0', 'max:100000'],
+        ]);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($user, $values, $request): void {
+            \Illuminate\Support\Facades\DB::table('operation_mutexes')->where('name', 'ai')->lockForUpdate()->first();
+            $locked = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $locked->forceFill($values)->save();
+            \App\Domain\Accounts\Services\AccountAudit::record('ai_quotas_updated', $locked, $request->user());
+        }, 3);
+        return to_route('admin.users.index')->with('status', __('operations.quotas_saved'));
+    }
+
     private function checkDelivery(string $delivery, SendInvitation $sender): void
     {
         if ($delivery === 'email' && ! $sender->isAvailable()) {

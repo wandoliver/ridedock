@@ -26,6 +26,9 @@ use Illuminate\Support\Collection;
  * @property ConnectionStatus $status
  * @property string|null $sync_cursor
  * @property CarbonImmutable|null $last_synced_at
+ * @property CarbonImmutable|null $sync_started_at
+ * @property CarbonImmutable|null $sync_retry_at
+ * @property CarbonImmutable|null $sync_since
  * @property string|null $last_error
  * @property array<string, mixed>|null $metadata
  * @property-read User $user
@@ -34,7 +37,7 @@ use Illuminate\Support\Collection;
 #[Fillable([
     'user_id', 'provider', 'external_user_id', 'access_token', 'refresh_token',
     'token_expires_at', 'scopes', 'capabilities', 'status', 'sync_cursor',
-    'last_synced_at', 'last_error', 'metadata',
+    'last_synced_at', 'last_error', 'metadata', 'sync_started_at', 'sync_retry_at', 'sync_since',
 ])]
 class ProviderConnection extends Model
 {
@@ -52,6 +55,9 @@ class ProviderConnection extends Model
             'refresh_token' => 'encrypted',
             'token_expires_at' => 'immutable_datetime',
             'last_synced_at' => 'immutable_datetime',
+            'sync_started_at' => 'immutable_datetime',
+            'sync_retry_at' => 'immutable_datetime',
+            'sync_since' => 'immutable_datetime',
             'scopes' => 'array',
             'capabilities' => 'array',
             'metadata' => 'array',
@@ -63,6 +69,7 @@ class ProviderConnection extends Model
         return $this->status !== ConnectionStatus::Revoked;
     }
 
+    /** @phpstan-impure */
     public function stillConnected(): bool
     {
         return self::query()->whereKey($this->id)

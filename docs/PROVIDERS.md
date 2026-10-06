@@ -30,6 +30,8 @@ RideDock imports completed cycling workouts and their FIT files. Planned workout
 
 ## Contract
 
+Version 0.8.0 adds hosted approval/terms confirmation, shared request budgets and cooldowns, sync/token locks and resumable checkpoints. Configure and verify them using [OPERATIONS.md](OPERATIONS.md). These controls do not grant external provider approval. Automatic periodic sync remains deferred.
+
 Every provider returns `ProviderActivity` and `ProviderPage`. OAuth and source-file support are separate optional interfaces, so a future file upload or Garmin adapter need not fake OAuth methods.
 
 ## Hammerhead/Karoo

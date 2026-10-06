@@ -13,6 +13,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
+use App\Domain\Operations\Services\ProviderOperations;
 
 final class HammerheadProvider implements ActivityFileProvider, OAuthActivityProvider
 {
@@ -29,6 +30,7 @@ final class HammerheadProvider implements ActivityFileProvider, OAuthActivityPro
     public function authorizationUrl(string $state): string
     {
         $this->assertConfigured();
+        app(ProviderOperations::class)->assertAllowed('hammerhead');
 
         return rtrim(config('activity-providers.hammerhead.auth_url'), '/').'/oauth/authorize?'.http_build_query([
             'client_id' => config('activity-providers.hammerhead.client_id'),
@@ -42,8 +44,9 @@ final class HammerheadProvider implements ActivityFileProvider, OAuthActivityPro
     public function exchangeAuthorizationCode(string $code): ProviderToken
     {
         $this->assertConfigured();
+        app(ProviderOperations::class)->assertAllowed('hammerhead');
 
-        return $this->tokenFromResponse(Http::asForm()->post($this->tokenUrl(), [
+        return $this->tokenFromResponse(app(ProviderOperations::class)->client('hammerhead', Http::asForm()->connectTimeout(5)->timeout(30))->post($this->tokenUrl(), [
             'client_id' => config('activity-providers.hammerhead.client_id'),
             'client_secret' => config('activity-providers.hammerhead.client_secret'),
             'grant_type' => 'authorization_code',
@@ -55,8 +58,9 @@ final class HammerheadProvider implements ActivityFileProvider, OAuthActivityPro
     public function refreshAccessToken(ProviderConnection $connection): ProviderToken
     {
         $this->assertConfigured();
+        app(ProviderOperations::class)->assertAllowed('hammerhead');
 
-        return $this->tokenFromResponse(Http::asForm()->post($this->tokenUrl(), [
+        return $this->tokenFromResponse(app(ProviderOperations::class)->client('hammerhead', Http::asForm()->connectTimeout(5)->timeout(30))->post($this->tokenUrl(), [
             'client_id' => config('activity-providers.hammerhead.client_id'),
             'client_secret' => config('activity-providers.hammerhead.client_secret'),
             'grant_type' => 'refresh_token',
@@ -69,7 +73,9 @@ final class HammerheadProvider implements ActivityFileProvider, OAuthActivityPro
         ?CarbonImmutable $since = null,
         ?string $cursor = null,
     ): ProviderPage {
-        $page = max(1, (int) ($cursor ?: 1));
+        $parts = explode(':', $cursor ?: '1:0');
+        $page = max(1, (int) $parts[0]);
+        $offset = max(0, (int) ($parts[1] ?? 0));
         $pageSize = config('activity-providers.sync.page_size');
         $payload = $this->client($connection)->get('/activities', array_filter([
             'page' => $page,
@@ -77,12 +83,15 @@ final class HammerheadProvider implements ActivityFileProvider, OAuthActivityPro
             'startDate' => $since?->toDateString(),
         ], fn ($value) => $value !== null))->throw()->json();
 
-        $activities = array_values(array_map(function (array $summary) use ($connection): ProviderActivity {
-            return $this->activity($connection, (string) $summary['id']);
-        }, $payload['data'] ?? []));
+        // One detail per checkpoint avoids restarting a whole fan-out page after throttling.
+        $summaries = $payload['data'] ?? [];
+        $activities = isset($summaries[$offset]['id'])
+            ? [$this->activity($connection, (string) $summaries[$offset]['id'])] : [];
         $totalPages = (int) ($payload['totalPages'] ?? $page);
+        $next = $offset + 1 < count($summaries) ? $page.':'.($offset + 1)
+            : ($page < $totalPages ? ($page + 1).':0' : null);
 
-        return new ProviderPage($activities, $page < $totalPages ? (string) ($page + 1) : null);
+        return new ProviderPage($activities, $next);
     }
 
     public function activity(ProviderConnection $connection, string $externalId): ProviderActivity
@@ -135,12 +144,14 @@ final class HammerheadProvider implements ActivityFileProvider, OAuthActivityPro
 
     private function client(ProviderConnection $connection): PendingRequest
     {
-        return Http::baseUrl(config('activity-providers.hammerhead.api_url'))
-            ->connectTimeout(5)
-            ->timeout(30)
-            ->acceptJson()
-            ->withToken((string) $connection->access_token)
-            ->retry(2, 250, throw: false);
+        return app(ProviderOperations::class)->client(
+            'hammerhead',
+            Http::baseUrl(config('activity-providers.hammerhead.api_url'))
+                ->connectTimeout(5)
+                ->timeout(30)
+                ->acceptJson()
+                ->withToken((string) $connection->access_token)
+        );
     }
 
     /** @param array<string, mixed> $payload */

@@ -45,6 +45,9 @@ final class PersonalDataExport
                         'streams' => DB::table('activity_streams')->whereIn('activity_id', clone $activityIds),
                         'events' => DB::table('activity_events')->whereIn('activity_id', clone $activityIds),
                         'analyses' => DB::table('ai_analyses')->where('user_id', $user->id),
+                        'ai_usage_requests' => DB::table('ai_usage_requests')->where('user_id', $user->id),
+                        'ai_usage_attempts' => DB::table('ai_usage_attempts')->where('user_id', $user->id),
+                        'operation_events' => DB::table('operation_events')->where('user_id', $user->id),
                         'invitations' => DB::table('user_invitations')->where('user_id', $user->id),
                         'api_tokens' => $user->tokens()->getQuery()->toBase(),
                         'sessions' => DB::table('sessions')->where('user_id', $user->id),
@@ -84,7 +87,7 @@ final class PersonalDataExport
                                 }
                             }
                             // Database JSON columns become structured values in the portable export.
-                            foreach (['metadata', 'context', 'output', 'raw_payload', 'data', 'scopes', 'capabilities', 'available_days', 'abilities'] as $key) {
+                            foreach (['metadata', 'context', 'output', 'raw_payload', 'data', 'scopes', 'capabilities', 'available_days', 'abilities', 'pricing'] as $key) {
                                 if (isset($data[$key]) && is_string($data[$key])) {
                                     $decoded = json_decode($data[$key], true);
                                     if (json_last_error() === JSON_ERROR_NONE) {

@@ -14,7 +14,11 @@ class GenerateGoalTrainingPlan implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
 
-    public int $tries = 3;
+    public int $tries = 0;
+
+    public int $maxExceptions = 3;
+
+    public int $deadline = 0;
 
     public int $timeout;
 
@@ -27,7 +31,13 @@ class GenerateGoalTrainingPlan implements ShouldBeUnique, ShouldQueue
 
     public function __construct(public readonly string $analysisId)
     {
+        $this->deadline = now()->addDay()->getTimestamp();
         $this->timeout = max(120, (int) config('ai.providers.openai.timeout_seconds') + 10);
+    }
+
+    public function retryUntil(): \DateTimeInterface
+    {
+        return $this->deadline > 0 ? \Carbon\CarbonImmutable::createFromTimestamp($this->deadline) : \Carbon\CarbonImmutable::now()->addDays(1);
     }
 
     public function uniqueId(): string
@@ -47,13 +57,21 @@ class GenerateGoalTrainingPlan implements ShouldBeUnique, ShouldQueue
             return;
         }
 
-        $analysis->update([
-            'status' => AiAnalysisStatus::Processing,
-            'started_at' => now(),
-            'error' => null,
-        ]);
-
-        $advice = $trainingPlanner->generateGoalPlan($analysis->context);
+        try {
+            $advice = app(\App\Domain\Operations\Services\AiUsage::class)->run(
+                $analysis,
+                fn () => $trainingPlanner->generateGoalPlan($analysis->context)
+            );
+        } catch (\App\Domain\Operations\Exceptions\WorkDeferred $deferred) {
+            if ($this->job === null || $this->job instanceof \Illuminate\Queue\Jobs\SyncJob) {
+                throw $deferred;
+            }
+            $this->release($deferred->retryAfter);
+            return;
+        }
+        if ($advice === null) {
+            return;
+        }
 
         $analysis->update([
             'status' => AiAnalysisStatus::Completed,
@@ -75,6 +93,7 @@ class GenerateGoalTrainingPlan implements ShouldBeUnique, ShouldQueue
             return;
         }
 
+        app(\App\Domain\Operations\Services\OperationalEvents::class)->record('ai', 'job_failed', $analysis->user_id);
         app()->setLocale($analysis->user()->value('locale') ?? config('app.locale'));
         $analysis->update([
             'status' => AiAnalysisStatus::Failed,

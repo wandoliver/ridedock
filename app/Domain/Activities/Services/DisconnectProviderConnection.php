@@ -24,6 +24,9 @@ final class DisconnectProviderConnection
             'capabilities' => null,
             'metadata' => null,
             'sync_cursor' => null,
+            'sync_started_at' => null,
+            'sync_retry_at' => null,
+            'sync_since' => null,
             'last_error' => null,
             'status' => ConnectionStatus::Revoked,
         ])->save();

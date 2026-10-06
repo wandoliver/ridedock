@@ -19,6 +19,15 @@ RideDock already provides several useful multiuser boundaries:
 
 These are foundations, not a complete hosted product. Public registration is removed as of v0.6.0; accounts are provisioned by administrators. See [account administration](ACCOUNTS.md). The following readiness work remains before broader managed hosting.
 
+## v0.8.0 operational controls
+
+Version 0.8.0 implements controls for two operational areas:
+
+1. **Provider operations:** hosted approval/terms confirmation gates, configurable API budgets and cooldowns for user-triggered sync and existing webhooks, coordination across application servers and centralized failure monitoring. Provider approvals must be obtained externally; documentation or application changes do not grant approval. Automatic periodic synchronization (Auto-Sync) remains deferred.
+2. **AI costs and capacity:** per-user quotas with administrator overrides, per-attempt usage/estimated cost summaries, configurable operator budget warnings and operational monitoring. The existing queue, retries, input/output token recording and prompt versioning form the implementation baseline.
+
+Follow [operations setup](OPERATIONS.md) and the [v0.8.0 backlog](MVP_BACKLOG.md#v080--provider-operations-and-ai-costscapacity). These controls require deployment configuration and verification; they do not close the other hosted-service requirements or the public-launch gate below.
+
 ## Hosting model
 
 The recommended first managed architecture is one application deployment with a shared PostgreSQL database and strict `user_id` ownership boundaries. RideDock does not currently model teams or organizations, so adding a more complex tenancy layer would create operational cost without a present product requirement.
@@ -52,20 +61,20 @@ Version 0.7.0 provides [personal archives, synchronous confirmed account deletio
 - production approval for every supported provider application;
 - terms review for offering each integration to unrelated users;
 - stable production callback and webhook domains;
-- rate-limit-aware queues, retries and circuit breakers;
-- per-provider operational dashboards and user-visible connection errors;
+- deployment verification of the implemented shared API budgets, delayed queue releases, locks and cooldowns;
+- alert delivery and support use of the implemented provider operations dashboard and user-visible connection states;
 - a support path for revoked, expired and duplicate provider connections.
 
 ### AI service controls
 
 - monitoring and capacity planning for the implemented AI queue (activity analyses, goal roadmaps, training blocks and weekly plans);
 - a dedicated server-side OpenAI project or service-account key;
-- per-user analysis and training-plan quotas;
-- token and cost accounting by user, feature and model;
-- project budgets and operator alerts;
-- request throttling and graceful handling of rate limits or outages;
+- operator-selected per-user quotas and shared capacity limits, implemented in v0.8.0;
+- configured model prices, usage/cost reconciliation and treatment of unreported spend for the implemented per-attempt accounting;
+- provider project budgets and delivery of the implemented operator budget warnings;
+- deployment validation of request admission limits and graceful queue handling under provider outages;
 - a privacy-preserving `safety_identifier` before unrestricted public access;
-- model and prompt versioning with regression evaluations;
+- regression evaluations for the existing model metadata and prompt versioning;
 - explicit user consent and a non-medical-advice presentation.
 
 The OpenAI Responses API supports a stable safety identifier and recommends hashing a username or email instead of sending identifying information directly. See the official [Responses API reference](https://developers.openai.com/api/reference/responses#create).
