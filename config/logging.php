@@ -54,12 +54,14 @@ return [
 
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', (string) env('LOG_STACK', 'single')),
+            'channels' => explode(',', (string) env('LOG_STACK', 'daily')),
             'ignore_exceptions' => false,
         ],
 
+        // Keep existing LOG_STACK=single installations on bounded daily rotation too.
         'single' => [
-            'driver' => 'single',
+            'driver' => 'daily',
+            'max_files' => env('LOG_DAILY_DAYS', 14),
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,

@@ -23,6 +23,10 @@ php artisan migrate
 
 Provider imports run synchronously by default (`QUEUE_CONNECTION=sync`). AI activity analyses and all training plans use a separate persistent database queue by default (`AI_QUEUE_CONNECTION=ai`). `composer run dev` starts its worker automatically. When starting the web server separately, also run `php artisan queue:work ai --queue=ai --sleep=1 --timeout=120`. Provider imports may independently use an asynchronous connection such as `database`, with their own worker. See [DEPLOYMENT.md](DEPLOYMENT.md) for supervision and retry settings.
 
+### Upgrading to v0.7.0
+
+Run `php artisan migrate` and `php artisan optimize:clear`, and restart servers/workers. PHP's ZIP extension is required for personal archives. Existing accounts receive a fresh inactivity timestamp; no data is automatically removed on migration. Preview `php artisan app:prune-data`, review [data lifecycle policies](PRIVACY.md), and enable scheduled deletion only when intended. The application uses daily bounded logging even with the legacy `LOG_STACK=single` setting. No scheduler is required while `DATA_LIFECYCLE_SCHEDULED=false`.
+
 ### Upgrading to v0.6.0
 
 Run `php artisan migrate` and `php artisan optimize:clear`, then promote your existing account with `php artisan app:create-admin your-existing-email@example.com`. Promotion keeps its password and data. All existing accounts otherwise remain active members. Restart development servers/workers after updating. See [account administration](ACCOUNTS.md) for mail delivery and invitation handling.

@@ -16,6 +16,8 @@ class ImportProviderActivity implements ShouldQueue
 {
     use Queueable;
 
+    public bool $deleteWhenMissingModels = true;
+
     public function __construct(
         public readonly ProviderConnection $providerConnection,
         public readonly string $externalId,

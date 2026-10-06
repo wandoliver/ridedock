@@ -17,7 +17,10 @@ final class ActivityFileArchiver
         ActivitySource $source,
     ): void {
         DB::transaction(function () use ($provider, $connection, $source): void {
-            $user = User::query()->whereKey($connection->user_id)->lockForUpdate()->firstOrFail();
+            $user = User::query()->whereKey($connection->user_id)->lockForUpdate()->first();
+            if (! $user || ! $connection->stillConnected()) {
+                return;
+            }
             $current = ActivitySource::query()->find($source->id);
             if (! $current || $current->purged_at
                 || app(DataRetention::class)->sourceExpired($user, $current->activity->started_at)

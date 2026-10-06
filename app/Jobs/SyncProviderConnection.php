@@ -12,6 +12,8 @@ class SyncProviderConnection implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
 
+    public bool $deleteWhenMissingModels = true;
+
     public int $tries = 3;
 
     public int $uniqueFor = 3600;

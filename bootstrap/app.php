@@ -26,8 +26,9 @@ return Application::configure(basePath: dirname(__DIR__))
         );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->dontFlash(['export_password', 'delete_password']);
         $exceptions->respond(function (\Symfony\Component\HttpFoundation\Response $response): \Symfony\Component\HttpFoundation\Response {
-            if (request()->is('invitations/*', 'admin/*')) {
+            if (request()->is('invitations/*', 'admin/*', 'settings/privacy*')) {
                 $response->headers->set('Cache-Control', 'no-store, private');
                 $response->headers->set('Referrer-Policy', 'no-referrer');
                 $response->headers->set('X-Robots-Tag', 'noindex, nofollow');

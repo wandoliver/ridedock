@@ -28,11 +28,19 @@ class ProviderOAuthController extends Controller
         }
 
         $state = Str::random(64);
-        Cache::put("provider-oauth-state:{$state}", [
-            'user_id' => $request->user()->id,
-            'provider' => $providerName->value,
-            'session_hash' => $request->hasSession() ? hash('sha256', $request->session()->getId()) : null,
-        ], now()->addMinutes(10));
+        \Illuminate\Support\Facades\DB::transaction(function () use ($request, $state, $providerName): void {
+            User::query()->whereKey($request->user()->id)->lockForUpdate()->firstOrFail();
+            \Illuminate\Support\Facades\DB::table('user_oauth_states')->insert([
+                'state_hash' => hash('sha256', $state), 'user_id' => $request->user()->id,
+                'cache_key' => \Illuminate\Support\Facades\Crypt::encryptString("provider-oauth-state:{$state}"),
+                'expires_at' => now()->addMinutes(10),
+            ]);
+            Cache::put("provider-oauth-state:{$state}", [
+                'user_id' => $request->user()->id,
+                'provider' => $providerName->value,
+                'session_hash' => $request->hasSession() ? hash('sha256', $request->session()->getId()) : null,
+            ], now()->addMinutes(10));
+        });
 
         return redirect()->away($adapter->authorizationUrl($state));
     }
@@ -64,6 +72,7 @@ class ProviderOAuthController extends Controller
                     throw new BadRequestHttpException('Invalid or expired OAuth state.');
                 }
 
+                \Illuminate\Support\Facades\DB::table('user_oauth_states')->where('state_hash', hash('sha256', substr($stateKey, strlen('provider-oauth-state:'))))->delete();
                 return Cache::pull($stateKey);
             });
 
@@ -82,20 +91,23 @@ class ProviderOAuthController extends Controller
         } catch (\Throwable) {
             throw new \RuntimeException('Provider authorization could not be completed. Please try again.');
         }
-        $connection = ProviderConnection::query()->updateOrCreate(
-            ['user_id' => $state['user_id'], 'provider' => $providerName],
-            [
-                'external_user_id' => $token->externalUserId,
-                'access_token' => $token->accessToken,
-                'refresh_token' => $token->refreshToken,
-                'token_expires_at' => $token->expiresAt,
-                'scopes' => $token->scopes,
-                'capabilities' => $adapter->capabilities(),
-                'status' => ConnectionStatus::Active,
-                'last_error' => null,
-            ],
-        );
-
+        $connection = \Illuminate\Support\Facades\DB::transaction(function () use ($state, $providerName, $token, $adapter): ProviderConnection {
+            $user = User::query()->whereKey($state['user_id'])->lockForUpdate()->firstOrFail();
+            abort_unless($user->status === \App\Domain\Accounts\Enums\UserStatus::Active, 403);
+            return ProviderConnection::query()->updateOrCreate(
+                ['user_id' => $state['user_id'], 'provider' => $providerName],
+                [
+                    'external_user_id' => $token->externalUserId,
+                    'access_token' => $token->accessToken,
+                    'refresh_token' => $token->refreshToken,
+                    'token_expires_at' => $token->expiresAt,
+                    'scopes' => $token->scopes,
+                    'capabilities' => $adapter->capabilities(),
+                    'status' => ConnectionStatus::Active,
+                    'last_error' => null,
+                ],
+            );
+        });
         SyncProviderConnection::dispatch($connection);
 
         $locale = User::query()->whereKey($state['user_id'])->value('locale');

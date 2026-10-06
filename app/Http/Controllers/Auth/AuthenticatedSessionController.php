@@ -29,6 +29,7 @@ final class AuthenticatedSessionController extends Controller
             ]);
         }
 
+        $request->user()->forceFill(['last_active_at' => now()])->save();
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard'));

@@ -15,7 +15,10 @@ final class ActivityImporter
     public function import(ProviderConnection $connection, ProviderActivity $payload): ?ActivitySource
     {
         return DB::transaction(function () use ($connection, $payload): ?ActivitySource {
-            $user = User::query()->whereKey($connection->user_id)->lockForUpdate()->firstOrFail();
+            $user = User::query()->whereKey($connection->user_id)->lockForUpdate()->first();
+            if (! $user || ! $connection->stillConnected()) {
+                return null;
+            }
             $retention = app(DataRetention::class);
             if ($retention->activityExpired($user, $payload->startedAt)) {
                 return null;

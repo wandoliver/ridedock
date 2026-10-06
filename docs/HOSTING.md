@@ -39,11 +39,12 @@ Bring-your-own OpenAI keys may remain an option for self-hosted installations. I
 
 ### Account and data lifecycle
 
-- disconnect and deauthorize provider connections;
-- user-controlled data export;
-- account deletion with background deletion of activities, source files, tokens and analyses;
-- explicit retention windows for inactive accounts, failed jobs, logs and backups;
-- auditable deletion status and retry behavior;
+Version 0.7.0 provides [personal archives, synchronous confirmed account deletion and configurable operational retention](PRIVACY.md) for sync/database queues. Broader managed hosting still requires:
+
+- scalable background export/deletion status for accounts too large for synchronous requests;
+- owner-aware cleanup for any non-database queue backend;
+- monitored retention execution and verified external backup/log expiry;
+- operator erasure reconciliation during recovery;
 - a policy for provider-originated deletions and revoked permissions.
 
 ### Provider operations

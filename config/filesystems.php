@@ -46,6 +46,13 @@ return [
             'report' => true,
         ],
 
+        'lifecycle_backups' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/lifecycle-backups'),
+            'serve' => false,
+            'throw' => true,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

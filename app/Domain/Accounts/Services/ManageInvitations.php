@@ -81,6 +81,7 @@ final class ManageInvitations
 
             $user->password = $password;
             $user->status = UserStatus::Active;
+            $user->last_active_at = now();
             if ($locked->emailed_at !== null) {
                 $user->email_verified_at = now();
             }

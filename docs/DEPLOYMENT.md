@@ -112,11 +112,17 @@ AI activity analyses, goal roadmaps, four-week blocks and weekly plans use the d
 php artisan queue:work ai --queue=ai --sleep=1 --timeout=120
 ```
 
-Each AI job allows three attempts with 15- and 60-second retry delays. Its timeout is the greater of 120 seconds and `OPENAI_TIMEOUT_SECONDS + 10`; timeouts fail the analysis visibly. The built-in `ai` connection reserves jobs for at least 180 seconds, or `OPENAI_TIMEOUT_SECONDS + 60`, so the reservation outlives the job timeout. For a custom `AI_QUEUE_CONNECTION` (for example `redis`), set that connection's `retry_after` or visibility timeout above the job timeout and run its worker with `--queue=ai`. Do not use `sync`, `deferred`, or a nonpersistent connection in production. `AI_QUEUE_CONNECTION=sync` is available for tests and explicitly synchronous installations.
+Each AI job allows three attempts with 15- and 60-second retry delays. Its timeout is the greater of 120 seconds and `OPENAI_TIMEOUT_SECONDS + 10`; timeouts fail the analysis visibly. The built-in `ai` connection reserves jobs for at least 180 seconds, or `OPENAI_TIMEOUT_SECONDS + 60`, so the reservation outlives the job timeout. Account lifecycle in v0.7.0 currently supports database queues; an owner-aware cleanup integration is required before selecting another backend. For a custom `AI_QUEUE_CONNECTION`, set that connection's `retry_after` or visibility timeout above the job timeout and run its worker with `--queue=ai`. Do not use `sync`, `deferred`, or a nonpersistent connection in production. `AI_QUEUE_CONNECTION=sync` is available for tests and explicitly synchronous installations.
 
 Requests reserve one outstanding analysis per owner and type (per ride for activity analyses). Completion status is owner-scoped and contains no AI context or provider details. Pages preserve completed plans while replacement jobs run, and show a safe error after final failure. Inspect `php artisan queue:failed` for operational details and use `php artisan queue:retry JOB_ID` after resolving a failure. Restart both AI and provider workers after deployments.
 
-RideDock currently has no mandatory scheduled command. Add a scheduler process only when recurring synchronization, cleanup or retention jobs are introduced.
+Version 0.7.0 adds `app:prune-data`. Review its preview and [operational retention policy](PRIVACY.md#operational-retention), then set `DATA_LIFECYCLE_SCHEDULED=true` and supervise the scheduler to apply expiry daily at 03:00 in the application's configured timezone. For a cron-based scheduler:
+
+```cron
+* * * * * cd /srv/ridedock && php artisan schedule:run >> /dev/null 2>&1
+```
+
+Monitor failures; configured periods are not enforced while the scheduler is disabled or stopped. Retention removes expired member accounts and data, so review pending-account ages before enabling it. Administrators are exempt from inactivity pruning. PHP ZIP is required for personal exports. Restart workers and clear cached configuration when upgrading. Database sessions and sync/database queues are the supported lifecycle backends.
 
 ## Storage and backups
 
@@ -127,7 +133,7 @@ Back up all of the following as one recoverable system:
 - the active deployment configuration and secret inventory, stored separately from application data;
 - provider registration details and callback URLs.
 
-Backups may contain precise location history, health-adjacent training data and encrypted OAuth tokens. Encrypt them, limit operator access, define retention periods and test a full restore on isolated infrastructure.
+Backups may contain precise location history, health-adjacent training data and encrypted OAuth tokens. Encrypt them, limit operator access and test a full restore on isolated infrastructure. The dedicated private `storage/app/private/lifecycle-backups` directory expires backup files after `BACKUP_RETENTION_DAYS` (30 by default) when maintenance runs. External backups, object versions and infrastructure logs need equivalent operator-managed expiry. Follow the [erasure reconciliation procedure](PRIVACY.md#backup-deletion-and-restoration) before a restored system goes online.
 
 ## OAuth and public URLs
 

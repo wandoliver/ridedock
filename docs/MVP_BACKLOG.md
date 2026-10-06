@@ -41,7 +41,8 @@
 - [x] Decode recorded SRAM AXS/FIT gear changes using synthetic protocol fixtures: native packed/components and explicitly equivalent developer fields, with visible counts and timeline
 - [ ] Extend support for proprietary gear-field encodings if a documented schema and synthetic reproduction become available
 - [x] Add explicit private-zone masking for detail maps, heatmaps and opt-in JSON routes
-- [ ] Add GDPR export/deletion flows and a deployer privacy-policy template
+- [x] Add personal complete export, confirmed account deletion and operational retention — v0.7.0
+- [ ] Add a deployment-specific privacy-policy template
 
 ## Project maintenance
 

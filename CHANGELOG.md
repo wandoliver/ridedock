@@ -4,6 +4,20 @@ All notable changes to RideDock are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-10-06
+
+### Added
+
+- Password-confirmed personal ZIP export in German/English Data & privacy settings, with structured account/training/activity/source/stream/event/AI data and available original FIT files; precise locations require explicit confirmation and authentication secrets are excluded.
+- Password-confirmed complete account deletion, including private source and orphan files, API/OAuth credentials, pending OAuth states, invitations, profiles, routes, analyses/plans, database sessions and owner-scoped queued/failed jobs.
+- Configurable inactive/pending member, failed-job, audit, application-log and dedicated private-backup retention; preview-first CLI maintenance and an operator-enabled daily schedule.
+- Account-use timestamps with a fresh upgrade window, missing-model job cancellation, late-enqueue/failure guards and synthetic export/deletion/retention regression coverage.
+
+### Changed
+
+- Default and legacy `single` application logging use bounded daily rotation; deployment guides explain managed versus external backup expiry and restore handling.
+- Personal archives contain unmasked originals, independently of private-zone masking in the existing JSON analysis export. Temporary export files are private and removed after generation/download.
+
 ## [0.6.0] - 2026-10-06
 
 ### Added

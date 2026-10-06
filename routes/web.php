@@ -64,6 +64,8 @@ Route::middleware('auth')->group(function (): void {
         ->middleware('throttle:30,1')
         ->name('activities.feedback.update');
     Route::get('/settings/connections', ConnectionSettingsController::class)->name('settings.connections');
+    Route::post('/settings/privacy/export', [\App\Http\Controllers\Settings\AccountDataController::class, 'export'])->middleware([ProtectAccountLinks::class, 'throttle:3,1'])->name('settings.privacy.export');
+    Route::delete('/settings/privacy/account', [\App\Http\Controllers\Settings\AccountDataController::class, 'destroy'])->middleware([ProtectAccountLinks::class, 'throttle:5,1'])->name('settings.privacy.account.destroy');
     Route::get('/settings/privacy', [\App\Http\Controllers\Settings\PrivacySettingsController::class, 'show'])->name('settings.privacy');
     Route::patch('/settings/privacy', [\App\Http\Controllers\Settings\PrivacySettingsController::class, 'update'])->name('settings.privacy.update');
     Route::post('/settings/privacy/zones', [\App\Http\Controllers\Settings\PrivacySettingsController::class, 'storeZone'])->middleware('throttle:20,1')->name('settings.privacy.zones.store');

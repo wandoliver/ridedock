@@ -24,6 +24,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $password
  * @property Carbon|null $email_verified_at
  * @property-read UserInvitation|null $latestInvitation
+ * @property Carbon|null $last_active_at
  * @property string $locale
  * @property int|null $activity_retention_days
  * @property int|null $source_retention_days
@@ -92,6 +93,7 @@ class User extends Authenticatable
             'activity_retention_days' => 'integer',
             'source_retention_days' => 'integer',
             'email_verified_at' => 'datetime',
+            'last_active_at' => 'datetime',
             'password' => 'hashed',
             'role' => UserRole::class,
             'status' => UserStatus::class,

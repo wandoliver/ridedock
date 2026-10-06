@@ -24,6 +24,11 @@ final class EnsureActiveAccount
             abort(403);
         }
 
+        if ($user instanceof User) {
+            User::query()->whereKey($user->id)->where(function ($query): void {
+                $query->whereNull('last_active_at')->orWhere('last_active_at', '<', now()->subMinutes(5));
+            })->update(['last_active_at' => now()]);
+        }
         return $next($request);
     }
 }

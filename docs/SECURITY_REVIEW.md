@@ -2,6 +2,12 @@
 
 Reviewed on 2026-10-05. Scope: the current application and repository tree, authorization boundaries, OAuth linking, external file intake, error handling, dependency lockfiles and test fixtures. This is a documented engineering review, not an independent penetration test or approval for public managed hosting.
 
+## v0.7.0 data lifecycle update — 2026-10-06
+
+Personal archives and account deletion require the authenticated owner's current password, explicit confirmation, CSRF protection, throttling and no-store headers. Archive datasets exclude credential hashes and session payloads; unmasked originals require separate confirmation. Temporary archives use private files without stored public links. Password validation inputs are excluded from session flash data.
+
+Account deletion serializes with import/file writers, retains database references on file failure, removes owner-scoped sessions/tokens/queues and discards late queue activity. Operational retention is configurable and disabled for automatic execution until the operator enables it. Backups are expired rather than rewritten; external destinations and restore-time erasure reconciliation remain operator responsibilities. See [the data lifecycle guide](PRIVACY.md) and synthetic regression tests for scope and limits.
+
 ## v0.6.0 account access update — 2026-10-06
 
 Public registration routes and their implementation are removed. Access is provisioned by explicit administrators; pending accounts cannot log in, use remembered browser sessions or use Sanctum API tokens. Admin authorization is checked on every management route and lifecycle service, without granting access to other riders' activity data. CLI token creation requires an existing active account.

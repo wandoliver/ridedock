@@ -59,6 +59,32 @@
             <x-button>{{ __('privacy.add_zone') }}</x-button>
         </form>
     </section>
+    <section class="rounded-lg border border-line bg-white p-5">
+        <h2>{{ __('privacy.export_title') }}</h2>
+        <p class="mt-2 text-sm text-ink-60">{{ __('privacy.export_hint') }}</p>
+        <form method="POST" action="{{ route('settings.privacy.export') }}" class="mt-4 space-y-4">
+            @csrf
+            <label class="block text-sm font-semibold">{{ __('privacy.password') }}<input type="password" name="export_password" autocomplete="current-password" required class="mt-2 block w-full rounded-lg border border-border-input px-3 py-2"></label>
+            <label class="flex items-start gap-2 text-sm"><input type="checkbox" name="include_sensitive_data" value="1" required class="mt-1">{{ __('privacy.export_sensitive') }}</label>
+            <x-button>{{ __('privacy.export_button') }}</x-button>
+        </form>
+    </section>
+    <section class="rounded-lg border border-line bg-white p-5">
+        <h2>{{ __('privacy.operations_title') }}</h2>
+        <p class="mt-2 text-sm text-ink-60">{{ __('privacy.operations_hint', ['inactive' => config('data-lifecycle.inactive_account_days'), 'pending' => config('data-lifecycle.pending_account_days'), 'failed' => config('data-lifecycle.failed_job_days'), 'audit' => config('data-lifecycle.audit_days'), 'logs' => config('data-lifecycle.log_days'), 'backups' => config('data-lifecycle.backup_days')]) }}</p>
+        <p class="mt-2 text-sm text-ink-60">{{ __(config('data-lifecycle.scheduled') ? 'privacy.schedule_enabled' : 'privacy.schedule_disabled') }}</p>
+        <p class="mt-2 text-sm text-ink-60">{{ __('privacy.backup_hint') }}</p>
+    </section>
+    <section class="rounded-lg border border-line bg-white p-5">
+        <h2>{{ __('privacy.delete_title') }}</h2>
+        <p class="mt-2 text-sm text-ink-60">{{ __('privacy.delete_hint') }}</p>
+        <form method="POST" action="{{ route('settings.privacy.account.destroy') }}" class="mt-4 space-y-4">
+            @csrf @method('DELETE')
+            <label class="block text-sm font-semibold">{{ __('privacy.password') }}<input type="password" name="delete_password" autocomplete="current-password" required class="mt-2 block w-full rounded-lg border border-border-input px-3 py-2"></label>
+            <label class="flex items-start gap-2 text-sm"><input type="checkbox" name="confirm_delete_account" value="1" required class="mt-1">{{ __('privacy.delete_confirm') }}</label>
+            <x-button secondary>{{ __('privacy.delete_button') }}</x-button>
+        </form>
+    </section>
     <p class="text-sm text-ink-60">{{ __('privacy.scope_hint') }}</p>
 </main>
 </x-layout>

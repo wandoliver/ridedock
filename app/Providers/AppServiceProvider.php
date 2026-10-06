@@ -58,6 +58,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Support\Facades\Queue::createPayloadUsing(
+            fn ($connection, $queue, $payload): array =>
+            app(\App\Domain\Privacy\Services\AccountQueueData::class)->payloadFor($payload['data']['command'] ?? null)
+        );
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Queue\Events\JobQueued::class, [
+            \App\Domain\Privacy\Services\AccountQueueData::class, 'cleanLateJob',
+        ]);
+        if (config('queue.failed.driver') === 'database-uuids') {
+            $this->app->singleton('queue.failer', fn ($app) => new \App\Infrastructure\Queue\PrivateFailedJobProvider(
+                $app['db'],
+                config('queue.failed.database'),
+                config('queue.failed.table')
+            ));
+        }
         Gate::define('manage-users', fn (User $user): bool => $user->role === UserRole::Admin && $user->status === UserStatus::Active);
         Model::preventLazyLoading(! app()->isProduction());
 
